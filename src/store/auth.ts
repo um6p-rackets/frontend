@@ -1,3 +1,5 @@
+// this just a simple example of a zustand store to manage authentication state 
+
 import { create } from "zustand";
 
 type Role = "visitor" | "member" | "leader" | "coach";

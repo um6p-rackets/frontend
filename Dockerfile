@@ -27,6 +27,7 @@ FROM node:24.21.0-alpine3.24 AS builder
 
 WORKDIR /app
 
+# using COPY --from=deps /app/node_modules . is not working why because of docker copy behavior
 COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
