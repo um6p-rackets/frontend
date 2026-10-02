@@ -60,15 +60,13 @@ Ensure you have the following installed before setting up the project:
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd racket-um6p-frontend
+   git clone <repository-url> frontend
+   cd frontend
    ```
 
 2. Install dependencies:
    ```bash
    npm install
-   # or
-   yarn install
    ```
 
 3. Configure your environment variables. Create a `.env.local` file in the root directory:
@@ -79,8 +77,6 @@ Ensure you have the following installed before setting up the project:
 4. Start the development server:
    ```bash
    npm run dev
-   # or
-   yarn dev
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) with your browser.
