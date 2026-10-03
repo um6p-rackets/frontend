@@ -5,10 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { VisitorNavbar } from "@/components/visitor-navbar";
+import HeroSection from "@/components/home/hero-section";
 
 
 export default function Home() {
   return (
+    <div className="min-h-screen">
+    <VisitorNavbar  /> 
+    <HeroSection />
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-foreground">
       <h1 className="text-3xl font-bold">
         Theme Test
@@ -21,6 +26,7 @@ export default function Home() {
       <ThemeToggle />
       <LoginForm />
     </main>
+    </div>
   );
 }
 
