@@ -4,13 +4,24 @@ import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
+import { ThemeToggle } from "@/components/theme-toggle";
+
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background text-foreground">
+      <h1 className="text-3xl font-bold">
+        Theme Test
+      </h1>
+
+      <p className="text-muted-foreground">
+        click to check
+      </p>
+
+      <ThemeToggle />
       <LoginForm />
-    </div>
-  );  
+    </main>
+  );
 }
 
 // this is a simple example show how you can use:
