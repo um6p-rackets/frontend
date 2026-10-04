@@ -17,8 +17,8 @@ export default function Home() {
         <VisitorNavbar />
         <HeroSection />
       </section>
-      <section className="my-8 ">
-        <SectionHeader title="Our Clubs" />
+      <section className="my-8 min-h-screen">
+        <SectionHeader title="Our Clubs" id="clubs" />
         <ClubList />
       </section>
       <Footer />

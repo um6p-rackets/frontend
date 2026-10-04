@@ -39,7 +39,7 @@ export default function ClubCard({ name, imageUrl }: ClubCardProps) {
 export function ClubCardTitle({ name }: { name: string }) {
   return (
     <CardHeader>
-      <CardTitle className="text-xl font-semibold text-accent">
+      <CardTitle className="text-xl font-semibold text-accent  w-fit truncate" title={name}>
         {name}
       </CardTitle>
       <CardTitle className="text-xl text-muted-foreground">Club</CardTitle>

@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 
 import {
@@ -9,11 +7,10 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle
 } from '@/components/ui/navigation-menu';
-import { Button } from './ui/button';
 import { ThemeToggle } from './theme-toggle';
 import Logo from './logo';
 
-export function VisitorNavbar() {
+export function StaticNavbar() {
   return (
     <NavigationMenu className="min-w-full p-4 bg-background ">
       <NavigationMenuList className="flex justify-between items-center gap-4">
@@ -21,6 +18,11 @@ export function VisitorNavbar() {
           <Logo />
         </NavigationMenuItem>
         <NavigationMenuItem className="flex items-center gap-4">
+          {/*Home */}
+          <NavigationMenuLink
+            className={navigationMenuTriggerStyle()}
+            render={<Link href="/">Home</Link>}
+          />
           {/*clubs */}
           <NavigationMenuLink
             className={navigationMenuTriggerStyle()}
@@ -36,20 +38,17 @@ export function VisitorNavbar() {
             className={navigationMenuTriggerStyle()}
             render={<Link href="/contact">Contact</Link>}
           />
-          <ThemeToggle />
-          {/* Sign In */}
+          {/* privacy policy */}
           <NavigationMenuLink
             className={navigationMenuTriggerStyle()}
-            render={
-              <Button
-                onClick={() => {
-                  console.log('Sign In clicked');
-                }}
-              >
-                Sign In
-              </Button>
-            }
+            render={<Link href="/privacy">Privacy Policy</Link>}
           />
+          {/* Terms of Service */}
+          <NavigationMenuLink
+            className={navigationMenuTriggerStyle()}
+            render={<Link href="/terms">Terms of Service</Link>}
+          />
+          <ThemeToggle />
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
