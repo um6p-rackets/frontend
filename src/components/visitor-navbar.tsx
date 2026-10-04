@@ -12,10 +12,11 @@ import {
 import { Button } from './ui/button';
 import { ThemeToggle } from './theme-toggle';
 import Logo from './logo';
+import { AuthButton } from './auth/auth_button';
 
 export function VisitorNavbar() {
   return (
-    <NavigationMenu className="min-w-full p-4 bg-background ">
+    <NavigationMenu className="absolute z-50 min-w-full p-4 bg-transparent">
       <NavigationMenuList className="flex justify-between items-center gap-4">
         <NavigationMenuItem>
           <Logo />
@@ -36,18 +37,15 @@ export function VisitorNavbar() {
             className={navigationMenuTriggerStyle()}
             render={<Link href="/contact">Contact</Link>}
           />
-          <ThemeToggle />
+          {/* <ThemeToggle /> dark mode not supported on this platform */}
           {/* Sign In */}
           <NavigationMenuLink
             className={navigationMenuTriggerStyle()}
             render={
-              <Button
-                onClick={() => {
-                  console.log('Sign In clicked');
-                }}
-              >
-                Sign In
-              </Button>
+              <AuthButton
+                title="Sign up"
+                className="min-w-25 min-h-10 text-lg! font-semibold! hover:bg-primary/90! focus-visible:outline-none! focus-visible:ring-2! focus-visible:ring-ring! focus-visible:ring-offset-2! disabled:pointer-events-none! disabled:opacity-50! dark:hover:bg-primary/80!"
+              />
             }
           />
         </NavigationMenuItem>

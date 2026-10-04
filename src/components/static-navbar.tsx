@@ -48,7 +48,7 @@ export function StaticNavbar() {
             className={navigationMenuTriggerStyle()}
             render={<Link href="/terms">Terms of Service</Link>}
           />
-          <ThemeToggle />
+          {/* <ThemeToggle /> dark mode not supported on this platform */}
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>

@@ -9,7 +9,7 @@ import SectionHeader from '@/components/home/section-header';
 export default function Home() {
   return (
     <div className="min-h-screen">
-      <section>
+      <section >
         <VisitorNavbar />
         <HeroSection />
       </section>
