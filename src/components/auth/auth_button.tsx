@@ -5,11 +5,11 @@ import {
   AlertDialogContent,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
-import { RegisterForm } from './register-form';
+import { AuthTabs } from './tabs';
 
-export function Register({ title }: { title: string }) {
+export function AuthButton({ title }: { title: string }) {
   return (
-    <AlertDialog>
+    <AlertDialog >
       <AlertDialogTrigger
         render={
           <Button className="mt-8 h-14.25 w-fit rounded-md bg-primary px-10 text-xl font-normal text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-primary/80">
@@ -17,8 +17,8 @@ export function Register({ title }: { title: string }) {
           </Button>
         }
       />
-      <AlertDialogContent>
-        <RegisterForm />
+      <AlertDialogContent className=" w-fit h-fit max-w-fit" size="lg">
+        <AuthTabs />
       </AlertDialogContent>
     </AlertDialog>
   );

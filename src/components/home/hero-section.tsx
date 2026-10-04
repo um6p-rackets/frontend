@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { Register } from '../auth/register';
+import { AuthButton } from '../auth/auth_button';
 
 export default function HeroSection() {
   return (
@@ -50,7 +50,7 @@ export default function HeroSection() {
             All Rackets Sport In One Place
           </p>
 
-          <Register title="Get Started" />
+          <AuthButton title="Get Started" />
 
           <p className="mt-12 max-w-[545px] font-[family-name:var(--font-roboto-condensed)] text-lg font-light leading-snug text-[#2B2F33] dark:text-gray-300 lg:ml-[230px] lg:mt-14">
             Welcome to the UM6P racket sports hub—a platform designed to make
