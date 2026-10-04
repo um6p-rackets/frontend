@@ -10,7 +10,7 @@ import {
   navigationMenuTriggerStyle
 } from '@/components/ui/navigation-menu';
 import Logo from '../logo';
-import { AuthButton } from '../auth/auth_button';
+import { AuthButton } from '../auth/auth-button';
 import { useAuth } from '@/store/auth';
 
 export default function Navbar() {

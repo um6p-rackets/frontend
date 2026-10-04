@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { AuthButton } from '../auth/auth_button';
+import { AuthButton } from '../auth/auth-button';
 
 export default function HeroSection() {
   return (
