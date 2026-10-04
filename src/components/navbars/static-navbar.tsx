@@ -7,8 +7,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle
 } from '@/components/ui/navigation-menu';
-import { ThemeToggle } from './theme-toggle';
-import Logo from './logo';
+import Logo from '../logo';
 
 export function StaticNavbar() {
   return (

@@ -1,6 +1,5 @@
 'use client';
 
-import { VisitorNavbar } from '@/components/visitor-navbar';
 import HeroSection from '@/components/home/hero-section';
 import ClubList from '@/components/home/club-list';
 import { Footer } from '@/components/footer';
@@ -10,7 +9,6 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <section >
-        <VisitorNavbar />
         <HeroSection />
       </section>
       <section className="my-8 min-h-screen">

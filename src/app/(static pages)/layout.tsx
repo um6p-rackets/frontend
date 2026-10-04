@@ -1,10 +1,10 @@
 import { Footer } from '@/components/footer';
-import { StaticNavbar } from '@/components/static-navbar';
+import { StaticNavbar } from '@/components/navbars/static-navbar';
 
 export default function StaticLayout({ children }: LayoutProps<'/'>) {
   return (
-    <div>
-      <StaticNavbar />
+    <div className="min-h-screen pt-20">
+      {/* <StaticNavbar /> its old */}
       {children}
       <Footer />
     </div>

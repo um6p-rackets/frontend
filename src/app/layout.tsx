@@ -3,6 +3,7 @@ import { Geist_Mono, Poppins, Roboto_Condensed } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Providers } from '@/components/providers';
+import Navbar from '@/components/navbars/navbar';
 
 const poppins = Poppins({
   weight: '400',
@@ -40,7 +41,10 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       )}
     >
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );
