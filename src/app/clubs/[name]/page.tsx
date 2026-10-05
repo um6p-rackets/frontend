@@ -106,14 +106,14 @@ export default function ClubPage() {
           members={mockClubData.members}
         />
       </section>
-      <div className="w-full flex items-center justify-center mt-8">
-        <div className="grid grid-cols-2 gap-12  justify-center">
+      <div className="w-full flex items-center justify-center mt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8  justify-center w-full md:w-2xl lg:w-fit">
           <section>
             {/* this section for taps (training sessions, announcements, tournament,
           Documents, About) */}
-            <ClubTaps />
+            <ClubTaps weekly_sessions={mockClubData.weekly_sessions} announcements={mockClubData.announcements} documents={mockClubData.documents} top_members={mockClubData.top_members}  />
           </section>
-          <section>leaderboad top 5 members</section>
+          <section className="lg:w-xl">leaderboad top 5 members</section>
         </div>
       </div>
     </div>
