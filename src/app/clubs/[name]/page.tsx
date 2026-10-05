@@ -87,27 +87,27 @@ const mockClubData: ClubPageData = {
   ],
   top_members: [
     {
-      name: 'Alice Johnson',
-      points: 150,
-      department: 'Science'
+      name: 'Ilorez (Zobair Najdaoui)',
+      points: 1500,
+      department: '1337'
     },
     {
-      name: 'Bob Smith',
+      name: 'Hamza Wahmane',
       points: 120,
       department: 'Arts'
     },
     {
-      name: 'Charlie Brown',
+      name: 'I am Atomic',
       points: 100,
-      department: 'Commerce'
+      department: '1337'
     },
     {
-      name: 'Diana Prince',
+      name: 'Ablabib',
       points: 90,
       department: 'Science'
     },
     {
-      name: 'Ethan Hunt',
+      name: 'Nsila lmd9s',
       points: 80,
       department: 'Arts'
     }
