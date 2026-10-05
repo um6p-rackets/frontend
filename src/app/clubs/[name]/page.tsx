@@ -32,6 +32,15 @@ const mockClubData: ClubPageData = {
       location: 'Sport Department',
       spots_available: 5,
       total_spots: 10
+    },
+    {
+      type: 'Training Session',
+      day: 'Wednesday',
+      start_time: '18:00',
+      end_time: '20:00',
+      location: 'Sport Department',
+      spots_available: 5,
+      total_spots: 10
     }
   ],
   announcements: [
@@ -46,6 +55,18 @@ const mockClubData: ClubPageData = {
       content:
         'We are pleased to welcome Mr. Michael as our new badminton coach. He brings a wealth of experience and is looking forward to helping our members improve their skills.',
       date: '2024-04-15'
+    },
+    {
+      title: 'Meeting Reminder',
+      content:
+        'Please remember that we have a club meeting scheduled for this Friday at 4:00 PM in the main hall. All members are encouraged to attend.',
+      date: '2024-05-01'
+    },
+    {
+      title: 'Event Update',
+      content:
+        'We are excited to announce that the upcoming event has been rescheduled. Please check the updated schedule for more details.',
+      date: '2024-05-01'
     }
   ],
   documents: [
@@ -111,7 +132,12 @@ export default function ClubPage() {
           <section>
             {/* this section for taps (training sessions, announcements, tournament,
           Documents, About) */}
-            <ClubTaps weekly_sessions={mockClubData.weekly_sessions} announcements={mockClubData.announcements} documents={mockClubData.documents} top_members={mockClubData.top_members}  />
+            <ClubTaps
+              weekly_sessions={mockClubData.weekly_sessions}
+              announcements={mockClubData.announcements}
+              documents={mockClubData.documents}
+              top_members={mockClubData.top_members}
+            />
           </section>
           <section className="lg:w-xl">leaderboad top 5 members</section>
         </div>
