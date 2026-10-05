@@ -1,5 +1,4 @@
 import { Footer } from '@/components/footer';
-import { StaticNavbar } from '@/components/navbars/static-navbar';
 
 export default function StaticLayout({ children }: LayoutProps<'/'>) {
   return (
