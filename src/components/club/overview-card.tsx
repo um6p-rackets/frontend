@@ -1,3 +1,8 @@
+import { Users, Whistle } from 'lucide-react';
+import { Button } from '../ui/button';
+import Image from 'next/image';
+import { Card } from '../ui/card';
+
 export default function OverviewCard({
   desc,
   members,

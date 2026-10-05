@@ -4,10 +4,8 @@ import ClubTitle from '@/components/club/club-title';
 import { useParams } from 'next/navigation';
 
 import type { ClubPageData } from '@/types/club';
-import { Card } from '@/components/ui/card';
-import { Users, Whistle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import Image from 'next/image';
+import OverviewCard from '@/components/club/overview-card';
+import ClubTaps from '@/components/club/taps';
 
 // Mock data for demonstration purposes
 const mockClubData: ClubPageData = {
@@ -102,12 +100,17 @@ export default function ClubPage() {
       <ClubTitle name={params.name} />
       <section className="relative">
         {/* discript/number of memebers/ coach name/ join button for new members */}
-        
+        <OverviewCard
+          desc={mockClubData.description}
+          coach={mockClubData.coach_name}
+          members={mockClubData.members}
+        />
       </section>
       <div>
         <section>
-          this section for taps (training sessions, announcements, tournament,
-          Documents, About)
+          {/* this section for taps (training sessions, announcements, tournament,
+          Documents, About) */}
+          <ClubTaps />
         </section>
         <section>leaderboad top 5 members</section>
       </div>
