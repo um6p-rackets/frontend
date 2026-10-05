@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import type { ClubPageData } from '@/types/club';
 import OverviewCard from '@/components/club/overview-card';
 import ClubTaps from '@/components/club/taps';
+import Leaderboard from '@/components/club/leaderboard';
 
 // Mock data for demonstration purposes
 const mockClubData: ClubPageData = {
@@ -127,19 +128,23 @@ export default function ClubPage() {
           members={mockClubData.members}
         />
       </section>
-      <div className="w-full flex items-center justify-center mt-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8  justify-center w-full md:w-2xl lg:w-fit">
-          <section>
-            {/* this section for taps (training sessions, announcements, tournament,
+      <div className="w-full flex items-center justify-center mt-12 ">
+        <div className="w-full h-full flex items-center justify-center ">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8  justify-center xl:w-500 ">
+            <section className="">
+              {/* this section for taps (training sessions, announcements, tournament,
           Documents, About) */}
-            <ClubTaps
-              weekly_sessions={mockClubData.weekly_sessions}
-              announcements={mockClubData.announcements}
-              documents={mockClubData.documents}
-              top_members={mockClubData.top_members}
-            />
-          </section>
-          <section className="lg:w-xl">leaderboad top 5 members</section>
+              <ClubTaps
+                weekly_sessions={mockClubData.weekly_sessions}
+                announcements={mockClubData.announcements}
+                documents={mockClubData.documents}
+                top_members={mockClubData.top_members}
+              />
+            </section>
+            <section className="">
+              <Leaderboard top_members={mockClubData.top_members} />
+            </section>
+          </div>
         </div>
       </div>
     </div>
