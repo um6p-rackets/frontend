@@ -106,13 +106,15 @@ export default function ClubPage() {
           members={mockClubData.members}
         />
       </section>
-      <div>
-        <section>
-          {/* this section for taps (training sessions, announcements, tournament,
+      <div className="w-full flex items-center justify-center mt-8">
+        <div className="grid grid-cols-2 gap-12  justify-center">
+          <section>
+            {/* this section for taps (training sessions, announcements, tournament,
           Documents, About) */}
-          <ClubTaps />
-        </section>
-        <section>leaderboad top 5 members</section>
+            <ClubTaps />
+          </section>
+          <section>leaderboad top 5 members</section>
+        </div>
       </div>
     </div>
   );
