@@ -6,7 +6,7 @@ import { Providers } from '@/components/providers';
 import Navbar from '@/components/navbars/navbar';
 
 const poppins = Poppins({
-  weight: ['400', '500', '600', '700'], 
+  weight: ['400', '500', '600', '700'],
   subsets: ['latin', 'latin-ext'],
   variable: '--font-poppins'
 });
