@@ -32,7 +32,11 @@ export default function ClubTaps({
           <AnnouncementList announcements={announcements} />
         </TabsContent>
         <TabsContent value="Tournament">
+          {/* TODO: Implement tournament content */}
           tournament content should be here
+          {/* so you should create two components:
+          one for tournament register link and one for tournament bracket link
+          also its shown just on case of there is a tournament */}
         </TabsContent>
         <TabsContent value="Documents">
           <DocumentList documents={documents} />
