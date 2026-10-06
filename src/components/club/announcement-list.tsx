@@ -7,7 +7,7 @@ function Announcement({
   announcement: ClubPageData['announcements'][0];
 }) {
   return (
-    <Card className="p-4 gap-2 flex flex-col justify-between items-start m-0">
+    <Card className="p-4 gap-2 flex flex-col justify-between items-start m-0 w-full">
       <h3 className="font-bold text-lg">{announcement.title}</h3>
       <p className="text-sm text-muted-foreground">{announcement.content}</p>
       <p className="text-xs text-muted-foreground w-full  text-right">

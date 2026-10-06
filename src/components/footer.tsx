@@ -31,7 +31,10 @@ function LinkList({ items }: { items: typeof links }) {
 export function Footer() {
   return (
     <footer className="mt-5 py-10 px-6 bg-secondary  text-secondary-foreground center flex flex-col gap-4 items-center">
-    <Separator className="bg-secondary-foreground "  style={{ height: '4px' , width: '100%'  }} />
+      <Separator
+        className="bg-secondary-foreground "
+        style={{ height: '4px', width: '100%' }}
+      />
       <div className="w-full h-full  ">
         <div className="flex justify-between h-full">
           <LinkList items={links} />
@@ -42,13 +45,19 @@ export function Footer() {
             <p>Email: support@um6prackets.ma</p>
             <p>Hours: Monday – Sunday, 7:00 AM – 10:00 PM</p>
             <div className="mt-4 inline-block rounded-md dark:bg-white dark:p-2">
-              <Image
-                src="/UM6P_LOGO/COLOR/UM6P_Horizontal.png"
-                alt="UM6P"
-                width={200}
-                height={50}
-                className="h-auto w-40 sm:w-48"
-              />
+              <Link
+                href="https://www.um6p.ma/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src="/UM6P_LOGO/COLOR/UM6P_Horizontal.png"
+                  alt="UM6P"
+                  width={200}
+                  height={50}
+                  className="h-auto w-40"
+                />
+              </Link>
             </div>
           </div>
         </div>

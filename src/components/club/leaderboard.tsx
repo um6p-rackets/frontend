@@ -1,18 +1,34 @@
 import { ClubPageData } from '@/types/club';
 import { Card } from '../ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 export function LeaderboardMemberCard({
+  rank,
   member
 }: {
+  rank: number;
   member: ClubPageData['top_members'][0];
 }) {
   return (
-    <div className="p-4 gap-2 flex flex-col justify-between items-start m-0 border rounded-md shadow-sm hover:shadow-md transition-shadow duration-300">
-      <h3 className="font-bold text-lg">{member.name}</h3>
-      <p className="text-sm text-muted-foreground">{member.department}</p>
-      <p className="text-xs text-muted-foreground w-full  text-right">
-        {member.points} points
-      </p>
+    <div className="p-4 gap-4 grid grid-cols-2   justify-between items-center  m-0 border rounded-md shadow-sm hover:shadow-md transition-shadow duration-300">
+      <div className="flex flex-row justify-start items-center gap-4">
+        <Avatar>
+          <AvatarImage src={member.avatar_url} alt={member.name} />
+          <AvatarFallback className="bg-accent text-accent-foreground">
+            {rank}
+          </AvatarFallback>
+        </Avatar>
+        <div>
+          <h3 className="font-bold text-lg truncate">{member.name}</h3>
+          <p className="text-sm text-muted-foreground">{member.department}</p>
+        </div>
+      </div>
+      <div className="text-xs text-muted-foreground  text-right flex flex-col justify-center items-end">
+        <p className="flex flex-col justify-center items-center w-fit">
+          <span className="font-bold text-accent">{member.points}</span> <br />{' '}
+          <span className="text-xs">PTS</span>
+        </p>
+      </div>
     </div>
   );
 }
@@ -27,7 +43,7 @@ export default function Leaderboard({
       <h2 className="text-2xl px-4 py-2 font-bold text-accent">Leaderboard</h2>
       <div className="grid grid-cols-1 gap-4  overflow-auto  min-h-0 ">
         {top_members.map((member, index) => (
-          <LeaderboardMemberCard key={index} member={member} />
+          <LeaderboardMemberCard key={index} member={member} rank={index + 1} />
         ))}
       </div>
     </Card>
