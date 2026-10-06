@@ -8,7 +8,7 @@ function DocumentCard({
   document: ClubPageData['documents'][0];
 }) {
   return (
-    <div className="p-4 gap-2 flex flex-col justify-between items-start m-0 border rounded-md shadow-sm hover:shadow-md transition-shadow duration-300">
+    <div className="p-4 gap-2 flex flex-col justify-between items-start m-0 border rounded-md shadow-sm hover:shadow-md transition-shadow duration-300 ">
       <h3 className="font-bold text-lg">{document.title}</h3>
       <p className="text-sm text-muted-foreground">{document.description}</p>
       <p className="text-xs text-muted-foreground w-full  text-right">

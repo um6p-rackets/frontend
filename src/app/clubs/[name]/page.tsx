@@ -89,27 +89,32 @@ const mockClubData: ClubPageData = {
     {
       name: 'Ilorez (Zobair Najdaoui)',
       points: 1500,
-      department: '1337'
+      department: '1337',
+      avatar_url: 'https://unavatar.io/github/ilorez'
     },
     {
       name: 'Hamza Wahmane',
       points: 120,
-      department: 'Arts'
+      department: 'Arts',
+      avatar_url: 'https://unavatar.io/github/hamzawhmn'
     },
     {
       name: 'I am Atomic',
       points: 100,
-      department: '1337'
+      department: '1337',
+      avatar_url: 'https://unavatar.io/github/atomic'
     },
     {
       name: 'Ablabib',
       points: 90,
-      department: 'Science'
+      department: 'Science',
+      avatar_url: 'https://unavatar.io/github/ablabib'
     },
     {
       name: 'Nsila lmd9s',
       points: 80,
-      department: 'Arts'
+      department: 'Arts',
+      avatar_url: 'https://unavatar.io/github/nsila'
     }
   ]
 };
@@ -121,7 +126,7 @@ export default function ClubPage() {
     <div>
       <ClubTitle name={params.name} />
       <section className="relative">
-        {/* discript/number of memebers/ coach name/ join button for new members */}
+        {/* description/number of members/ coach name/ join button for new members */}
         <OverviewCard
           desc={mockClubData.description}
           coach={mockClubData.coach_name}
@@ -130,7 +135,7 @@ export default function ClubPage() {
       </section>
       <div className="w-full flex items-center justify-center mt-12 ">
         <div className="w-full h-full flex items-center justify-center ">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8  justify-center xl:w-500 ">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8  justify-center">
             <section className="">
               {/* this section for taps (training sessions, announcements, tournament,
           Documents, About) */}
@@ -138,7 +143,6 @@ export default function ClubPage() {
                 weekly_sessions={mockClubData.weekly_sessions}
                 announcements={mockClubData.announcements}
                 documents={mockClubData.documents}
-                top_members={mockClubData.top_members}
               />
             </section>
             <section className="">

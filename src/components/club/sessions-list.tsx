@@ -11,7 +11,7 @@ function SessionCard({
 }) {
   return (
     <Card className="grid grid-cols-3 justify-between items-center p-4 gap-4">
-      <div className="font-semibold text-accent text-lg p-4 bg-accent-foreground rounded-md w-fit">
+      <div className="font-semibold text-accent text-lg p-4 bg-accent-foreground rounded-md">
         <span className="md:hidden">{session.day.slice(0, 3)}</span>
         <span className="hidden md:inline">{session.day}</span>
       </div>
