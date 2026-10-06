@@ -2,6 +2,7 @@ import { ClubPageData } from '@/types/club';
 import { Card } from '../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { MoveUpRight } from 'lucide-react';
+import Link from 'next/link';
 
 export function LeaderboardMemberCard({
   rank,
@@ -11,7 +12,7 @@ export function LeaderboardMemberCard({
   member: ClubPageData['top_members'][0];
 }) {
   return (
-    <div className="p-4 gap-4 grid grid-cols-2   justify-between items-center  m-0 hover:shadow-sm cursor-pointer transition-shadow duration-300 m-1">
+    <Link href="#" className="p-4 gap-4 grid grid-cols-2   justify-between items-center  m-0 hover:shadow-sm cursor-pointer transition-shadow duration-300 m-1">
       <div className="flex flex-row justify-start items-center gap-4">
         <Avatar>
           <AvatarImage src={member.avatar_url} alt={member.name} />
@@ -30,7 +31,7 @@ export function LeaderboardMemberCard({
           <span className="text-xs">PTS</span>
         </p>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -47,10 +48,13 @@ export default function Leaderboard({
           <LeaderboardMemberCard key={index} member={member} rank={index + 1} />
         ))}
       </div>
-      <div className="flex flex-row justify-center items-center gap-2 p-4  font-semibold hover:underline cursor-pointer">
+      <Link
+        href="#"
+        className="flex flex-row justify-center items-center gap-2 p-4  font-semibold hover:underline cursor-pointer"
+      >
         <MoveUpRight className="w-6 h-6 text-accent" />
         <p>View Full Campus Ladder</p>
-      </div>
+      </Link>
     </Card>
   );
 }
