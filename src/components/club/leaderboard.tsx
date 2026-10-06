@@ -1,7 +1,7 @@
 import { ClubPageData } from '@/types/club';
 import { Card } from '../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { MoveUpRight } from 'lucide-react';
+import { ListOrdered, MoveUpRight, Podium, Trophy } from 'lucide-react';
 import Link from 'next/link';
 
 export function LeaderboardMemberCard({
@@ -12,7 +12,10 @@ export function LeaderboardMemberCard({
   member: ClubPageData['top_members'][0];
 }) {
   return (
-    <Link href="#" className="p-4 gap-4 grid grid-cols-2   justify-between items-center  m-0 hover:shadow-sm cursor-pointer transition-shadow duration-300 m-1">
+    <Link
+      href="#"
+      className="p-4 gap-4 grid grid-cols-2   justify-between items-center  m-0 hover:shadow-sm cursor-pointer transition-shadow duration-300 m-1"
+    >
       <div className="flex flex-row justify-start items-center gap-4">
         <Avatar>
           <AvatarImage src={member.avatar_url} alt={member.name} />
@@ -42,7 +45,9 @@ export default function Leaderboard({
 }) {
   return (
     <Card className="w-full h-full  bg-gray-50 border-none shadow-none ring-0 rounded-md grid-rows-[auto_minmax(0,1fr)] ">
-      <h2 className="text-2xl px-4 py-2 font-bold text-accent">Leaderboard</h2>
+      <div className="text-2xl px-4 py-2 font-bold  flex items-center justify-start  gap-4  border-b border-gray-200">
+        <Trophy className="w-8 h-8 text-accent" /> <span>Leaderboard</span>
+      </div>
       <div className="grid grid-cols-1 gap-4  overflow-auto  min-h-0 ">
         {top_members.map((member, index) => (
           <LeaderboardMemberCard key={index} member={member} rank={index + 1} />
