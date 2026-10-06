@@ -126,7 +126,7 @@ export default function ClubPage() {
     <div>
       <ClubTitle name={params.name} />
       <section className="relative">
-        {/* discript/number of memebers/ coach name/ join button for new members */}
+        {/* description/number of members/ coach name/ join button for new members */}
         <OverviewCard
           desc={mockClubData.description}
           coach={mockClubData.coach_name}
@@ -143,7 +143,6 @@ export default function ClubPage() {
                 weekly_sessions={mockClubData.weekly_sessions}
                 announcements={mockClubData.announcements}
                 documents={mockClubData.documents}
-                top_members={mockClubData.top_members}
               />
             </section>
             <section className="">

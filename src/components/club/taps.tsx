@@ -8,13 +8,11 @@ import type { ClubPageData } from '@/types/club';
 export default function ClubTaps({
   weekly_sessions,
   announcements,
-  documents,
-  top_members
+  documents
 }: {
   weekly_sessions: ClubPageData['weekly_sessions'];
   announcements: ClubPageData['announcements'];
   documents: ClubPageData['documents'];
-  top_members: ClubPageData['top_members'];
 }) {
   return (
     <Tabs defaultValue="sessions" className="w-full max-w-150">
@@ -33,7 +31,9 @@ export default function ClubTaps({
         <TabsContent value="Announcements">
           <AnnouncementList announcements={announcements} />
         </TabsContent>
-        <TabsContent value="Tournament">tournament contnet should be here</TabsContent>
+        <TabsContent value="Tournament">
+          tournament content should be here
+        </TabsContent>
         <TabsContent value="Documents">
           <DocumentList documents={documents} />
         </TabsContent>
