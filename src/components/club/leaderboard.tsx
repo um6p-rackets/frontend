@@ -1,7 +1,7 @@
 import { ClubPageData } from '@/types/club';
 import { Card } from '../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { ListOrdered, MoveUpRight, Podium, Trophy } from 'lucide-react';
+import { MoveUpRight, Trophy } from 'lucide-react';
 import Link from 'next/link';
 
 export function LeaderboardMemberCard({
@@ -14,7 +14,7 @@ export function LeaderboardMemberCard({
   return (
     <Link
       href="#"
-      className="p-4 gap-4 grid grid-cols-2   justify-between items-center  m-0 hover:shadow-sm cursor-pointer transition-shadow duration-300 m-1"
+      className="p-4 gap-4 grid grid-cols-2   justify-between items-center  m-1 hover:shadow-sm cursor-pointer transition-shadow duration-300"
     >
       <div className="flex flex-row justify-start items-center gap-4">
         <Avatar>
