@@ -13,12 +13,11 @@ import {
 
 export function ThemeToggle() {
   const { setTheme } = useTheme();
-
+  setTheme("light");
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={false}
-        
         render={
           <Button variant="outline" size="icon">
             <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
