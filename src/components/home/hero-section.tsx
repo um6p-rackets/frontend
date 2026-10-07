@@ -6,7 +6,7 @@ export default function HeroSection() {
   return (
     <section
       className={cn(
-        'relative overflow-hidden bg-secondary font-[family-name:var(--font-poppins)] dark:bg-[#121417] pt-10'
+        'relative overflow-hidden bg-secondary/50 font-[family-name:var(--font-poppins)] dark:bg-[#121417] pt-10'
       )}
     >
       {/* decorative bars (desktop only) */}

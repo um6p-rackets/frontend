@@ -11,7 +11,7 @@ export default function Home() {
       <section >
         <HeroSection />
       </section>
-      <section className="my-8 min-h-screen">
+      <section className="my-10 min-h-screen">
         <SectionHeader title="Our Clubs" id="clubs" />
         <ClubList />
       </section>

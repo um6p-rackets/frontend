@@ -139,7 +139,7 @@ export const mockClubData: ClubPageData = {
       department: 'Science',
       avatar_url: 'https://unavatar.io/github/ablabib',
       record: '4W - 4L',
-      badges: []
+      badges: ['undefeated']
     },
     {
       name: 'Nsila lmd9s',

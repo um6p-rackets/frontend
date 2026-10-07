@@ -28,17 +28,17 @@ export default function LeaderboardRow({
   rank: number 
 }) {
   let rankBg = 'bg-brand-ink text-background';
-  let rowBg = 'bg-card hover:bg-muted';
+  let rowBg = 'bg-brand-cream/20 hover:bg-muted';
   
   if (rank === 1) { 
-    rankBg = 'bg-brand-orange text-white'; 
-    rowBg = 'bg-brand-cream/50';
+    rankBg = 'bg-yellow-400 text-white'; 
+    rowBg = 'bg-orange-50 hover:bg-muted';
   } else if (rank === 2) { 
     rankBg = 'bg-brand-teal text-white'; 
-    rowBg = 'bg-muted/80'; 
+    rowBg = 'bg-orange-50 hover:bg-muted'; 
   } else if (rank === 3) { 
     rankBg = 'bg-accent text-white'; 
-    rowBg = 'bg-card'; 
+    rowBg = 'bg-orange-50 hover:bg-muted'; 
   }
 
   const hasBadges = rank <= 3 || (member.badges && member.badges.length > 0);
@@ -57,7 +57,7 @@ export default function LeaderboardRow({
         </div>
       )}
 
-        <div className={`grid grid-cols-[60px_2fr_1fr_1fr_1fr_80px] items-center gap-4 w-full ${hasBadges ? 'mt-4 sm:mt-4' : ''}`}>
+      <div className={`grid grid-cols-[60px_2.2fr_1fr_1fr_1fr_80px] items-center gap-4 w-full ${hasBadges ? 'mt-4 sm:mt-4' : ''}`}>
         
         {/* Rank */}
         <div className="font-bold text-sm sm:text-lg">
@@ -72,7 +72,9 @@ export default function LeaderboardRow({
             <AvatarImage src={member.avatar_url} alt={member.name} />
             <AvatarFallback className="bg-brand-cream text-brand-orange font-bold text-xs sm:text-base">{member.name.charAt(0)}</AvatarFallback>
           </Avatar>
-          <span className="font-bold text-brand-ink italic text-xs sm:text-base truncate">{member.name}</span>
+          <span className="font-bold text-brand-ink italic text-xs sm:text-base truncate pr-2 sm:pr-3">
+            {member.name}
+          </span>
         </div>
 
         {/* Department */}
