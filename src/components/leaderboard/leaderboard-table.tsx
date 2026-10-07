@@ -13,7 +13,6 @@ export default function LeaderboardTable({
   const itemsPerPage = 10; 
   
   const sortedMembers = [...top_members].sort((a, b) => b.points - a.points);
-  
   const totalPages = Math.ceil(sortedMembers.length / itemsPerPage);
   
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -28,47 +27,58 @@ export default function LeaderboardTable({
   };
 
   return (
-    <div className="w-full max-w-6xl bg-card shadow-sm rounded-2xl p-8 border border-border">
+    <div className="w-full max-w-6xl bg-card shadow-sm rounded-xl sm:rounded-2xl p-3 sm:p-8 border border-border">
       
-      <div className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_80px] gap-4 w-full px-6 py-4 mb-2 text-xs font-bold text-muted-foreground italic tracking-widest border-b border-border">
-        <div>RANK</div>
-        <div>ATHLETE</div>
-        <div>DEPARTMENT</div>
-        <div>RECORD</div>
-        <div>WIN RATE</div>
-        <div className="text-right">POINTS</div>
+      <div className="mb-4 px-2">
+        <p className="text-[10px] sm:text-xs text-muted-foreground italic mt-1">
+          Active campus contenders ranked by performance.
+        </p>
       </div>
 
-      <div className="flex flex-col gap-2">
-        {currentMembers.map((member, index) => (
-          <LeaderboardRow 
-            key={`${member.name}-${startIndex + index}`}
-            member={member} 
-            rank={startIndex + index + 1}
-          />
-        ))}
+      <div className="w-full overflow-x-auto pb-4 scrollbar-thin">
+        <div className="min-w-170">
+          
+          <div className="grid grid-cols-[60px_2fr_1fr_1fr_1fr_80px] gap-4 w-full px-4 sm:px-6 py-3 mb-2 text-[9px] sm:text-xs font-black text-muted-foreground italic tracking-widest border-b border-border">
+            <div>RANK</div>
+            <div>ATHLETE</div>
+            <div>DEPARTMENT</div>
+            <div>RECORD</div>
+            <div>WIN RATE</div>
+            <div className="text-right">POINTS</div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {currentMembers.map((member, index) => (
+              <LeaderboardRow 
+                key={`${member.name}-${startIndex + index}`} 
+                member={member} 
+                rank={startIndex + index + 1} 
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       {totalPages > 0 && (
-        <div className="mt-8 flex justify-between items-center px-4 text-xs font-bold text-muted-foreground italic">
-          <p>
-            Displaying {startIndex + 1}–{Math.min(startIndex + itemsPerPage, sortedMembers.length)} of {sortedMembers.length} active collegiate contenders
+        <div className="mt-4 sm:mt-8 flex flex-col md:flex-row justify-between items-center gap-4 px-2 sm:px-4 text-[10px] sm:text-xs font-bold text-muted-foreground italic">
+          <p className="text-center md:text-left">
+            Displaying {startIndex + 1}–{Math.min(startIndex + itemsPerPage, sortedMembers.length)} of {sortedMembers.length} active contenders
           </p>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button 
               onClick={handlePrev}
               disabled={currentPage === 1}
-              className="px-4 py-1.5 bg-background border border-border text-brand-ink rounded-md hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed italic font-black text-sm"
+              className="px-3 py-1 sm:py-1.5 bg-background border border-border text-brand-ink rounded-md hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed italic font-black text-[10px] sm:text-xs"
             >
-              Previous
+              Prev
             </button>
             
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1.5 rounded-md italic font-black text-sm transition-colors ${
+                className={`px-2.5 py-1 sm:py-1.5 rounded-md italic font-black text-[10px] sm:text-xs transition-colors ${
                   currentPage === page 
                     ? 'bg-brand-orange text-white border border-brand-orange' 
                     : 'bg-background border border-border text-brand-ink hover:bg-muted'
@@ -81,7 +91,7 @@ export default function LeaderboardTable({
             <button 
               onClick={handleNext}
               disabled={currentPage === totalPages}
-              className="px-4 py-1.5 bg-background border border-border text-brand-ink rounded-md hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed italic font-black text-sm"
+              className="px-3 py-1 sm:py-1.5 bg-background border border-border text-brand-ink rounded-md hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed italic font-black text-[10px] sm:text-xs"
             >
               Next
             </button>

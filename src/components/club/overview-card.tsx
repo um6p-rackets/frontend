@@ -24,20 +24,20 @@ export default function OverviewCard({
       <h2 className="text-xl font-semibold mb-2">Official Campus Club</h2>
       <p className="mb-2">{desc}</p>
       <div className="flex flex-col sm:flex-row items-left gap-6">
-        <p className="mb-2 flex gap-3 items-center">
+        <div className="mb-2 flex gap-3 items-center">
           <Users className="text-accent" />
-          <p>
+          <div>
             <span className="font-semibold truncate">{members}</span>
             <br /> Members
-          </p>
-        </p>
-        <p className="mb-2 flex gap-3 items-center">
+          </div>
+        </div>
+        <div className="mb-2 flex gap-3 items-center">
           <Whistle className="text-accent" />
-          <p>
+          <div>
             <span className="font-semibold truncate">{coach}</span>
             <br /> Coach
-          </p>
-        </p>
+          </div>
+        </div>
         <Button className="bg-accent p-2 py-5">Request to Join</Button>
       </div>
     </Card>

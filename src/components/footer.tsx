@@ -30,7 +30,7 @@ function LinkList({ items }: { items: typeof links }) {
 
 export function Footer() {
   return (
-    <footer className="mt-5 py-10 px-6 bg-secondary  text-secondary-foreground center flex flex-col gap-4 items-center">
+    <footer className="mt-5 py-10 px-6 bg-secondary/50  text-secondary-foreground center flex flex-col gap-4 items-center">
       <Separator
         className="bg-secondary-foreground "
         style={{ height: '4px', width: '100%' }}

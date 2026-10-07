@@ -5,7 +5,7 @@ import { mockClubData } from '@/lib/mock-data';
 
 export default function LeaderboardPage() {
   return (
-    <main className="min-h-screen bg-brand-cream/30 p-8 md:p-16 flex flex-col items-center">
+    <main className="min-h-screen p-8 md:p-15 flex flex-col items-center">
       <LeaderboardHeader />
       <LeaderboardTable top_members={mockClubData.top_members} />
     </main>

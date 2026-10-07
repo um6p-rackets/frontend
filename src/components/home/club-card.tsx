@@ -1,9 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MoveUpRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-// this card got sport name example("Badminton, table tennis, padel") and a link and a image png link
 
 type ClubCardProps = {
   name: string;
@@ -13,38 +10,39 @@ type ClubCardProps = {
 
 export default function ClubCard({ name, imageUrl, link }: ClubCardProps) {
   return (
-    <Card className="w-[350px] flex flex-row h-[200px] rounded-none shadow-md border border-border bg-card text-card-foreground p-0">
-      <div className="flex flex-col justify-between w-full p-4">
-        <ClubCardTitle name={name} />
-        <Link href={link} className="flex gap-1 text-sm text-muted-foreground w-full pl-5   items-center cursor-pointer hover:text-accent transition-colors duration-200">
-          <span>click to join</span>
-          <MoveUpRight />
-        </Link>
-      </div>
-      <CardContent className="relative w-full p-0">
-        <span className="absolute  top-0 w-[80px] h-full bg-accent border-0 rounded-none" />
+    <Link 
+      href={link}
+      className="group relative block w-full max-w-85 sm:max-w-100 md:max-w-115 h-42.5 md:h-52.5 rounded-none shadow-md border-0 bg-white overflow-visible transition-all duration-500 hover:shadow-xl cursor-pointer"
+    >
+      
+      <div className="absolute top-0 right-20 sm:right-32 md:right-20 w-14 md:w-18 h-full bg-accent z-0 transition-all duration-500 ease-out group-hover:w-full group-hover:right-0" />
 
-        <div className="absolute right-2  center  w-[200px] h-[200px] ">
-          <Image
-            src={imageUrl}
-            alt={name}
-            width={180}
-            height={180}
-            className="rounded-md w-full h-full object-cover"
-          />
+      <div className="relative z-10 flex flex-col justify-between h-full p-5 sm:p-7 md:p-8">
+        <div>
+          <h3 className="text-2xl sm:text-3xl md:text-[36px] font-black italic text-accent leading-none tracking-tight transition-colors duration-500 group-hover:text-white">
+            {name}
+          </h3>
+          <p className="text-lg sm:text-xl md:text-2xl italic font-semibold text-brand-ink mt-0.5 transition-colors duration-500 group-hover:text-white">
+            club
+          </p>
         </div>
-      </CardContent>
-    </Card>
-  );
-}
+        
+        <div className="flex gap-1.5 text-xs sm:text-sm italic font-bold text-muted-foreground items-center transition-colors duration-500 group-hover:text-white w-fit">
+          <MoveUpRight className="w-3.5 h-3.5" />
+          <span>click to join</span>
+        </div>
+      </div>
 
-export function ClubCardTitle({ name }: { name: string }) {
-  return (
-    <CardHeader>
-      <CardTitle className="text-xl font-semibold text-accent  w-fit truncate" title={name}>
-        {name}
-      </CardTitle>
-      <CardTitle className="text-xl text-muted-foreground">Club</CardTitle>
-    </CardHeader>
+      <div className="absolute top-1/2 -translate-y-1/2 -right-6 sm:-right-8 md:-right-12 w-37.5 h-37.5 sm:w-45 sm:h-45 md:w-55 md:h-55 z-10 drop-shadow-xl pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110">
+        <Image
+          src={imageUrl}
+          alt={name}
+          fill
+          className="object-contain"
+          sizes="(max-width: 768px) 150px, 220px"
+          priority
+        />
+      </div>
+    </Link>
   );
 }
