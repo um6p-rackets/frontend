@@ -111,11 +111,11 @@ export const mockClubData: ClubPageData = {
     },
     {
       name: 'Nsila lmd9s',
-      points: 80,
+      points: 1000,
       department: 'Arts',
       avatar_url: 'https://unavatar.io/github/nsila',
       record: '8W - 7L',
-      badges: []
+      badges: ['hot-streak']
     },
     {
       name: 'Hamza Wahmane',

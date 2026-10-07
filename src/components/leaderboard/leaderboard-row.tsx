@@ -5,20 +5,17 @@ import Rank1Badge from '@/components/badge/rank1';
 import Rank2Badge from '@/components/badge/rank2';
 import Rank3Badge from '@/components/badge/rank3';
 import UndefeatedBadge from '@/components/badge/undefeated';
+import HotStreakBadge from '@/components/badge/hot-streak';
 
 function calculateWinRate(record?: string) {
   if (!record) return '-';
-  
   const match = record.match(/(\d+)W\s*-\s*(\d+)L/);
   if (match) {
     const wins = parseInt(match[1], 10);
     const losses = parseInt(match[2], 10);
     const total = wins + losses;
-    
     if (total === 0) return '0%';
-    
-    const rate = Number(((wins / total) * 100).toFixed(1));
-    return `${rate}%`;
+    return `${Number(((wins / total) * 100).toFixed(1))}%`;
   }
   return '-';
 }
@@ -45,43 +42,48 @@ export default function LeaderboardRow({
   }
 
   const hasBadges = rank <= 3 || (member.badges && member.badges.length > 0);
-  
   const winRate = calculateWinRate(member.record);
 
   return (
-    <div className={`relative flex flex-col justify-center px-6 py-4 rounded-xl transition-colors ${rowBg}`}>
+    <div className={`relative flex flex-col justify-center px-4 sm:px-6 py-2.5 sm:py-4 rounded-xl transition-colors ${rowBg}`}>
       
       {hasBadges && (
-        <div className="absolute top-2 left-6 flex items-center gap-2">
+        <div className="absolute top-1 left-4 sm:left-6 flex flex-wrap items-center gap-1 scale-[0.8] sm:scale-100 origin-top-left">
           {rank === 1 && <Rank1Badge />}
           {rank === 2 && <Rank2Badge />}
           {rank === 3 && <Rank3Badge />}
           {member.badges?.includes('undefeated') && <UndefeatedBadge />}
+          {member.badges?.includes('hot-streak') && <HotStreakBadge />}
         </div>
       )}
 
-      <div className={`grid grid-cols-[80px_2fr_1fr_1fr_1fr_80px] items-center gap-4 w-full ${hasBadges ? 'mt-4' : ''}`}>
+        <div className={`grid grid-cols-[60px_2fr_1fr_1fr_1fr_80px] items-center gap-4 w-full ${hasBadges ? 'mt-4 sm:mt-4' : ''}`}>
         
-        <div className="font-bold text-lg">
-          <div className={`w-8 h-8 flex items-center justify-center rounded-md ${rankBg}`}>
+        {/* Rank */}
+        <div className="font-bold text-sm sm:text-lg">
+          <div className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-md ${rankBg}`}>
             {rank}
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Avatar className="w-10 h-10 border-2 border-background shadow-sm">
+        {/* Athlete */}
+        <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
+          <Avatar className="w-8 h-8 sm:w-10 sm:h-10 border-2 border-background shadow-sm shrink-0">
             <AvatarImage src={member.avatar_url} alt={member.name} />
-            <AvatarFallback className="bg-brand-cream text-brand-orange font-bold">{member.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback className="bg-brand-cream text-brand-orange font-bold text-xs sm:text-base">{member.name.charAt(0)}</AvatarFallback>
           </Avatar>
-          <span className="font-bold text-brand-ink italic">{member.name}</span>
+          <span className="font-bold text-brand-ink italic text-xs sm:text-base truncate">{member.name}</span>
         </div>
 
-        <div className="font-bold text-muted-foreground italic text-sm">{member.department}</div>
+        {/* Department */}
+        <div className="font-bold text-muted-foreground italic text-[11px] sm:text-sm truncate">{member.department}</div>
         
-        <div className="font-bold text-muted-foreground italic text-sm">{member.record || '-'}</div>
-        <div className="font-bold text-muted-foreground italic text-sm">{winRate}</div>
+        {/* Record & Win Rate */}
+        <div className="font-bold text-muted-foreground italic text-[11px] sm:text-sm truncate">{member.record || '-'}</div>
+        <div className="font-bold text-muted-foreground italic text-[11px] sm:text-sm truncate">{winRate}</div>
         
-        <div className="font-bold text-brand-orange italic text-right text-lg">{member.points}</div>
+        {/* Points */}
+        <div className="font-bold text-brand-orange italic text-right text-sm sm:text-lg">{member.points}</div>
       </div>
     </div>
   );

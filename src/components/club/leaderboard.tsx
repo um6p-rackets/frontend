@@ -43,18 +43,21 @@ export default function Leaderboard({
 }: {
   top_members: ClubPageData['top_members'];
 }) {
+  const sortedMembers = [...top_members].sort((a, b) => b.points - a.points);
+  
   return (
     <Card className="w-full h-full  bg-gray-50 border-none shadow-none ring-0 rounded-md grid-rows-[auto_minmax(0,1fr)] ">
       <div className="text-2xl px-4 py-2 font-bold  flex items-center justify-start  gap-4  border-b border-gray-200">
         <Trophy className="w-8 h-8 text-accent" /> <span>Leaderboard</span>
       </div>
       <div className="grid grid-cols-1 gap-4  overflow-auto  min-h-0 ">
-        {top_members.map((member, index) => (
+        {/* زدنا slice(0, 5) باش ياخد غير 5 اللوالا */}
+        {sortedMembers.slice(0, 5).map((member, index) => (
           <LeaderboardMemberCard key={index} member={member} rank={index + 1} />
         ))}
       </div>
       <Link
-        href="#"
+        href="/leaderboard"
         className="flex flex-row justify-center items-center gap-2 p-4  font-semibold hover:underline cursor-pointer"
       >
         <MoveUpRight className="w-6 h-6 text-accent" />
