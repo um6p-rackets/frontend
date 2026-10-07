@@ -19,7 +19,7 @@ function LinkList({ items }: { items: typeof links }) {
     <ul className="space-y-3">
       {items.map((l) => (
         <li key={l.href}>
-          <Link href={l.href} className="hover:text-accent hover:underline">
+          <Link href={l.href} className="hover:text-accent hover:underline transition-colors">
             {l.label}
           </Link>
         </li>
@@ -30,21 +30,24 @@ function LinkList({ items }: { items: typeof links }) {
 
 export function Footer() {
   return (
-    <footer className="mt-5 py-10 px-6 bg-secondary/50  text-secondary-foreground center flex flex-col gap-4 items-center">
+    <footer className="mt-10 py-10 px-6 text-secondary-foreground flex flex-col items-center">
       <Separator
-        className="bg-secondary-foreground "
-        style={{ height: '4px', width: '100%' }}
+        className="bg-secondary-foreground mb-12 md:mb-18"
+        style={{ height: '4px', width: '70%' }}
       />
-      <div className="w-full h-full  ">
-        <div className="flex justify-between h-full">
+      
+      <div className="w-full max-w-7xl">
+        <div className="flex flex-col md:flex-row justify-between gap-12 md:gap-4 h-full">
+          
           <LinkList items={links} />
           <LinkList items={legalLinks} />
 
-          <div className="col-span-2 space-y-1 md:col-span-1">
+          <div className="space-y-2 text-sm sm:text-base">
             <p>Location: UM6P Campus, Ben Guerir, Morocco</p>
             <p>Email: support@um6prackets.ma</p>
             <p>Hours: Monday – Sunday, 7:00 AM – 10:00 PM</p>
-            <div className="mt-4 inline-block rounded-md dark:bg-white dark:p-2">
+            
+            <div className="mt-6 inline-block rounded-md dark:bg-white dark:p-2">
               <Link
                 href="https://www.um6p.ma/"
                 target="_blank"
@@ -60,6 +63,7 @@ export function Footer() {
               </Link>
             </div>
           </div>
+          
         </div>
       </div>
     </footer>
