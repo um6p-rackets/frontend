@@ -35,10 +35,11 @@ export default function LeaderboardTable({
         </p>
       </div>
 
-      <div className="w-full overflow-x-auto pb-4 scrollbar-thin">
-        <div className="min-w-170">
-          
-          <div className="grid grid-cols-[60px_2fr_1fr_1fr_1fr_80px] gap-4 w-full px-4 sm:px-6 py-3 mb-2 text-[9px] sm:text-xs font-black text-muted-foreground italic tracking-widest border-b border-border">
+      {/* Leaderboard List (Mobile Cards & Desktop Table) */}
+      <div className="w-full md:overflow-x-auto md:pb-4 scrollbar-thin">
+        <div className="w-full md:min-w-170">
+          {/* Desktop Table Header */}
+          <div className="hidden md:grid grid-cols-[60px_2.2fr_1fr_1fr_1fr_80px] gap-4 w-full px-4 sm:px-6 py-3 mb-2 text-[9px] sm:text-xs font-black text-muted-foreground italic tracking-widest border-b border-border">
             <div>RANK</div>
             <div>ATHLETE</div>
             <div>DEPARTMENT</div>
@@ -47,7 +48,8 @@ export default function LeaderboardTable({
             <div className="text-right">POINTS</div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          {/* Members List */}
+          <div className="flex flex-col gap-3 md:gap-2">
             {currentMembers.map((member, index) => (
               <LeaderboardRow 
                 key={`${member.name}-${startIndex + index}`} 
@@ -65,7 +67,7 @@ export default function LeaderboardTable({
             Displaying {startIndex + 1}–{Math.min(startIndex + itemsPerPage, sortedMembers.length)} of {sortedMembers.length} active contenders
           </p>
           
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex flex-wrap justify-center items-center gap-1.5 sm:gap-2">
             <button 
               onClick={handlePrev}
               disabled={currentPage === 1}
