@@ -26,10 +26,12 @@ type LeaderboardMember = {
   points: number;
   department: string;
   avatar_url: string;
+  record?: string;
+  badges?: string[];
 }
 
 export type ClubPageData = {
-  name: string;
+  name: string; 
   description: string;
   members: number;
   coach_name: string;
