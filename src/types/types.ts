@@ -46,6 +46,7 @@ export type NotificationReceiver = {
 export type Club = {
   id: number; // bigserial PK
   name: string; // varchar(255) UNIQUE
+  slug: string; // varchar(255) UNIQUE, used in URLs
   description: string | null; // text
   avatar: string | null; // text
   created_at: string; // timestamptz
@@ -193,7 +194,7 @@ export type TeamWithPlayers = Team & {
 };
 
 export type MatchDetail = Match & {
-  club: Pick<Club, 'id' | 'name'>;
+  club: Pick<Club, 'id' | 'name' | 'slug'>;
   team1: TeamWithPlayers;
   team2: TeamWithPlayers;
   referee: Player | null;
@@ -221,6 +222,7 @@ export type UserHistoryMatch = {
   match_id: number;
   club_id: number;
   club_name: string; // clubs.name (the sport)
+  club_slug: string; // for links like /clubs/badminton
   mode: MatchMode;
   partner: Player | null; // doubles only
   opponents: Player[]; // 1 in singles, 2 in doubles
@@ -234,6 +236,7 @@ export type UserHistoryMatch = {
 export type UserClubRank = {
   club_id: number;
   club_name: string;
+  club_slug: string;
   rank: number;
   points: number; // sum of points_change in this club
 };
