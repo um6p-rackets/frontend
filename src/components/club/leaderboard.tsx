@@ -3,6 +3,7 @@ import { Card } from '../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { MoveUpRight, Trophy } from 'lucide-react';
 import Link from 'next/link';
+import { getUserIdForMember } from '@/lib/mock-data';
 
 export function LeaderboardMemberCard({
   rank,
@@ -11,9 +12,11 @@ export function LeaderboardMemberCard({
   rank: number;
   member: ClubPageData['top_members'][0];
 }) {
+  const userId = member.user_id || getUserIdForMember(member);
+
   return (
     <Link
-      href="#"
+      href={`/profile/${userId}`}
       className="p-3 sm:p-4 gap-2 sm:gap-4 grid grid-cols-[1fr_auto] justify-between items-center m-1 hover:shadow-sm cursor-pointer transition-shadow duration-300 rounded-lg"
     >
       <div className="flex flex-row justify-start items-center gap-3 sm:gap-4 min-w-0">
