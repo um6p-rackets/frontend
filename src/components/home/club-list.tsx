@@ -1,34 +1,39 @@
 import ClubCard from "@/components/home/club-card";
+import { useClubs } from "@/hooks/use-clubs";
 
-const clubs = [
-  {
-    name: "Padel",
-    imageUrl: "/clubs/padel.png",
-    link: "/clubs/padel",
-  },
-  {
-    name: "Squash",
-    imageUrl: "/clubs/squash.png",
-    link: "/clubs/squash",
-  },
-  {
-    name: "Badminton",
-    imageUrl: "/clubs/badminton.png",
-    link: "/clubs/badminton",
-  },
-  {
-    name: "Table Tennis",
-    imageUrl: "/clubs/table-tennis.png",
-    link: "/clubs/table-tennis",
-  },
-  {
-    name: "Tennis",
-    imageUrl: "/clubs/tennis.png",
-    link: "/clubs/tennis",
-  }
-];
+// const clubs = [
+//   {
+//     name: "Padel",
+//     imageUrl: "/clubs/padel.png",
+//     link: "/clubs/padel",
+//   },
+//   {
+//     name: "Squash",
+//     imageUrl: "/clubs/squash.png",
+//     link: "/clubs/squash",
+//   },
+//   {
+//     name: "Badminton",
+//     imageUrl: "/clubs/badminton.png",
+//     link: "/clubs/badminton",
+//   },
+//   {
+//     name: "Table Tennis",
+//     imageUrl: "/clubs/table-tennis.png",
+//     link: "/clubs/table-tennis",
+//   },
+//   {
+//     name: "Tennis",
+//     imageUrl: "/clubs/tennis.png",
+//     link: "/clubs/tennis",
+//   }
+// ];
 
 export default function ClubList() {
+  const { data: clubs, isPending, isError, error } = useClubs();
+
+  if (isPending) return <p>Loading clubs...</p>;
+  if (isError) return <p>{error.message}</p>;
   return (
     <div className="relative max-w-6xl mx-auto w-full py-16 px-6 sm:px-12 md:px-16">
       
@@ -36,7 +41,7 @@ export default function ClubList() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-40 gap-y-14 md:gap-y-20 place-items-center">
         {clubs.map((club) => (
-          <ClubCard key={club.name} name={club.name} imageUrl={club.imageUrl} link={club.link} />
+          <ClubCard key={club.slug} name={club.name} imageUrl={`/clubs/${club.slug}.png`} link={`/clubs/${club.slug}`} />
         ))}
         
         <div className="max-w-[320px] text-xs sm:text-sm text-muted-foreground italic lg:justify-self-start self-center py-4 pl-4 border-l-2 border-brand-teal/20">
