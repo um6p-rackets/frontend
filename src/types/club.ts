@@ -1,4 +1,4 @@
-type ClubSession = {
+export type ClubSession = {
   type: string;
   day: string;
   start_time: string;
@@ -6,29 +6,30 @@ type ClubSession = {
   location: string;
   spots_available: number;
   total_spots: number;
-}
+};
 
-type ClubAnnouncement = {
+export type ClubAnnouncement = {
   title: string;
   content: string;
   date: string;
-}
+};
 
-type ClubDocument = {
+export type ClubDocument = {
   title: string;
   url: string;
   description: string;
   date: string;
-}
+};
 
-type LeaderboardMember = {
+export type LeaderboardMember = {
+  user_id?: number;
   name: string;
   points: number;
   department: string;
   avatar_url: string;
   record?: string;
   badges?: string[];
-}
+};
 
 export type ClubPageData = {
   name: string; 
@@ -38,5 +39,5 @@ export type ClubPageData = {
   weekly_sessions: ClubSession[];
   announcements: ClubAnnouncement[];
   documents: ClubDocument[];
-  top_members: LeaderboardMember[]; // Top 5 members based on points
+  top_members: LeaderboardMember[]; // Members based on points
 };
