@@ -128,6 +128,12 @@ function UserNav() {
                   render={<Link href="/#clubs">Clubs</Link>}
                 />
               </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  className={navigationMenuTriggerStyle()}
+                  render={<Link href="/profile">Profile</Link>}
+                />
+              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -151,6 +157,13 @@ function UserNav() {
             className="px-4 py-2 text-base font-semibold rounded-lg hover:bg-muted transition-colors"
           >
             Clubs
+          </Link>
+          <Link
+            href="/profile"
+            onClick={() => setIsOpen(false)}
+            className="px-4 py-2 text-base font-semibold rounded-lg hover:bg-muted transition-colors"
+          >
+            Profile
           </Link>
         </div>
       )}

@@ -21,6 +21,7 @@ export type User = {
   joined_at: string; // timestamptz
 };
 
+
 // ---------- NOTIFICATION service ----------
 
 export type SenderType = 'member' | 'club';

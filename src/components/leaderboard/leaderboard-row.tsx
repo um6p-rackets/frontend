@@ -1,5 +1,7 @@
+import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { ClubPageData } from '@/types/club';
+import { getUserIdForMember } from '@/lib/mock-data';
 
 import Rank1Badge from '@/components/badge/rank1';
 import Rank2Badge from '@/components/badge/rank2';
@@ -29,29 +31,33 @@ export default function LeaderboardRow({
 }) {
   let rankBg = 'bg-brand-ink text-background';
   let rowBg = 'bg-brand-cream/20 hover:bg-muted';
-  let cardBg = 'bg-brand-cream/20 border-border';
+  let cardBg = 'bg-brand-cream/20 border-border hover:border-brand-orange/60';
   
   if (rank === 1) { 
     rankBg = 'bg-yellow-400 text-white'; 
     rowBg = 'bg-orange-50 hover:bg-muted';
-    cardBg = 'bg-orange-50 border-amber-300/70';
+    cardBg = 'bg-orange-50 border-amber-300/70 hover:border-amber-400';
   } else if (rank === 2) { 
     rankBg = 'bg-brand-teal text-white'; 
     rowBg = 'bg-orange-50 hover:bg-muted'; 
-    cardBg = 'bg-orange-50 border-teal-300/70';
+    cardBg = 'bg-orange-50 border-teal-300/70 hover:border-teal-400';
   } else if (rank === 3) { 
     rankBg = 'bg-accent text-white'; 
     rowBg = 'bg-orange-50 hover:bg-muted'; 
-    cardBg = 'bg-orange-50 border-accent/40';
+    cardBg = 'bg-orange-50 border-accent/40 hover:border-accent';
   }
 
   const hasBadges = rank <= 3 || (member.badges && member.badges.length > 0);
   const winRate = calculateWinRate(member.record);
+  const userId = member.user_id || getUserIdForMember(member);
 
   return (
     <>
-      {/* Mobile Card View (< md) */}
-      <div className={`md:hidden relative flex flex-col p-4 rounded-xl border transition-all ${cardBg}`}>
+      {/* Mobile Card View (< md) - Links to user profile */}
+      <Link
+        href={`/profile/${userId}`}
+        className={`md:hidden relative flex flex-col p-4 rounded-xl border transition-all cursor-pointer shadow-2xs hover:shadow-md ${cardBg}`}
+      >
         {/* Header: Rank, Avatar, Name & Department, Points */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
@@ -72,7 +78,7 @@ export default function LeaderboardRow({
 
             {/* Athlete Name & Department */}
             <div className="min-w-0">
-              <div className="font-bold text-brand-ink italic text-sm truncate leading-tight">
+              <div className="font-bold text-brand-ink italic text-sm truncate leading-tight group-hover:text-brand-orange">
                 {member.name}
               </div>
               <div className="font-semibold text-muted-foreground italic text-xs truncate mt-0.5">
@@ -122,10 +128,13 @@ export default function LeaderboardRow({
             </span>
           </div>
         </div>
-      </div>
+      </Link>
 
-      {/* Desktop Row View (>= md) */}
-      <div className={`hidden md:flex relative flex-col justify-center px-4 sm:px-6 py-2.5 sm:py-4 rounded-xl transition-colors ${rowBg}`}>
+      {/* Desktop Row View (>= md) - Links to user profile */}
+      <Link
+        href={`/profile/${userId}`}
+        className={`hidden md:flex relative flex-col justify-center px-4 sm:px-6 py-2.5 sm:py-4 rounded-xl transition-all cursor-pointer hover:shadow-xs ${rowBg}`}
+      >
         {hasBadges && (
           <div className="absolute top-1 left-4 sm:left-6 flex flex-wrap items-center gap-1 scale-[0.8] sm:scale-100 origin-top-left">
             {rank === 1 && <Rank1Badge />}
@@ -152,7 +161,7 @@ export default function LeaderboardRow({
                 {member.name.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <span className="font-bold text-brand-ink italic text-xs sm:text-base truncate pr-2 sm:pr-3">
+            <span className="font-bold text-brand-ink italic text-xs sm:text-base truncate pr-2 sm:pr-3 hover:text-brand-orange transition-colors">
               {member.name}
             </span>
           </div>
@@ -175,7 +184,7 @@ export default function LeaderboardRow({
             {member.points.toLocaleString()}
           </div>
         </div>
-      </div>
+      </Link>
     </>
   );
 }
