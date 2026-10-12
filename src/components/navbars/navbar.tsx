@@ -24,7 +24,6 @@ function VisitorNav() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    // 1. bg-transparent مع padding من الفوق (pt-6) ومن الجناب (px-6/12/16) باش يبعد على الحواف
     <header className="absolute top-0 left-0 w-full z-50 bg-transparent pt-6 px-6 md:px-12 lg:px-16">
       <div className="max-w-8xl mx-auto flex justify-between items-center w-full">
         

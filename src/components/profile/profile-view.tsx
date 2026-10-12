@@ -6,7 +6,7 @@ import ProfileTabs, { ProfileTabType } from '@/components/profile/profile-tabs';
 import StatisticsTab from '@/components/profile/statistics-tab';
 import HistoryTab from '@/components/profile/history-tab';
 import SportRankCard from '@/components/profile/sport-rank-card';
-import { UserProfileData } from '@/types/types';
+import { UserProfileData } from '@/types/contracts/club';
 
 interface ProfileViewProps {
   data: UserProfileData;

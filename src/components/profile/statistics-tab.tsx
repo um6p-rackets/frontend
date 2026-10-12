@@ -1,4 +1,4 @@
-import { UserProfileData } from '@/types/types';
+import { UserProfileData } from '@/types/contracts/club';
 
 interface StatisticsTabProps {
   data: UserProfileData;
