@@ -1,4 +1,4 @@
-import { ClubPageData } from '@/types/club';
+import { ClubPageData } from '@/types/mock-data-types';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { CircleSmall } from 'lucide-react';

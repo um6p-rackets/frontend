@@ -1,4 +1,4 @@
-import { ClubPageData } from '@/types/club';
+import { ClubPageData } from '@/types/mock-data-types';
 import { BookOpenText } from 'lucide-react';
 import Link from 'next/link';
 
