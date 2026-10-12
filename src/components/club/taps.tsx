@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import AnnouncementList from './announcement-list';
 import DocumentList from './document-list';
 import SessionsList from './sessions-list';
-import type { ClubPageData } from '@/types/club';
+import type { ClubPageData } from '@/types/mock-data-types';
 
 export default function ClubTaps({
   weekly_sessions,
@@ -17,12 +17,16 @@ export default function ClubTaps({
   return (
     <Tabs defaultValue="sessions" className="w-full max-w-150">
       <TabsList className="m-0 p-4 flex flex-row w-full rounded-md shadow-none bg-gray-50 py-8 gap-2 lg:gap-6   justify-between *:rounded-md *:shadow:none *:bg-none  *:px-3 *:py-5 *:data-active:bg-accent *:data-active:text-accent-foreground *:focus:bg-accent *:focus:text-primary-foreground *:text-md *:font-semibold ">
-        <TabsTrigger value="Sessions" >Sessions</TabsTrigger>
-        <TabsTrigger value="Announcements" disabled>Announcements</TabsTrigger>
+        <TabsTrigger value="Sessions">Sessions</TabsTrigger>
+        <TabsTrigger value="Announcements" disabled>
+          Announcements
+        </TabsTrigger>
         <TabsTrigger value="Tournament" disabled>
           Tournament
         </TabsTrigger>
-        <TabsTrigger value="Documents" disabled>Documents</TabsTrigger>
+        <TabsTrigger value="Documents" disabled>
+          Documents
+        </TabsTrigger>
       </TabsList>
       <Card className="w-full h-full  min-h-50 p-4  overflow-auto bg-gray-50 border-none shadow-none ring-0 rounded-md  ">
         <TabsContent value="Sessions">

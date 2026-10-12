@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { ClubPageData } from '@/types/club';
+import type { ClubPageData } from '@/types/mock-data-types';
 import { getUserIdForMember } from '@/lib/mock-data';
 
 import Rank1Badge from '@/components/badge/rank1';
@@ -22,28 +22,28 @@ export function calculateWinRate(record?: string) {
   return '-';
 }
 
-export default function LeaderboardRow({ 
-  member, 
-  rank 
-}: { 
-  member: ClubPageData['top_members'][0]; 
-  rank: number; 
+export default function LeaderboardRow({
+  member,
+  rank
+}: {
+  member: ClubPageData['top_members'][0];
+  rank: number;
 }) {
   let rankBg = 'bg-brand-ink text-background';
   let rowBg = 'bg-brand-cream/20 hover:bg-muted';
   let cardBg = 'bg-brand-cream/20 border-border hover:border-brand-orange/60';
-  
-  if (rank === 1) { 
-    rankBg = 'bg-yellow-400 text-white'; 
+
+  if (rank === 1) {
+    rankBg = 'bg-yellow-400 text-white';
     rowBg = 'bg-orange-50 hover:bg-muted';
     cardBg = 'bg-orange-50 border-amber-300/70 hover:border-amber-400';
-  } else if (rank === 2) { 
-    rankBg = 'bg-brand-teal text-white'; 
-    rowBg = 'bg-orange-50 hover:bg-muted'; 
+  } else if (rank === 2) {
+    rankBg = 'bg-brand-teal text-white';
+    rowBg = 'bg-orange-50 hover:bg-muted';
     cardBg = 'bg-orange-50 border-teal-300/70 hover:border-teal-400';
-  } else if (rank === 3) { 
-    rankBg = 'bg-accent text-white'; 
-    rowBg = 'bg-orange-50 hover:bg-muted'; 
+  } else if (rank === 3) {
+    rankBg = 'bg-accent text-white';
+    rowBg = 'bg-orange-50 hover:bg-muted';
     cardBg = 'bg-orange-50 border-accent/40 hover:border-accent';
   }
 
@@ -145,10 +145,14 @@ export default function LeaderboardRow({
           </div>
         )}
 
-        <div className={`grid grid-cols-[60px_2.2fr_1fr_1fr_1fr_80px] items-center gap-4 w-full ${hasBadges ? 'mt-4 sm:mt-4' : ''}`}>
+        <div
+          className={`grid grid-cols-[60px_2.2fr_1fr_1fr_1fr_80px] items-center gap-4 w-full ${hasBadges ? 'mt-4 sm:mt-4' : ''}`}
+        >
           {/* Rank */}
           <div className="font-bold text-sm sm:text-lg">
-            <div className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-md ${rankBg}`}>
+            <div
+              className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-md ${rankBg}`}
+            >
               {rank}
             </div>
           </div>
@@ -170,7 +174,7 @@ export default function LeaderboardRow({
           <div className="font-bold text-muted-foreground italic text-[11px] sm:text-sm truncate">
             {member.department}
           </div>
-          
+
           {/* Record & Win Rate */}
           <div className="font-bold text-muted-foreground italic text-[11px] sm:text-sm truncate">
             {member.record || '-'}
@@ -178,7 +182,7 @@ export default function LeaderboardRow({
           <div className="font-bold text-muted-foreground italic text-[11px] sm:text-sm truncate">
             {winRate}
           </div>
-          
+
           {/* Points */}
           <div className="font-bold text-brand-orange italic text-right text-sm sm:text-lg">
             {member.points.toLocaleString()}
