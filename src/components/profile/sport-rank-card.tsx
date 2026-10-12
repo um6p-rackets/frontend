@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { UserClubRank } from '@/types/types';
+import { UserClubRank } from '@/types/contracts/club';
 import { MoveUpRight } from 'lucide-react';
 
 interface SportRankCardProps {

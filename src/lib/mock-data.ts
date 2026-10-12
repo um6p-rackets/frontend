@@ -1,6 +1,6 @@
+import { ClubPageData } from '@/types/mock-data-types';
+import { User } from '@/types/contracts/auth';
 import {
-  ClubPageData,
-  User,
   Club,
   Member,
   MemberRole,
@@ -13,14 +13,16 @@ import {
   SessionAttend,
   Announcement,
   Achievement,
-  Notification,
-  NotificationReceiver,
   Player,
   JoinedClub,
   UserHistoryMatch,
   UserClubRank,
   UserProfileData,
-} from '@/types/types';
+} from '@/types/contracts/club';
+import {
+  Notification,
+  NotificationReceiver,
+} from '@/types/contracts/notification';
 
 // ==========================================
 // 1. AUTH Service: `users`
@@ -638,6 +640,12 @@ export const mockWeekSessions: WeekSession[] = [
     day_of_week: WeekDay.WEDNESDAY,
     start_time: '17:30:00',
     end_time: '19:00:00',
+    capacity: 20,
+    title: 'Tennis Training',
+    location: 'Court 1',
+    is_active: true,
+    created_at: '2026-02-01T00:00:00Z',
+    updated_at: '2026-02-01T00:00:00Z',
   },
   {
     id: 2,
@@ -645,6 +653,12 @@ export const mockWeekSessions: WeekSession[] = [
     day_of_week: WeekDay.MONDAY,
     start_time: '17:00:00',
     end_time: '19:00:00',
+    capacity: 20,
+    title: 'Badminton Practice',
+    location: 'Sport Department',
+    is_active: true,
+    created_at: '2026-01-10T00:00:00Z',
+    updated_at: '2026-01-10T00:00:00Z',
   },
   {
     id: 3,
@@ -652,6 +666,12 @@ export const mockWeekSessions: WeekSession[] = [
     day_of_week: WeekDay.WEDNESDAY,
     start_time: '18:00:00',
     end_time: '20:00:00',
+    capacity: 10,
+    title: 'Badminton Match Session',
+    location: 'Sport Department',
+    is_active: true,
+    created_at: '2026-01-10T00:00:00Z',
+    updated_at: '2026-01-10T00:00:00Z',
   },
 ];
 

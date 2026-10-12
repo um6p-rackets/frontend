@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserProfileData } from '@/types/types';
+import { UserProfileData } from '@/types/contracts/club';
 import { Flame, Heart, GraduationCap } from 'lucide-react';
 import Rank1Badge from '@/components/badge/rank1';
 import Rank2Badge from '@/components/badge/rank2';

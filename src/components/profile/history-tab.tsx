@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { UserHistoryMatch } from '@/types/types';
+import { UserHistoryMatch } from '@/types/contracts/club';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ChevronDown } from 'lucide-react';
 
