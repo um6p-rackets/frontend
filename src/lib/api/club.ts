@@ -1,5 +1,5 @@
 import { api } from "@/lib/api/api";
-import type { Club } from "@/types/types";
+import type { Club } from "@/types/contracts/club";
 
 const CLUBS = "/clubs";
 
