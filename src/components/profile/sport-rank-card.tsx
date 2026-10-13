@@ -172,7 +172,7 @@ export default function SportRankCard({ clubRanks, userName, department }: Sport
         </div>
 
         {/* User Rank Box */}
-        <div className="bg-[#FAF7EE] dark:bg-muted/40 rounded-xl p-3.5 sm:p-4 flex items-center justify-between border border-[#ECE6D8] dark:border-border/40">
+        <div className="bg-secondary/50 dark:bg-[#121417] rounded-xl p-3.5 sm:p-4 flex items-center justify-between border border-border/60 dark:border-border/40">
           <div className="flex items-center gap-3 min-w-0">
             {/* Rank badge circle */}
             <div className="w-8 h-8 rounded-full bg-brand-orange text-white font-black italic flex items-center justify-center text-sm shrink-0 shadow-2xs">
