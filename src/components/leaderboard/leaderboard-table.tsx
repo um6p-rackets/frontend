@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import LeaderboardRow from './leaderboard-row';
 import type { ClubPageData } from '@/types/mock-data-types';
+import Pagination from './pagination';
 
 export default function LeaderboardTable({
   top_members
@@ -72,35 +73,11 @@ export default function LeaderboardTable({
           </p>
 
           <div className="flex flex-wrap justify-center items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-              className="px-3 py-1 sm:py-1.5 bg-background border border-border text-brand-ink rounded-md hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed italic font-black text-[10px] sm:text-xs"
-            >
-              Prev
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-2.5 py-1 sm:py-1.5 rounded-md italic font-black text-[10px] sm:text-xs transition-colors ${
-                  currentPage === page
-                    ? 'bg-brand-orange text-white border border-brand-orange'
-                    : 'bg-background border border-border text-brand-ink hover:bg-muted'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 sm:py-1.5 bg-background border border-border text-brand-ink rounded-md hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed italic font-black text-[10px] sm:text-xs"
-            >
-              Next
-            </button>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
       )}
