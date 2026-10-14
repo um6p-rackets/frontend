@@ -6,6 +6,7 @@ import {
   joinClubSession,
   leaveClubSession,
 } from "@/lib/api/club";
+import { mockClubs } from "@/lib/mock-data";
 
 import type { WeekView } from "@/types/contracts/club";
 
@@ -19,15 +20,30 @@ export const clubKeys = {
 export function useClubs() {
   return useQuery({
     queryKey: clubKeys.all,
-    queryFn: getClubs,
-    staleTime: 5 * 60 * 1000, // clubs rarely change: reuse for 5 minutes
+    queryFn: async () => {
+      try {
+        return await getClubs();
+      } catch (err) {
+        console.warn("Failed to fetch clubs from backend, falling back to mockClubs:", err);
+        return mockClubs;
+      }
+    },
+    staleTime: 5 * 60 * 1000,
   });
 }
 
 export function useClub(slug: string) {
   return useQuery({
     queryKey: clubKeys.detail(slug),
-    queryFn: () => getClub(slug),
+    queryFn: async () => {
+      try {
+        return await getClub(slug);
+      } catch (err) {
+        console.warn(`Failed to fetch club ${slug} from backend, falling back to mockClubs:`, err);
+        return mockClubs.find((c) => c.slug === slug) ?? null;
+      }
+    },
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -79,11 +95,6 @@ export function useJoinClubSession(slug: string) {
         });
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["clubs", slug, "sessions"],
-      });
-    },
   });
 }
 
@@ -126,11 +137,6 @@ export function useLeaveClubSession(slug: string) {
           queryClient.setQueryData(queryKey, data);
         });
       }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["clubs", slug, "sessions"],
-      });
     },
   });
 }

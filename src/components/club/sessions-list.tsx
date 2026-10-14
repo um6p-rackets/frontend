@@ -294,7 +294,7 @@ function SessionCard({
   );
 }
 
-function SessionsSkeleton() {
+export function SessionsSkeleton() {
   return (
     <div className="flex-1 flex flex-col gap-4">
       <Skeleton className="h-12 rounded-lg" />

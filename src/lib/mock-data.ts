@@ -9,7 +9,6 @@ import {
   MatchMode,
   MatchStatus,
   Session,
-  WeekDay,
   SessionAttend,
   Announcement,
   Achievement,
@@ -140,27 +139,27 @@ export const mockClubs: Club[] = [
   {
     id: 1,
     name: 'Badminton',
-    slug:'badminton',
+    slug: 'badminton',
     description:
-      'Badminton is a fast-paced, highly engaging racket sport played indoors either in singles or doubles.',
+      'Badminton is a fast-paced, highly engaging racket sport played indoors either in singles or doubles. Unlike other racket sports, badminton is played with a shuttlecock, which is a feathered projectile that flies differently from balls used in other sports.',
     avatar: '/clubs/badminton.png',
     created_at: '2026-01-10T00:00:00Z',
   },
   {
     id: 2,
     name: 'Tennis',
-    slug:'tennis',
+    slug: 'tennis',
     description:
-      'Tennis is a high-intensity racket sport played on courts of clay, grass, or acrylic surfaces.',
+      'Tennis is a high-intensity racket sport played on courts of clay, grass, or acrylic surfaces. Players use stringed rackets to strike a hollow rubber ball over a central net into the opponent’s court, testing precision, endurance, and power in singles or doubles.',
     avatar: '/clubs/tennis.png',
     created_at: '2026-01-15T00:00:00Z',
   },
   {
     id: 3,
     name: 'Padel',
-    slug:'padel',
+    slug: 'padel',
     description:
-      'Padel is an exhilarating doubles racket sport played in an enclosed court surrounded by glass walls and mesh.',
+      'Padel is an exhilarating doubles racket sport played in an enclosed court surrounded by glass walls and mesh. Combining elements of tennis and squash, balls can be played off the walls, leading to fast, strategic, and thrilling rallies.',
     avatar: '/clubs/padel.png',
     created_at: '2026-02-01T00:00:00Z',
   },
@@ -169,7 +168,7 @@ export const mockClubs: Club[] = [
     name: 'Table Tennis',
     slug: 'table-tennis',
     description:
-      'Fast-reflex sport played across a hard tabletop divided by a central net.',
+      'Table Tennis is a fast-reflex sport played across a hard tabletop divided by a central net. Players use small laminated paddles and a lightweight ball, demanding rapid footwork, extreme spin control, and lightning reflexes.',
     avatar: '/clubs/table-tennis.png',
     created_at: '2026-02-10T00:00:00Z',
   },
@@ -178,11 +177,41 @@ export const mockClubs: Club[] = [
     name: 'Squash',
     slug: 'squash',
     description:
-      'High-cardio indoor racket sport played in a four-walled court with a small hollow rubber ball.',
+      'Squash is a high-cardio indoor racket sport played in a four-walled court with a small hollow rubber ball. Players alternate striking the ball against the front wall above the tin, testing endurance, tactical positioning, and spatial precision.',
     avatar: '/clubs/squash.png',
     created_at: '2026-02-20T00:00:00Z',
   },
 ];
+
+export function getClubBySlug(slug: string): (Club & { coach_name: string; members_count: number }) | undefined {
+  if (!slug) return undefined;
+  const normalized = slug.toLowerCase().replace(/club/g, '').trim().replace(/\s+/g, '-');
+  const club = mockClubs.find((c) => c.slug === normalized) || mockClubs.find((c) => c.slug === slug);
+  if (!club) return undefined;
+
+  const coachMap: Record<string, string> = {
+    badminton: 'Mr. Michael',
+    tennis: 'Coach Karim Bennani',
+    padel: 'Coach Sofia Alami',
+    'table-tennis': 'Coach Youssef Tazi',
+    squash: 'Coach Omar Mansouri',
+  };
+
+  const membersCountMap: Record<string, number> = {
+    badminton: 42,
+    tennis: 38,
+    padel: 29,
+    'table-tennis': 24,
+    squash: 19,
+  };
+
+  return {
+    ...club,
+    coach_name: coachMap[club.slug] || 'Head Coach',
+    members_count: membersCountMap[club.slug] || 25,
+  };
+}
+
 
 // ==========================================
 // 3. CLUB Service: `members`

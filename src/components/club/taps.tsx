@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import AnnouncementList from './announcement-list';
 import DocumentList from './document-list';
-import SessionsList from './sessions-list';
+import SessionsList, { SessionsSkeleton } from './sessions-list';
 import type { ClubPageData } from '@/types/mock-data-types';
 
 import { cn } from 'cn';
@@ -47,7 +47,7 @@ export default function ClubTaps({
       </TabsList>
       <div className="w-full flex-1 p-4 bg-gray-50 rounded-xl flex flex-col mt-2">
         <TabsContent value="sessions" className="flex-1 flex flex-col m-0">
-          <Suspense fallback={<div className="p-4 text-center text-sm text-muted-foreground">Loading sessions...</div>}>
+          <Suspense fallback={<SessionsSkeleton />}>
             <SessionsList clubSlug={clubSlug} />
           </Suspense>
         </TabsContent>
