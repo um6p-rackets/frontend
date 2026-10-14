@@ -204,6 +204,7 @@ export type SessionView = Session & {
 export type WeekView = {
   week_start: string; // Monday, "2026-10-12"
   is_current_week: boolean;
+  is_future_week?: boolean;
   prev_week_start: string; // past weeks are read-only
   next_week_start: string | null; // null when already on next week (max one week ahead)
   sessions: SessionView[];

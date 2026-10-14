@@ -11,10 +11,11 @@ import { mockClubData } from '@/lib/mock-data';
 
 export default function ClubPage() {
   const params = useParams<{ name: string }>();
+  const clubSlug = params?.name ?? 'tennis';
 
   return (
     <div>
-      <ClubTitle name={params.name} />
+      <ClubTitle name={clubSlug} />
       <section className="relative">
         {/* description/number of members/ coach name/ join button for new members */}
         <OverviewCard
@@ -23,19 +24,19 @@ export default function ClubPage() {
           members={mockClubData.members}
         />
       </section>
-      <div className="w-full flex items-center justify-center mt-12 ">
-        <div className="w-full h-full flex items-center justify-center ">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8  justify-center">
-            <section className="">
+      <div className="w-full flex items-center justify-center mt-12">
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch justify-center w-full max-w-6xl">
+            <section className="lg:h-full flex flex-col min-w-0">
               {/* this section for taps (training sessions, announcements, tournament,
           Documents, About) */}
               <ClubTaps
-                weekly_sessions={mockClubData.weekly_sessions}
+                clubSlug={clubSlug}
                 announcements={mockClubData.announcements}
                 documents={mockClubData.documents}
               />
             </section>
-            <section className="">
+            <section className="self-start w-full min-w-0">
               <Leaderboard top_members={mockClubData.top_members} />
             </section>
           </div>

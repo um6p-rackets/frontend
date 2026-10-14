@@ -56,13 +56,13 @@ export default function Leaderboard({
   const sortedMembers = [...top_members].sort((a, b) => b.points - a.points);
 
   return (
-    <Card className="w-full h-full bg-gray-50 border-none shadow-none ring-0 rounded-md flex flex-col">
+    <Card className="w-full bg-gray-50 border-none shadow-none ring-0 rounded-md flex flex-col">
       <div className="text-xl sm:text-2xl px-4 py-3 font-bold flex items-center justify-start gap-3 sm:gap-4 border-b border-gray-200">
         <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-accent shrink-0" />
         <span>Leaderboard</span>
       </div>
 
-      <div className="flex flex-col gap-1 sm:gap-2 p-1 sm:p-2 overflow-auto flex-1">
+      <div className="flex flex-col gap-1 sm:gap-2 p-1 sm:p-2">
         {sortedMembers.slice(0, 5).map((member, index) => (
           <LeaderboardMemberCard key={index} member={member} rank={index + 1} />
         ))}

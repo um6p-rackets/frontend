@@ -1,51 +1,70 @@
-import { Card } from '../ui/card';
+'use client';
+
+import { Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import AnnouncementList from './announcement-list';
 import DocumentList from './document-list';
 import SessionsList from './sessions-list';
 import type { ClubPageData } from '@/types/mock-data-types';
 
+import { cn } from 'cn';
+
+const tabTriggerClass = cn(
+  'flex-1 basis-0 min-w-0 h-9 sm:h-10 px-1.5 sm:px-4 py-1.5 sm:py-2',
+  'text-xs sm:text-sm font-semibold text-center whitespace-nowrap',
+  'text-muted-foreground transition-all duration-200 cursor-pointer',
+  'hover:text-accent hover:bg-transparent',
+  'data-active:bg-accent data-active:text-accent-foreground data-active:hover:bg-accent data-active:hover:text-accent-foreground data-active:shadow-2xs',
+  'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+  'disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none disabled:hover:text-muted-foreground',
+  'after:hidden'
+);
+
 export default function ClubTaps({
-  weekly_sessions,
+  clubSlug,
   announcements,
   documents
 }: {
-  weekly_sessions: ClubPageData['weekly_sessions'];
+  clubSlug: string;
   announcements: ClubPageData['announcements'];
   documents: ClubPageData['documents'];
 }) {
   return (
-    <Tabs defaultValue="sessions" className="w-full max-w-150">
-      <TabsList className="m-0 p-4 flex flex-row w-full rounded-md shadow-none bg-gray-50 py-8 gap-2 lg:gap-6   justify-between *:rounded-md *:shadow:none *:bg-none  *:px-3 *:py-5 *:data-active:bg-accent *:data-active:text-accent-foreground *:focus:bg-accent *:focus:text-primary-foreground *:text-md *:font-semibold ">
-        <TabsTrigger value="Sessions">Sessions</TabsTrigger>
-        <TabsTrigger value="Announcements" disabled>
+    <Tabs defaultValue="sessions" className="w-full lg:h-full flex flex-col">
+      <TabsList className="w-full group-data-horizontal/tabs:h-auto h-auto p-1 sm:p-1.5 bg-gray-50 border border-border/50 rounded-xl flex flex-row items-center gap-1 sm:gap-1.5 shadow-2xs shrink-0">
+        <TabsTrigger value="sessions" className={tabTriggerClass}>
+          Sessions
+        </TabsTrigger>
+        <TabsTrigger value="Announcements" className={tabTriggerClass}>
           Announcements
         </TabsTrigger>
-        <TabsTrigger value="Tournament" disabled>
+        <TabsTrigger value="Tournament" disabled className={cn(tabTriggerClass, 'hidden')}>
           Tournament
         </TabsTrigger>
-        <TabsTrigger value="Documents" disabled>
+        <TabsTrigger value="Documents" className={tabTriggerClass}>
           Documents
         </TabsTrigger>
       </TabsList>
-      <Card className="w-full h-full  min-h-50 p-4  overflow-auto bg-gray-50 border-none shadow-none ring-0 rounded-md  ">
-        <TabsContent value="Sessions">
-          <SessionsList weekly_sessions={weekly_sessions} />
+      <div className="w-full flex-1 p-4 bg-gray-50 rounded-xl flex flex-col mt-2">
+        <TabsContent value="sessions" className="flex-1 flex flex-col m-0">
+          <Suspense fallback={<div className="p-4 text-center text-sm text-muted-foreground">Loading sessions...</div>}>
+            <SessionsList clubSlug={clubSlug} />
+          </Suspense>
         </TabsContent>
-        <TabsContent value="Announcements">
+        <TabsContent value="Announcements" className="flex-1 flex flex-col m-0">
           <AnnouncementList announcements={announcements} />
         </TabsContent>
-        <TabsContent value="Tournament">
+        <TabsContent value="Tournament" className="flex-1 flex flex-col m-0">
           {/* TODO: Implement tournament content */}
           tournament content should be here
           {/* so you should create two components:
           one for tournament register link and one for tournament bracket link
           also its shown just on case of there is a tournament */}
         </TabsContent>
-        <TabsContent value="Documents">
+        <TabsContent value="Documents" className="flex-1 flex flex-col m-0">
           <DocumentList documents={documents} />
         </TabsContent>
-      </Card>
+      </div>
     </Tabs>
   );
 }
