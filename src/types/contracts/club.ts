@@ -304,6 +304,7 @@ export type CreateSessionBody = {
   location?: string | null;
   capacity: number;
   week_start?: string; // optional, "YYYY-MM-DD", the Monday of the week to create the session for. If not provided, defaults to the current week.
+  repeat_weekly?: boolean; // false (default) = only this session, true = also later sessions and the weekly plan
 };
 
 // PATCH /clubs/:slug/sessions/:sessionId
@@ -314,6 +315,8 @@ export type UpdateSessionBody = {
   location?: string | null;
   capacity?: number; // not below the bookings of any affected session
   apply_to_future?: boolean; // false (default) = this session only, true = also later sessions and the weekly plan
+  template_id?: string;
+
 };
 
 // DELETE /clubs/:slug/sessions/:sessionId?apply_to_future=true|false
