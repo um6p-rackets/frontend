@@ -1,39 +1,40 @@
+"use client";
+
 import { X } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { LoginForm } from './login-form';
 import { RegisterForm } from './register-form';
 import { useAuthPopupStore } from '@/store/auth_popup';
 
 export function AuthTabs() {
-  const { close } = useAuthPopupStore.getState();
+  const close = useAuthPopupStore((state) => state.close);
+  const activeTab = useAuthPopupStore((state) => state.activeTab);
+  const setTab = useAuthPopupStore((state) => state.setTab);
+
   return (
-    <Tabs
-      defaultValue="register"
-      className="relative w-100 sm:w-150 max-h-150 min-h-150 overflow-auto pt-10"
-    >
-      <X
-        className="absolute top-2 left-2 cursor-pointer"
-        onClick={() => {
-          close();
-        }}
-      />
-      <TabsList className="grid w-full grid-cols-2 rounded-none shadow-none bg-none bg-muted/50">
-        <TabsTrigger value="login" className="rounded-none shadow-none bg-none">
-          Login
-        </TabsTrigger>
-        <TabsTrigger
-          value="register"
-          className="rounded-none shadow-none bg-none"
-        >
-          Register
-        </TabsTrigger>
-      </TabsList>
-      <TabsContent value="login">
-        <LoginForm />
-      </TabsContent>
-      <TabsContent value="register">
-        <RegisterForm />
-      </TabsContent>
-    </Tabs>
+    <div className="relative flex flex-col w-[calc(100vw-2rem)] max-w-[600px] max-h-[85vh] mx-auto">
+      
+      {/* Exit Button */}
+      <button 
+        onClick={close}
+        className="absolute top-4 right-4 z-50 p-1.5 bg-background/60 hover:bg-muted rounded-full transition-colors cursor-pointer"
+      >
+        <X className="size-5 text-muted-foreground" />
+      </button>              
+
+      <div className="flex-1 overflow-y-auto w-full custom-scrollbar">
+        {activeTab === "login" ? (
+          <LoginForm 
+            onSuccess={close} // Keep this as close, so logging in closes the popup
+            onSwitchToRegister={() => setTab("register")} 
+          />
+        ) : (
+          <RegisterForm 
+            // Changed this line so it switches to login instead of closing!
+            onSuccess={() => setTab("login")} 
+            onSwitchToLogin={() => setTab("login")} 
+          />
+        )}
+      </div>
+    </div>
   );
 }
