@@ -1,19 +1,25 @@
-// this just a simple example of a zustand store to manage authentication state 
-
+// src/store/auth.ts
 import { create } from "zustand";
-
-type Role = "visitor" | "member" | "leader" | "coach";
+import { persist } from "zustand/middleware";
+import type { User } from "@/types/contracts/auth";
 
 type AuthState = {
-  user: { id: string; name: string } | null;
-  role: Role;
-  setUser: (user: AuthState["user"], role: Role) => void;
+  user: User | null;
+  token: string | null;
+  setAuth: (user: User, token: string) => void;
   logout: () => void;
 };
 
-export const useAuth = create<AuthState>((set) => ({
-  user: null,
-  role: "visitor",
-  setUser: (user, role) => set({ user, role }),
-  logout: () => set({ user: null, role: "visitor" }),
-}));
+export const useAuth = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      setAuth: (user, token) => set({ user, token }),
+      logout: () => set({ user: null, token: null }),
+    }),
+    {
+      name: "auth-storage",
+    }
+  )
+);

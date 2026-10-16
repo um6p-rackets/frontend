@@ -15,7 +15,7 @@ export function AuthButton({ title, className }: { title: string; className?: st
     <AlertDialog open={isOpen} onOpenChange={(v) => (v ? open() : close())}>
       <AlertDialogTrigger
         render={
-          <Button className={`  ${className}`}>
+          <Button className={`${className || ''}`}>
             {title}
           </Button>
         }

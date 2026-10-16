@@ -1,122 +1,153 @@
-import { cn } from 'cn';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Mail, Lock, SlidersHorizontal, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { useAuthPopupStore } from '@/store/auth_popup';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { api } from '@/lib/api/api';
+import { useAuth } from '@/store/auth';
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<'div'>) {
-  return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>Login with your Google account</CardDescription>
-          <Button variant="outline" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path
-                d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                fill="currentColor"
-              />
-            </svg>
-            Login with Google
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <LoginFormFields />
-        </CardContent>
-      </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our{' '}
-        <a href="/terms">Terms of Service</a> and{' '}
-        <a href="/privacy">Privacy Policy</a>.
-      </FieldDescription>
-    </div>
-  );
+interface FormErrors {
+  email?: string;
+  password?: string;
 }
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8)
-});
-type FormData = z.infer<typeof schema>;
+interface LoginFormProps {
+  onSuccess?: () => void;
+  onSwitchToRegister?: () => void;
+}
 
-function LoginFormFields() {
-  const close = useAuthPopupStore((s) => s.close);
+export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const setUser = useAuth((state) => state.setAuth);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors, isSubmitting }
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
+    if (!email.trim()) newErrors.email = "Email address is required.";
+    if (!password.trim()) newErrors.password = "Password is required.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  async function onSubmit(data: FormData) {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); 
+    if (!validate()) return;
+
+    setIsLoading(true);
     try {
-      // await login(data); // API call
-      console.log(data);
-      close(); // only reached when validation passed and the call API succeeded
-    } catch {
-      setError('root', { message: 'Login failed, try again.' });
+      const payload = {
+        email: email.trim(),
+        password: password,
+      };
+
+      const response = (await api('/auth/login', { 
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })) as { user?: Parameters<typeof setUser>[0]; token?: string } & Parameters<typeof setUser>[0];
+
+      if (setUser && response) {
+        const userData = response.user ? response.user : response;
+        
+        const token = response.token || ""; 
+        
+        setUser(userData, token); 
+      }
+
+      if (onSuccess) onSuccess();
+
+    } catch (error) {
+      console.error("Login failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Invalid email or password.";
+      setErrors({ email: errorMessage });
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" placeholder="Email" {...register('email')} />
-          {errors.email && (
-            <FieldDescription className="text-sm text-red-500">
-              {errors.email.message}
-            </FieldDescription>
-          )}
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="password">Password</FieldLabel>
-          <Input
-            id="password"
-            type="password"
-            placeholder="Password"
-            {...register('password')}
-          />
-          {errors.password && (
-            <FieldDescription className="text-sm text-red-500">
-              {errors.password.message}
-            </FieldDescription>
-          )}
-        </Field>
-        {errors.root && (
-          <FieldDescription className="text-sm text-red-500">
-            {errors.root.message}
-          </FieldDescription>
-        )}
-        <Field>
-          <Button type="submit" disabled={isSubmitting}>
-            Login
-          </Button>
-        </Field>
-      </FieldGroup>
-    </form>
+    <div className="w-full flex flex-col">
+      <div className="border-b border-border/60 bg-muted/20 pb-6 pt-6 sm:pt-8 px-6 sm:px-8">
+        <div className="mb-2 inline-flex w-fit items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/40 text-brand-orange border border-orange-200/60 dark:border-orange-900/40 text-[11px] font-black italic tracking-wide uppercase">
+          <SlidersHorizontal className="size-3" />
+          <span>Welcome Back</span>
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-black italic tracking-tight text-brand-ink dark:text-white">
+          Login to Account
+        </h2>
+        <p className="text-xs sm:text-sm italic font-medium mt-1 text-muted-foreground">
+          Enter your credentials to access your UM6P Racket dashboard.
+        </p>
+      </div>
+      
+      <div className="p-6 sm:p-8">
+        <form onSubmit={handleLogin}>
+          <FieldGroup className="space-y-4">
+            
+            <Field className="space-y-1.5">
+              <FieldLabel htmlFor="email" className={cn("text-xs font-bold uppercase tracking-wider flex items-center gap-1.5", errors.email ? "text-destructive" : "text-muted-foreground")}>
+                <Mail className="size-3.5 text-brand-orange" /> Email Address
+              </FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                placeholder="user@um6p.ma"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={cn("h-11 w-full rounded-xl bg-background/60 focus-visible:ring-2 font-medium text-sm transition-all", errors.email ? "border-destructive focus-visible:ring-destructive/30" : "border-border/80 focus-visible:ring-brand-orange/40")}
+              />
+              {errors.email && (
+                <p className="text-[11px] font-semibold text-destructive mt-1 flex items-center gap-1">
+                  <AlertCircle className="size-3 shrink-0" /> {errors.email}
+                </p>
+              )}
+            </Field>
+
+            <Field className="space-y-1.5">
+              <FieldLabel htmlFor="password" className={cn("text-xs font-bold uppercase tracking-wider flex items-center gap-1.5", errors.password ? "text-destructive" : "text-muted-foreground")}>
+                <Lock className="size-3.5 text-brand-orange" /> Password
+              </FieldLabel>
+              <Input 
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={cn("h-11 w-full rounded-xl bg-background/60 focus-visible:ring-2 font-medium text-sm transition-all", errors.password ? "border-destructive focus-visible:ring-destructive/30" : "border-border/80 focus-visible:ring-brand-orange/40")}
+              />
+              {errors.password && (
+                <p className="text-[11px] font-semibold text-destructive mt-1 flex items-center gap-1">
+                  <AlertCircle className="size-3 shrink-0" /> {errors.password}
+                </p>
+              )}
+            </Field>
+
+            <Field className="pt-4 border-t border-border/60">
+              <Button type="submit" disabled={isLoading} className="h-11 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-black italic text-sm tracking-wide shadow-md shadow-brand-orange/20 w-full flex items-center justify-center gap-2">
+                {isLoading ? <><Loader2 className="size-4 animate-spin" /> Signing in...</> : <>Sign In <ArrowRight className="size-4" /></>}
+              </Button>
+            </Field>
+
+            <p className="text-center text-[13px] font-medium text-muted-foreground mt-3">
+              Dont have an account?{" "}
+              <button
+                type="button"
+                onClick={onSwitchToRegister}
+                className="text-brand-orange hover:text-brand-orange/80 hover:underline font-bold transition-colors cursor-pointer"
+              >
+                Sign up
+              </button>
+            </p>
+
+          </FieldGroup>
+        </form>
+      </div>
+    </div>
   );
 }
