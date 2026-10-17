@@ -22,9 +22,7 @@ const tabTriggerClass = cn(
 
 export default function ClubTaps({
   clubSlug,
-  announcements,
-  documents
-}: {
+}: { 
   clubSlug: string;
   announcements: ClubPageData['announcements'];
   documents: ClubPageData['documents'];
@@ -51,9 +49,12 @@ export default function ClubTaps({
             <SessionsList clubSlug={clubSlug} />
           </Suspense>
         </TabsContent>
+        
         <TabsContent value="Announcements" className="flex-1 flex flex-col m-0">
-          <AnnouncementList announcements={announcements} />
+          {/* FIXED: Passing the clubSlug so the API knows which club to search for! */}
+          <AnnouncementList clubSlug={clubSlug} />
         </TabsContent>
+        
         <TabsContent value="Tournament" className="flex-1 flex flex-col m-0">
           {/* TODO: Implement tournament content */}
           tournament content should be here
@@ -62,7 +63,7 @@ export default function ClubTaps({
           also its shown just on case of there is a tournament */}
         </TabsContent>
         <TabsContent value="Documents" className="flex-1 flex flex-col m-0">
-          <DocumentList documents={documents} />
+          <DocumentList clubSlug={clubSlug} />
         </TabsContent>
       </div>
     </Tabs>
