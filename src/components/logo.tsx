@@ -10,6 +10,7 @@ export default function Logo( {className}: {className?: string}) {
         width={500}
         height={500}
         className={`object-contain w-20 h-20 ${className || ''}`}
+        priority
       />
     </Link>
   );
