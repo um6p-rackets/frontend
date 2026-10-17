@@ -60,8 +60,22 @@ export type ClubMemberStatus = {
 };
 
 
+
 export const getClubStatus = async (slug: string): Promise<ClubMemberStatus> => {
-  return await api<ClubMemberStatus>(`${CLUBS}/${slug}/status`);
+  // Check if user exists before calling the API
+  const user = useAuth.getState().user;
+  if (!user) {
+    return { is_member: false, member_id: null, role: null };
+  }
+
+  try {
+    return await api<ClubMemberStatus>(`${CLUBS}/${slug}/status`);
+  } catch (error: unknown) {
+    if (error instanceof ApiError && error.status === 401) {
+      return { is_member: false, member_id: null, role: null };
+    }
+    throw error;
+  }
 };
 
 export const joinClubSession = async (slug: string, sessionId: number) => {

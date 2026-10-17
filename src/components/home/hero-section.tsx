@@ -43,8 +43,10 @@ export default function HeroSection() {
           width={535}
           height={628}
           priority
-          className=" z-10 mx-auto  h-auto w-full max-w-133.75 lg:mx-0 hidden lg:block"
+          style={{ width: '100%', height: 'auto' }}
+          className="z-10 mx-auto max-w-133.75 lg:mx-0 hidden lg:block" 
         />
+        
 
         {/* content */}
         <div className="relative z-10 flex flex-col md:flex-row lg:flex-col pt-10 lg:pt-37.5 gap-6 lg:gap-0">

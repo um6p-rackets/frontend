@@ -1,10 +1,5 @@
-'use client';
-
-import { useState } from 'react';
-import { Users, Whistle, UserPlus, Check } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Users, Whistle } from 'lucide-react';
 import { Card } from '../ui/card';
-import { cn } from 'cn';
 
 export default function OverviewCard({
   clubName,
@@ -13,17 +8,12 @@ export default function OverviewCard({
   coach,
 }: {
   clubName?: string;
-  clubSlug?: string;
   desc: string;
   members: number;
   coach: string;
-  imageUrl?: string;
 }) {
-  const [isRequested, setIsRequested] = useState(false);
-
   return (
     <Card className="p-4 sm:p-7 rounded-xl sm:rounded-2xl border border-border/70 shadow-2xs bg-card sm:bg-gray-50 dark:bg-gray-800/80">
-
       <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
         {clubName ? `${clubName} Club Overview` : 'Official Campus Club'}
       </h2>
@@ -58,29 +48,6 @@ export default function OverviewCard({
             </div>
           </div>
         </div>
-
-        {/* <Button
-          variant="accent"
-          onClick={() => setIsRequested((prev) => !prev)}
-          className={cn(
-            'w-full sm:w-auto h-11 sm:h-12 px-6 sm:px-8 font-bold text-sm sm:text-base rounded-md',
-            'shadow-md shadow-accent/25 hover:shadow-lg hover:shadow-accent/40 active:scale-[0.98]',
-            'transition-all duration-200 cursor-pointer flex items-center justify-center gap-2.5 shrink-0',
-            isRequested && 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30'
-          )}
-        >
-          {isRequested ? (
-            <>
-              <Check className="w-5 h-5 shrink-0" />
-              <span>Request Sent</span>
-            </>
-          ) : (
-            <>
-              <UserPlus className="w-5 h-5 shrink-0" />
-              <span>Request to Join</span>
-            </>
-          )}
-        </Button> */}
       </div>
     </Card>
   );
