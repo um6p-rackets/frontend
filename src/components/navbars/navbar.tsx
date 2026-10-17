@@ -182,7 +182,7 @@ function UserNav() {
           {isAppView && (
             <Link 
               title="Club Members" 
-              href="/members" 
+              href="clubs/{slug}/members" 
               className={`flex items-center justify-center transition-colors hover:text-brand-orange ${pathname?.startsWith('/members') ? 'text-brand-orange' : 'text-foreground'}`}
             >
               <Users className="w-5 h-5" />

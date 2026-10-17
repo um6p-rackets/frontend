@@ -24,10 +24,6 @@ export default function OverviewCard({
   return (
     <Card className="p-4 sm:p-7 rounded-xl sm:rounded-2xl border border-border/70 shadow-2xs bg-card sm:bg-gray-50 dark:bg-gray-800/80">
 
-      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent font-semibold text-xs mb-3 w-fit">
-        Official Campus Club
-      </div>
-
       <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
         {clubName ? `${clubName} Club Overview` : 'Official Campus Club'}
       </h2>
@@ -63,7 +59,7 @@ export default function OverviewCard({
           </div>
         </div>
 
-        <Button
+        {/* <Button
           variant="accent"
           onClick={() => setIsRequested((prev) => !prev)}
           className={cn(
@@ -84,7 +80,7 @@ export default function OverviewCard({
               <span>Request to Join</span>
             </>
           )}
-        </Button>
+        </Button> */}
       </div>
     </Card>
   );
