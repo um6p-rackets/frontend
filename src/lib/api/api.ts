@@ -1,5 +1,5 @@
 import { ErrorBody } from "@/types/error";
-import { useAuth } from "@/store/auth"; // 1. جلب متجر Auth
+import { useAuth } from "@/store/auth"; //
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX ?? "/api/v1";

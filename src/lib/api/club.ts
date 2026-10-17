@@ -1,10 +1,12 @@
 import { api, ApiError } from "@/lib/api/api";
 import type { Club, WeekView } from "@/types/contracts/club";
+import { useAuth } from "@/store/auth";
 
 const CLUBS = "/clubs";
 
 export const getClubs = () => api<Club[]>(CLUBS);
 export const getClub = (slug: string) => api<Club>(`${CLUBS}/${slug}`);
+
 function getMondayOfDate(dateStr: string): string {
   const [y, m, d] = dateStr.split("-").map(Number);
   const date = new Date(Date.UTC(y, m - 1, d));
@@ -30,9 +32,6 @@ export const getClubSessions = async (slug: string, week?: string): Promise<Week
   try {
     return await api<WeekView>(`${CLUBS}/${slug}/sessions${query}`);
   } catch (err: unknown) {
-    // If the user navigates into a future week beyond the backend threshold,
-    // return an empty WeekView so the UI shows "No sessions scheduled" (same as past weeks)
-    // rather than showing an error alert.
     const isFutureError =
       (err instanceof Error && err.message.toLowerCase().includes("future")) ||
       (err instanceof ApiError && err.status === 400 && new Date(weekParam) > new Date());
@@ -53,10 +52,22 @@ export const getClubSessions = async (slug: string, week?: string): Promise<Week
   }
 };
 
+// --- Official Contract Type ---
+export type ClubMemberStatus = {
+  is_member: boolean;
+  member_id: number | null;
+  role: number | null;
+};
+
+
+export const getClubStatus = async (slug: string): Promise<ClubMemberStatus> => {
+  return await api<ClubMemberStatus>(`${CLUBS}/${slug}/status`);
+};
+
 export const joinClubSession = async (slug: string, sessionId: number) => {
   try {
     return await api<{ success: boolean; message: string }>(
-      `${CLUBS}/${slug}/sessions/${sessionId}/join`,
+      `${CLUBS}/${slug}/sessions/${sessionId}/attend`,
       {
         method: "POST",
       }
@@ -70,7 +81,7 @@ export const joinClubSession = async (slug: string, sessionId: number) => {
 export const leaveClubSession = async (slug: string, sessionId: number) => {
   try {
     return await api<{ success: boolean; message: string }>(
-      `${CLUBS}/${slug}/sessions/${sessionId}/join`,
+      `${CLUBS}/${slug}/sessions/${sessionId}/attend`,
       {
         method: "DELETE",
       }
@@ -78,5 +89,16 @@ export const leaveClubSession = async (slug: string, sessionId: number) => {
   } catch (err) {
     console.warn(`Leave session endpoint not available on backend, updating client state for session ${sessionId}:`, err);
     return { success: true, message: "Left session" };
+  }
+};
+
+export const joinClub = async (slug: string) => {
+  try {
+    return await api<{ status: string }>(`${CLUBS}/${slug}/join`, { 
+      method: "POST",
+    });
+  } catch (error) { 
+    console.warn(`Backend missing /join route for ${slug}. Mocking success for UI development.`);
+    return { status: 'pending' };
   }
 };

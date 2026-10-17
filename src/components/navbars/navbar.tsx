@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation'; // <-- 1. Import usePathname
+import { usePathname } from 'next/navigation';
 
 import { Menu, X, Users, Bell, BarChart2 } from 'lucide-react'; 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -124,10 +124,14 @@ function UserNav() {
   
   const pathname = usePathname(); 
   
-  const isAppView = pathname?.startsWith('/club') || 
+  // 1. Extract the club slug from the URL (e.g., "/clubs/badminton" -> "badminton")
+  const pathParts = pathname?.split('/').filter(Boolean) || [];
+  const clubsIndex = pathParts.indexOf('clubs');
+  const currentClubSlug = clubsIndex !== -1 && pathParts.length > clubsIndex + 1 ? pathParts[clubsIndex + 1] : '';
+  
+  const isAppView = pathname?.startsWith('/clubs') || 
                     pathname?.startsWith('/leaderboard') || 
-                    pathname?.startsWith('/profile') || 
-                    pathname?.startsWith('/members');
+                    pathname?.startsWith('/profile');
 
   const handleLogout = async () => {
     try {
@@ -178,12 +182,12 @@ function UserNav() {
             </NavigationMenu>
           )}
 
-          {/* Members Icon */}
-          {isAppView && (
+          {/* Members Icon - NOW USING DYNAMIC SLUG */}
+          {isAppView && currentClubSlug && (
             <Link 
               title="Club Members" 
-              href="/members" 
-              className={`flex items-center justify-center transition-colors hover:text-brand-orange ${pathname?.startsWith('/members') ? 'text-brand-orange' : 'text-foreground'}`}
+              href={`/clubs/${currentClubSlug}/members`} 
+              className={`flex items-center justify-center transition-colors hover:text-brand-orange ${pathname?.includes('/members') ? 'text-brand-orange' : 'text-foreground'}`}
             >
               <Users className="w-5 h-5" />
             </Link>
@@ -208,11 +212,11 @@ function UserNav() {
           </Sheet>
 
           {/* Leaderboard Icon */}
-          {isAppView && (
+          {isAppView && currentClubSlug && (
             <Link 
               title="Leaderboard" 
-              href="/leaderboard" 
-              className={`flex items-center justify-center transition-colors hover:text-brand-orange ${pathname?.startsWith('/leaderboard') ? 'text-brand-orange' : 'text-foreground'}`}
+              href={`/leaderboard`} 
+              className={`flex items-center justify-center transition-colors hover:text-brand-orange ${pathname?.includes('/leaderboard') ? 'text-brand-orange' : 'text-foreground'}`}
             >
               <BarChart2 className="w-5 h-5" />
             </Link>
@@ -278,8 +282,9 @@ function UserNav() {
             </>
           )}
 
-          {isAppView && (
-            <Link href="/members" onClick={() => setIsOpen(false)} className={`px-4 py-2 flex items-center gap-3 text-base font-semibold rounded-lg transition-colors ${pathname?.startsWith('/members') ? 'bg-orange-50 text-brand-orange dark:bg-orange-950/40' : 'hover:bg-muted text-foreground'}`}>
+          {/* Members Link - Mobile */}
+          {isAppView && currentClubSlug && (
+            <Link href={`/clubs/${currentClubSlug}/members`} onClick={() => setIsOpen(false)} className={`px-4 py-2 flex items-center gap-3 text-base font-semibold rounded-lg transition-colors ${pathname?.includes('/members') ? 'bg-orange-50 text-brand-orange dark:bg-orange-950/40' : 'hover:bg-muted text-foreground'}`}>
               <Users className="w-5 h-5" /> Members
             </Link>
           )}
@@ -298,8 +303,9 @@ function UserNav() {
             </SheetContent>
           </Sheet>
 
-          {isAppView && (
-            <Link href="/leaderboard" onClick={() => setIsOpen(false)} className={`px-4 py-2 flex items-center gap-3 text-base font-semibold rounded-lg transition-colors ${pathname?.startsWith('/leaderboard') ? 'bg-orange-50 text-brand-orange dark:bg-orange-950/40' : 'hover:bg-muted text-foreground'}`}>
+          {/* Leaderboard Link - Mobile */}
+          {isAppView && currentClubSlug && (
+            <Link href={`/leaderboard`} onClick={() => setIsOpen(false)} className={`px-4 py-2 flex items-center gap-3 text-base font-semibold rounded-lg transition-colors ${pathname?.includes('/leaderboard') ? 'bg-orange-50 text-brand-orange dark:bg-orange-950/40' : 'hover:bg-muted text-foreground'}`}>
               <BarChart2 className="w-5 h-5" /> Leaderboard
             </Link>
           )}

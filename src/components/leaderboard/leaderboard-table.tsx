@@ -8,7 +8,8 @@ import Pagination from './pagination';
 export default function LeaderboardTable({
   top_members
 }: {
-  top_members: ClubPageData['top_members'];
+  // We extend the type so TypeScript knows originalRank might exist
+  top_members: (ClubPageData['top_members'][0] & { originalRank?: number })[];
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -20,15 +21,7 @@ export default function LeaderboardTable({
   const currentMembers = sortedMembers.slice(
     startIndex,
     startIndex + itemsPerPage
-  );
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
+  ); 
 
   return (
     <div className="w-full max-w-6xl bg-card shadow-sm rounded-xl sm:rounded-2xl p-3 sm:p-8 border border-border">
@@ -38,11 +31,9 @@ export default function LeaderboardTable({
         </p>
       </div>
 
-      {/* Leaderboard List (Mobile Cards & Desktop Table) */}
-      <div className="w-full md:overflow-x-auto md:pb-4 scrollbar-thin">
+      <div className="w-full md:overflow-x-auto md:pb-4 scrollbar-thin"> 
         <div className="w-full md:min-w-170">
-          {/* Desktop Table Header */}
-          <div className="hidden md:grid grid-cols-[60px_2.2fr_1fr_1fr_1fr_80px] gap-4 w-full px-4 sm:px-6 py-3 mb-2 text-[9px] sm:text-xs font-black text-muted-foreground italic tracking-widest border-b border-border">
+          <div className="hidden md:grid grid-cols-[60px_2.2fr_1fr_1fr_1fr_80px] gap-4 w-full px-4 sm:px-6 py-3 mb-2 text-[9px] sm:text-xs font-black text-muted-foreground italic tracking-widest border-b border-border"> 
             <div>RANK</div>
             <div>ATHLETE</div>
             <div>DEPARTMENT</div>
@@ -51,13 +42,13 @@ export default function LeaderboardTable({
             <div className="text-right">POINTS</div>
           </div>
 
-          {/* Members List */}
-          <div className="flex flex-col gap-3 md:gap-2">
+          <div className="flex flex-col gap-3 md:gap-2"> 
             {currentMembers.map((member, index) => (
               <LeaderboardRow
                 key={`${member.name}-${startIndex + index}`}
                 member={member}
-                rank={startIndex + index + 1}
+                // FIXED: Use the true rank if we passed it, otherwise fallback to the index!
+                rank={member.originalRank ?? (startIndex + index + 1)}
               />
             ))}
           </div>

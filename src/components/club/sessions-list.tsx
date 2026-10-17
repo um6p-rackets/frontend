@@ -336,12 +336,27 @@ export default function SessionsList({ clubSlug }: { clubSlug: string }) {
     router.push(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false });
   };
 
-  const handleJoin = (sessionId: number) => {
-    joinMutation.mutate(sessionId);
+const handleJoin = (sessionId: number) => {
+    const numericId = Number(sessionId);
+    
+    if (!numericId || isNaN(numericId) || numericId <= 0) {
+      console.error("🚨 BUG: Invalid session ID:", sessionId);
+      alert("Cannot join: Session ID is missing. Check your console!");
+      return;
+    }
+
+    joinMutation.mutate(numericId);
   };
 
   const handleCancel = (sessionId: number) => {
-    leaveMutation.mutate(sessionId);
+    const numericId = Number(sessionId);
+
+    if (!numericId || isNaN(numericId) || numericId <= 0) {
+      console.error("🚨 BUG: Invalid session ID:", sessionId);
+      return;
+    }
+
+    leaveMutation.mutate(numericId);
   };
 
   if (isPending) {
