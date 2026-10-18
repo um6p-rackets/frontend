@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 import { useClub } from '@/hooks/use-clubs';
-import { mockClubData } from '@/lib/mock-data'; // Only keeping this for the bottom tabs/leaderboard for now
+import { mockClubData } from '@/lib/mock-data'; 
 import { useAuth } from '@/store/auth';
 
 import { getClubStatus, joinClub } from '@/lib/api/club'; 
@@ -23,22 +23,23 @@ export default function ClubPage() {
 
   const user = useAuth((state) => state.user);
   
-  // FETCH REAL DATA FROM API
   const { data: apiClub, isLoading: isClubLoading } = useClub(clubSlug);
+
+  console.log("API Club Data Response:", apiClub);
 
   const [status, setStatus] = useState<{ is_member: boolean; role?: number } | null>(null);
   const [isChecking, setIsChecking] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
   const [joinStatus, setJoinStatus] = useState<"idle" | "pending" | "success">("idle");
 
-  // STRICTLY USE API DATA (No more mock data for the overview!)
   const clubName = apiClub?.name || clubSlug;
   const description = apiClub?.description || 'Welcome to the official campus club.';
   const members = (apiClub as { members_count?: number })?.members_count || 0; 
-  const avatar = apiClub?.avatar || `/clubs/${clubSlug}.png`;
   
-  // Hardcoded until backend adds coach_name to the database response
-  const coach = "Pending"; 
+  const rawCoach = (apiClub as { coach?: { first_name?: string; last_name?: string; login?: string } | null })?.coach;
+  const coach: string = rawCoach 
+    ? ([rawCoach.first_name, rawCoach.last_name].filter(Boolean).join(' ') || rawCoach.login || "Pending")
+    : "Pending";
 
   useEffect(() => {
     async function checkMembership() {
@@ -73,15 +74,13 @@ export default function ClubPage() {
   return (
     <div className="w-[92%] lg:w-[70%] mx-auto">
       
-      {/* Show a loader while the real club data is fetching from the database */}
       {isClubLoading ? (
         <div className="flex justify-center items-center py-24">
           <Loader2 className="size-10 animate-spin text-brand-orange" />
         </div>
       ) : (
         <>
-          {/* ALWAYS SHOW THE HEADER AND OVERVIEW WITH REAL DATA */}
-          <ClubTitle name={clubName} slug={clubSlug} avatar={avatar} />
+          <ClubTitle name={clubName} slug={clubSlug} />
           <section className="relative mt-4"> 
             <OverviewCard
               clubName={clubName}
@@ -91,14 +90,12 @@ export default function ClubPage() {
             />
           </section>
 
-          {/* CONDITIONAL RENDER FOR THE BOTTOM SECTION */}
           {isChecking ? (
             <div className="flex justify-center items-center py-24">
               <Loader2 className="size-10 animate-spin text-brand-orange" />
             </div>
           ) : status?.is_member ? (
             
-            /* UNLOCKED VIEW */
             <div className="w-full flex flex-col items-center justify-center mt-10 sm:mt-12">
               <div className="w-full flex justify-start mb-4 gap-2">
                 {status.role === 2 && <Badge className="bg-blue-500 hover:bg-blue-600 text-white">Coach Access</Badge>}
@@ -110,9 +107,7 @@ export default function ClubPage() {
                 <section className="lg:h-full flex flex-col min-w-0">
                   <ClubTaps
                     clubSlug={clubSlug}
-                    // Still using mock data for tabs until you build those API routes
-                    announcements={mockClubData.announcements}
-                    documents={mockClubData.documents}
+                    userRole={status.role}
                   />
                 </section>
                 <section className="self-start w-full min-w-0">
@@ -123,7 +118,6 @@ export default function ClubPage() {
 
           ) : (
 
-            /* LOCKED VIEW */
             <div className="mt-10 sm:mt-12 flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-border/60 rounded-3xl bg-muted/10 animate-in fade-in zoom-in-95 duration-500">
               <div className="w-20 h-20 bg-orange-50 dark:bg-orange-950/40 text-brand-orange rounded-full flex items-center justify-center mb-6 shadow-sm border border-orange-200/60 dark:border-orange-900/40">
                 <Lock className="w-10 h-10" />

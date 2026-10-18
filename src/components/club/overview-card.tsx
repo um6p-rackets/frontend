@@ -13,12 +13,13 @@ export default function OverviewCard({
   coach: string;
 }) {
   return (
-    <Card className="p-4 sm:p-7 rounded-xl sm:rounded-2xl border border-border/70 shadow-2xs bg-card sm:bg-gray-50 dark:bg-gray-800/80">
+    <Card className="p-4 sm:p-7 rounded-xl sm:rounded-2xl border border-border/70 shadow-2xs bg-card sm:bg-gray-50 dark:bg-gray-800/80 w-full">
       <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
         {clubName ? `${clubName} Club Overview` : 'Official Campus Club'}
       </h2>
 
-      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mb-5 sm:mb-6">
+      {/* Removed max-w-2xl so description takes the full width of the card */}
+      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed w-full mb-5 sm:mb-6 break-words">
         {desc}
       </p>
 
