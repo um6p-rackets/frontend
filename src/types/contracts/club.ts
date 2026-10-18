@@ -2,6 +2,7 @@
 // Timestamps are ISO strings. Ids from other services are plain numbers.
 
 import { User } from "./auth";
+import { AchievementCode } from './achievement-code';
 
 // ==========================================
 // 1. Enums
@@ -70,8 +71,8 @@ export type Achievement = {
   id: number;
   club_id: number;
   user_id: number; // auth service
-  name: string;
-  description: string | null;
+  code: AchievementCode;
+  awarded_by: number | null; // member id, null = awarded automatically
   taken_at: string;
 };
 

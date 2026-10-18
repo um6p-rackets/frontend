@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner"; // <--- 1. IMPORT TOAST HERE
 import {
   getClub,
   getClubs,
@@ -52,6 +53,8 @@ export function useClubSessions(slug: string, week?: string) {
     queryKey: clubKeys.sessions(slug, week),
     queryFn: () => getClubSessions(slug, week),
     enabled: Boolean(slug),
+    refetchInterval: 4000,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -88,12 +91,30 @@ export function useJoinClubSession(slug: string) {
 
       return { previousData };
     },
-    onError: (_err, _sessionId, context) => {
+    onSuccess: () => {
+      toast.success("You have successfully joined the session!");
+    },
+    // Replaced 'any' with unknown / Error type guard
+    onError: (err: unknown, _sessionId, context) => {
       if (context?.previousData) {
         context.previousData.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
         });
       }
+
+      const errorMessage = err instanceof Error ? err.message : "";
+      if (
+        errorMessage.toLowerCase().includes("full") || 
+        errorMessage.toLowerCase().includes("capacity") || 
+        errorMessage.toLowerCase().includes("conflict")
+      ) {
+        toast.error("You couldn't join because the session is now full!");
+      } else {
+        toast.error(errorMessage || "Failed to join session");
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["clubs", slug, "sessions"] });
     },
   });
 }
@@ -131,12 +152,21 @@ export function useLeaveClubSession(slug: string) {
 
       return { previousData };
     },
-    onError: (_err, _sessionId, context) => {
+    onSuccess: () => {
+      toast.success("You have left the session.");
+    },
+    // Replaced 'any' with unknown / Error type guard
+    onError: (err: unknown, _sessionId, context) => {
       if (context?.previousData) {
         context.previousData.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
         });
       }
+      const errorMessage = err instanceof Error ? err.message : "Failed to leave session";
+      toast.error(errorMessage);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["clubs", slug, "sessions"] });
     },
   });
 }

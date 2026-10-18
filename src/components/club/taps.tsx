@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import AnnouncementList from './announcement-list';
 import DocumentList from './document-list';
 import SessionsList, { SessionsSkeleton } from './sessions-list';
-import type { ClubPageData } from '@/types/mock-data-types';
 
 import { cn } from 'cn';
 
@@ -22,13 +21,15 @@ const tabTriggerClass = cn(
 
 export default function ClubTaps({
   clubSlug,
-  announcements,
-  documents
-}: {
+  userRole, // 1. Add userRole to the props
+}: { 
   clubSlug: string;
-  announcements: ClubPageData['announcements'];
-  documents: ClubPageData['documents'];
+  userRole?: number; // 2. Add it to the types (Optional because non-members won't have a role)
 }) {
+  
+  // 3. Define who is an admin (Role 1 = Leader, Role 2 = Coach)
+  const isAdmin = userRole === 1 || userRole === 2;
+
   return (
     <Tabs defaultValue="sessions" className="w-full lg:h-full flex flex-col">
       <TabsList className="w-full group-data-horizontal/tabs:h-auto h-auto p-1 sm:p-1.5 bg-gray-50 border border-border/50 rounded-xl flex flex-row items-center gap-1 sm:gap-1.5 shadow-2xs shrink-0">
@@ -48,21 +49,24 @@ export default function ClubTaps({
       <div className="w-full flex-1 p-4 bg-gray-50 rounded-xl flex flex-col mt-2">
         <TabsContent value="sessions" className="flex-1 flex flex-col m-0">
           <Suspense fallback={<SessionsSkeleton />}>
-            <SessionsList clubSlug={clubSlug} />
+            {/* Pass isAdmin to Sessions (for later) */}
+            <SessionsList clubSlug={clubSlug} isAdmin={isAdmin} />
           </Suspense>
         </TabsContent>
+        
         <TabsContent value="Announcements" className="flex-1 flex flex-col m-0">
-          <AnnouncementList announcements={announcements} />
+          {/* Pass isAdmin down to Announcements */}
+          <AnnouncementList clubSlug={clubSlug} isAdmin={isAdmin} />
         </TabsContent>
+        
         <TabsContent value="Tournament" className="flex-1 flex flex-col m-0">
           {/* TODO: Implement tournament content */}
           tournament content should be here
-          {/* so you should create two components:
-          one for tournament register link and one for tournament bracket link
-          also its shown just on case of there is a tournament */}
         </TabsContent>
+        
         <TabsContent value="Documents" className="flex-1 flex flex-col m-0">
-          <DocumentList documents={documents} />
+          {/* Pass isAdmin down to Documents */}
+          <DocumentList clubSlug={clubSlug} isAdmin={isAdmin} />
         </TabsContent>
       </div>
     </Tabs>
