@@ -1,8 +1,8 @@
 // Club service types, shared by the backend and the frontend.
 // Timestamps are ISO strings. Ids from other services are plain numbers.
 
-import { User } from "./auth";
-import { AchievementCode } from './achievement-code';
+import { AchievementCode } from './achievement-code.js';
+import { User } from './auth.js';
 
 // ==========================================
 // 1. Enums
@@ -33,6 +33,7 @@ export enum MatchStatus {
   PENDING = 0, // waiting for the referee
   CONFIRMED = 1, // accepted, not played yet
   FINISHED = 2, // result entered
+  CANCELLED = 3, // cancelled by one of the teams or the referee or system
 }
 
 // ==========================================
@@ -146,7 +147,11 @@ export type Match = {
   team2_points: number;
   mode: MatchMode;
   status: MatchStatus;
+  location: string | null;
   scheduled_at: string;
+  cancelled_at: string | null;
+  cancelled_by: number | null; // member id
+  created_at: string;
 };
 
 // ==========================================
@@ -174,7 +179,7 @@ export type Player = UserSummary & { member_id: number };
 // 4. Club views
 // ==========================================
 
-export type ClubWithMembersCount = Club & { members_count: number };
+export type ClubWithMembersCountAndCoachFullName = Club & { members_count: number, coach_full_name: string };
 
 // GET /:slug/status: who the current user is in this club.
 export type ClubMemberStatus = {
@@ -205,7 +210,6 @@ export type SessionView = Session & {
 export type WeekView = {
   week_start: string; // Monday, "2026-10-12"
   is_current_week: boolean;
-  is_future_week?: boolean;
   prev_week_start: string; // past weeks are read-only
   next_week_start: string | null; // null when already on next week (max one week ahead)
   sessions: SessionView[];
@@ -305,7 +309,7 @@ export type CreateSessionBody = {
   location?: string | null;
   capacity: number;
   week_start?: string; // optional, "YYYY-MM-DD", the Monday of the week to create the session for. If not provided, defaults to the current week.
-  repeat_weekly?: boolean; // false (default) = only this session, true = also later sessions and the weekly plan
+  repeat_weekly?: boolean; // false (default) = this week only, true = also next weeks
 };
 
 // PATCH /clubs/:slug/sessions/:sessionId
@@ -328,6 +332,6 @@ export type MatchRequestBody = {
   mode: MatchMode;
   partner_id?: number; // member id, required for doubles
   opponent_ids: number[]; // member ids, 1 for singles, 2 for doubles
-  requested_ref_id: number; // member id
+  location?: string | null;
   scheduled_at: string; // must be in the future
 };
