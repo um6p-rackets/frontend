@@ -144,7 +144,7 @@ export default function AnnouncementList({
   const [newDesc, setNewDesc] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const INITIAL_VISIBLE_COUNT = 3;
+  const INITIAL_VISIBLE_COUNT = 4;
 
   useEffect(() => {
     async function fetchAnnouncements() {
@@ -250,12 +250,12 @@ export default function AnnouncementList({
       )}
 
       {hasMore && (
-        <div className="pt-3 mt-auto">
+        <div className="pt-6 pb-1 flex justify-center">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => setShowAll(!showAll)}
-            className="w-full border-border/70 bg-card hover:bg-card hover:text-brand-orange hover:border-brand-orange/40 text-xs font-semibold text-foreground flex items-center justify-center gap-1.5 py-2 cursor-pointer shadow-2xs transition-colors"
+            className="text-xs text-brand-orange hover:text-brand-orange/80 hover:bg-transparent p-0 h-auto font-semibold cursor-pointer inline-flex items-center gap-1"
           >
             {showAll ? (
               <><span>Show less</span><ChevronUp className="w-3.5 h-3.5" /></>

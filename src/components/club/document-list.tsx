@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpenText, Loader2, Plus, Trash2 } from 'lucide-react';
+import { BookOpenText, Loader2, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api/api';
 import { toast } from 'sonner';
@@ -150,6 +150,7 @@ export default function DocumentList({
 }) {
   const [documents, setDocuments] = useState<ClubDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
 
   // Form States
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -157,6 +158,8 @@ export default function DocumentList({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [path, setPath] = useState('');
+
+  const INITIAL_VISIBLE_COUNT = 3;
 
   useEffect(() => {
     async function fetchDocuments() {
@@ -214,6 +217,9 @@ export default function DocumentList({
   };
 
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-brand-orange" /></div>;
+
+  const visibleDocuments = showAll ? documents : documents.slice(0, INITIAL_VISIBLE_COUNT);
+  const hasMore = documents.length > INITIAL_VISIBLE_COUNT;
 
   return (
     <div className="flex-1 flex flex-col">
@@ -279,7 +285,7 @@ export default function DocumentList({
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 mt-2">
-          {documents.map((document) => (
+          {visibleDocuments.map((document) => (
             <DocumentCard 
               key={document.id} 
               clubSlug={clubSlug}
@@ -288,6 +294,23 @@ export default function DocumentList({
               onDelete={removeDocumentFromState} 
             />
           ))}
+        </div>
+      )}
+
+      {hasMore && (
+        <div className="pt-2 pb-1 flex justify-center mt-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAll(!showAll)}
+            className="text-xs text-brand-orange hover:text-brand-orange/80 hover:bg-transparent p-0 h-auto font-semibold cursor-pointer inline-flex items-center gap-1"
+          >
+            {showAll ? (
+              <><span>Show less</span><ChevronUp className="w-3.5 h-3.5" /></>
+            ) : (
+              <><span>Show more ({documents.length - INITIAL_VISIBLE_COUNT} more)</span><ChevronDown className="w-3.5 h-3.5" /></>
+            )}
+          </Button>
         </div>
       )}
     </div>
