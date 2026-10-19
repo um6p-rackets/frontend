@@ -736,9 +736,18 @@ export default function SessionsList({
       </div>
 
       {hasMore && (
-        <div className="pt-3 mt-auto">
-          <Button variant="outline" size="sm" onClick={() => setExpandedWeek(showAll ? null : currentWeekKey)} className="w-full border-border/70 bg-card hover:bg-card hover:text-accent hover:border-accent/40 text-xs font-semibold text-foreground flex items-center justify-center gap-1.5 py-2 cursor-pointer shadow-2xs transition-colors">
-            {showAll ? <><span className="ml-2">Show less</span><ChevronUp className="w-3.5 h-3.5" /></> : <><span className="ml-2">Show more ({sessions.length - INITIAL_VISIBLE_COUNT} more)</span><ChevronDown className="w-3.5 h-3.5" /></>}
+        <div className="pt-6 pb-1 flex justify-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setExpandedWeek(showAll ? null : currentWeekKey)}
+            className="text-xs text-brand-orange hover:text-brand-orange/80 hover:bg-transparent p-0 h-auto font-semibold cursor-pointer inline-flex items-center gap-1"
+          >
+            {showAll ? (
+              <><span>Show less</span><ChevronUp className="w-3.5 h-3.5" /></>
+            ) : (
+              <><span>Show more ({sessions.length - INITIAL_VISIBLE_COUNT} more)</span><ChevronDown className="w-3.5 h-3.5" /></>
+            )}
           </Button>
         </div>
       )}
