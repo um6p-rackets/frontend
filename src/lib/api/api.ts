@@ -1,8 +1,8 @@
 import { ErrorBody } from "@/types/error";
-import { useAuth } from "@/store/auth"; //
+import { useAuth } from "@/store/auth";
+import { getUrl } from "../utils";
+import { AuthApi } from "./auth";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
-const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX ?? "/api/v1";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -10,42 +10,86 @@ export class ApiError extends Error {
   }
 }
 
+// This methode called 
+let isRefreshing = false;
+let refreshSubscribers: Array<() => void> = [];
+let errorSubscribers: Array<(error: Error) => void> = [];
+
+const onTokenRefreshed = () => {
+  refreshSubscribers.forEach((callback) => callback());
+  refreshSubscribers = [];
+  errorSubscribers = [];
+}
+
+const onRefreshFailed =(error: Error) => {
+  errorSubscribers.forEach((callback) => callback(error));
+  refreshSubscribers = [];
+  errorSubscribers = [];
+}
+
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-  const token = useAuth.getState().token;
-
   const headers = new Headers(init?.headers);
   headers.set("Content-Type", "application/json");
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
 
   try {
-    const res = await fetch(`${API_URL}${API_PREFIX}${path}`, {
+    let res = await fetch(getUrl(path), {
       credentials: "include",
       signal: init?.signal ?? controller.signal,
       ...init,
       headers,
     });
 
-    if (!res.ok) {
-      if (res.status === 401) {
-        useAuth.getState().logout();
+    if (res.status === 401) {
+      if (path.includes('/auth/')) {
+        throw new ApiError(401, "Authentication failed.");
       }
 
+      // Attempt to refresh the token
+      if (!isRefreshing) {
+        isRefreshing = true;
+
+        try {
+            await AuthApi.refreshToken();
+            // Unlock and process the queue
+            isRefreshing = false;
+            onTokenRefreshed();
+
+            res = await fetch(getUrl(path), { ...init, headers, credentials: "include" });
+        } catch (refreshError) {
+            isRefreshing = false;
+            onRefreshFailed(refreshError as Error);
+            useAuth.getState().logout();
+            throw new ApiError(401, "Session expired. Please log in again.");
+        }
+        // If the token was refreshed successfully, retry the original request
+      } else {
+        // Wait for the token to be refreshed and then retry the request
+        const retryWithNewToken = new Promise<Response>((resolve, reject) => {
+          refreshSubscribers.push(async () => {
+            resolve(await fetch(getUrl(path), { ...init, headers, credentials: "include" }));
+          });
+          errorSubscribers.push((err: Error) => reject(err));
+        });
+        res = await retryWithNewToken;
+      }
+    }
+
+    if (!res.ok) {
       const body: ErrorBody | null = await res.json().catch(() => null);
-      const message = Array.isArray(body?.message)
-        ? body.message.join(", ")
+      const message = Array.isArray(body?.message) 
+        ? body.message.join(", ") 
         : body?.message ?? `API error ${res.status}`;
       throw new ApiError(res.status, message);
     }
 
-    return await res.json();
+    return res.json() as Promise<T>;
+
   } catch (err: unknown) {
     if (err instanceof Error && err.name === "AbortError") {
-      throw new ApiError(504, "Request timed out. Please check if the backend service is running.");
+      throw new ApiError(504, "Request timed out.");
     }
     throw err;
   } finally {
