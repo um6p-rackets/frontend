@@ -213,6 +213,7 @@ export type WeekView = {
   prev_week_start: string; // past weeks are read-only
   next_week_start: string | null; // null when already on next week (max one week ahead)
   sessions: SessionView[];
+  is_future_week: boolean; // true = all sessions are in the future, can be deleted
 };
 
 // ==========================================
