@@ -23,11 +23,10 @@ interface LoginFormProps {
 
 export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToForgot }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const setUser = useAuth((state) => state.setAuth);
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false); // 2. Added Remember Me state
+  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
 
   const validate = (): boolean => {
@@ -44,17 +43,14 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToForgot }: L
 
     setIsLoading(true);
     try {
-      const response = await AuthApi.login({
+      await AuthApi.login({
         email: email.trim(),
         password: password,
         // rememberMe: rememberMe, // Later
       });
 
-      if (setUser && response?.user) {
-        setUser(response.user); 
-      }
-
-      if (onSuccess) onSuccess();
+      if (onSuccess)
+          onSuccess();
 
     } catch (error: any) {
       setErrors({ email: error.message || "Invalid email or password." });

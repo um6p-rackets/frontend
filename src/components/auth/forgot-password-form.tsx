@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { api } from '@/lib/api/api';
 import { AuthApi } from '@/lib/api/auth';
 
 interface ForgotPasswordFormProps {
@@ -31,12 +30,9 @@ export function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps)
     setError(null);
     
     try {
-      await api('/auth/forget-password', { 
-        method: 'POST',
-        body: JSON.stringify({ email: email.trim() })
-      });
+      await AuthApi.forgotPassword({ email });
       setIsSuccess(true);
-      toast.success("Recovery email sent!");
+      toast.success("Check your inbox for the reset link (Remember that you need to have a valid email address).");
     } catch (err: any) {
       setError(err.message || "Failed to send reset link.");
     } finally {
