@@ -12,17 +12,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 import { useClub } from '@/hooks/use-clubs';
-import { mockClubData } from '@/lib/mock-data'; 
+import { mockClubData } from '@/lib/mock-data';
 import { useAuth } from '@/store/auth';
 
-import { getClubStatus, joinClub } from '@/lib/api/club'; 
+import { getClubStatus, joinClub } from '@/lib/api/club';
 
 export default function ClubPage() {
   const params = useParams<{ name: string }>();
   const clubSlug = params?.name ?? 'tennis';
 
   const user = useAuth((state) => state.user);
-  
+
   const { data: apiClub, isLoading: isClubLoading } = useClub(clubSlug);
 
   console.log("API Club Data Response:", apiClub);
@@ -34,10 +34,10 @@ export default function ClubPage() {
 
   const clubName = apiClub?.name || clubSlug;
   const description = apiClub?.description || 'Welcome to the official campus club.';
-  const members = (apiClub as { members_count?: number })?.members_count || 0; 
-  
+  const members = (apiClub as { members_count?: number })?.members_count || 0;
+
   const rawCoach = (apiClub as { coach?: { first_name?: string; last_name?: string; login?: string } | null })?.coach;
-  const coach: string = rawCoach 
+  const coach: string = rawCoach
     ? ([rawCoach.first_name, rawCoach.last_name].filter(Boolean).join(' ') || rawCoach.login || "Pending")
     : "Pending";
 
@@ -51,7 +51,7 @@ export default function ClubPage() {
         const statusData = await getClubStatus(clubSlug);
         setStatus(statusData as { is_member: boolean; role?: number });
       } catch (error) {
-        console.error("Failed to fetch club status", error);
+        // console.error("Failed to fetch club status", error);
       } finally {
         setIsChecking(false);
       }
@@ -65,7 +65,7 @@ export default function ClubPage() {
       await joinClub(clubSlug);
       setJoinStatus("pending");
     } catch (error) {
-      console.error("Failed to join club", error);
+      // console.error("Failed to join club", error);
     } finally {
       setIsJoining(false);
     }
@@ -73,7 +73,7 @@ export default function ClubPage() {
 
   return (
     <div className="w-[92%] lg:w-[70%] mx-auto">
-      
+
       {isClubLoading ? (
         <div className="flex justify-center items-center py-24">
           <Loader2 className="size-10 animate-spin text-brand-orange" />
@@ -81,7 +81,7 @@ export default function ClubPage() {
       ) : (
         <>
           <ClubTitle name={clubName} slug={clubSlug} />
-          <section className="relative mt-4"> 
+          <section className="relative mt-4">
             <OverviewCard
               clubName={clubName}
               desc={description}
@@ -95,7 +95,7 @@ export default function ClubPage() {
               <Loader2 className="size-10 animate-spin text-brand-orange" />
             </div>
           ) : status?.is_member ? (
-            
+
             <div className="w-full flex flex-col items-center justify-center mt-10 sm:mt-12">
               <div className="w-full flex justify-start mb-4 gap-2">
                 {status.role === 2 && <Badge className="bg-blue-500 hover:bg-blue-600 text-white">Coach Access</Badge>}
@@ -134,8 +134,8 @@ export default function ClubPage() {
                   <CheckCircle className="size-6" /> Join Request Sent
                 </div>
               ) : (
-                <Button 
-                  onClick={handleJoinClub} 
+                <Button
+                  onClick={handleJoinClub}
                   disabled={isJoining}
                   className="h-12 px-10 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-black italic text-base tracking-wide shadow-md shadow-brand-orange/20"
                 >
