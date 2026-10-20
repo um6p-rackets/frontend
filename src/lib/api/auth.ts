@@ -1,4 +1,6 @@
+import { useAuth } from "@/store/auth";
 import { getUrl } from "../utils";
+import { forgotPasswordPayload, loginPayload, registerPayload, resetPasswordPayload } from "@/types";
 
 async function handleResponse(res: Response) {
 	// For redirects
@@ -19,26 +21,37 @@ async function handleResponse(res: Response) {
 }
 
 export const AuthApi = {
-	// login
-	login: async (payload: { email: string; password: string; rememberMe?: boolean }) => {
-		const res = await fetch(getUrl("/auth/login"), {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(payload),
-			credentials: "include",
-		});
-		return handleResponse(res);
-	},
 
 	// register
-	register: async (payload: { email: string; password: string }) => {
+	register: async (payload: registerPayload) => {
 		const res = await fetch(getUrl("/auth/register"), {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(payload),
 			credentials: "include",
 		});
-		return handleResponse(res);
+		const data = await handleResponse(res);
+    	if (data.user) {
+            localStorage.setItem('is_authenticated', 'true');
+            useAuth.getState().setAuth(data.user); 
+        }
+    	return data;
+	},
+
+	// login
+	login: async (payload: loginPayload) => {
+		const res = await fetch(getUrl("/auth/login"), {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(payload),
+			credentials: "include",
+		});
+		const data = await handleResponse(res);
+    	if (data.user) {
+            localStorage.setItem('is_authenticated', 'true');
+            useAuth.getState().setAuth(data.user); 
+        }
+    	return data;
 	},
 
 	// refresh token
@@ -56,11 +69,13 @@ export const AuthApi = {
 			method: "POST",
 			credentials: "include",
 		});
+		localStorage.removeItem('is_authenticated');
+		// useAuth.getState().logout();
 		return res.ok;
 	},
 
 	// forgot password
-	forgotPassword: async (payload: { email: string }) => {
+	forgotPassword: async (payload: forgotPasswordPayload) => {
 		const res = await fetch(getUrl("/auth/forget-password"), {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -70,11 +85,10 @@ export const AuthApi = {
 	},
 
 	// reset password
-	resetPassword: async (payload: { token: string; newPassword: string }) => {
+	resetPassword: async (payload: resetPasswordPayload) => {
 		const res = await fetch(getUrl("/auth/reset-password"), {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			// FIX 3 (Part A): Map "newPassword" to "password" as the backend expects
 			body: JSON.stringify({
 				token: payload.token,
 				password: payload.newPassword,
@@ -85,7 +99,21 @@ export const AuthApi = {
 
 	// oauth login
 	oauthLogin: () => {
-		// fetch dosent work here because it will be blocked by CORS, so we redirect the user to the backend endpoint
-		window.location.href = getUrl("/auth/google/login");
+		const returnTo = window.location.pathname + window.location.search;
+		// Land the user rigtht after the oauth login to the page they were on before
+		window.location.href = getUrl("/auth/google/login") + "?returnTo=" + encodeURIComponent(returnTo);
+	},
+
+	// get current user
+	getMe: async () => {
+		const res = await fetch(getUrl("/auth/me"), { credentials: "include" });
+
+		if (res.status === 401) {
+            localStorage.removeItem('is_authenticated');
+            return null;
+        }
+
+		const data = await handleResponse(res);
+		return data.user;
 	},
 };
