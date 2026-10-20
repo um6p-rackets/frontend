@@ -44,7 +44,7 @@ export default function MembersRow({ member }: { member: ClubMember }) {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <Avatar className="w-12 h-12 border-2 border-background shadow-xs shrink-0">
-              <AvatarImage src={member.user.avatar || undefined} alt={displayName} />
+              <AvatarImage src={member.user.avatar || undefined} alt={displayName}  referrerPolicy="no-referrer" />
               <AvatarFallback className="bg-brand-cream text-brand-orange font-bold text-sm">
                 {member.user.first_name.charAt(0)}
               </AvatarFallback>
@@ -104,7 +104,7 @@ export default function MembersRow({ member }: { member: ClubMember }) {
           {/* Member Info */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Avatar className="w-8 h-8 sm:w-10 sm:h-10 border-2 border-background shadow-sm shrink-0">
-              <AvatarImage src={member.user.avatar || undefined} alt={displayName} />
+              <AvatarImage src={member.user.avatar || undefined} alt={displayName}  referrerPolicy="no-referrer" />
               <AvatarFallback className="bg-brand-cream text-brand-orange font-bold text-xs sm:text-base">
                 {member.user.first_name.charAt(0)}
               </AvatarFallback>

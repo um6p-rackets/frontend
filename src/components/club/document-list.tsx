@@ -18,7 +18,7 @@ export interface ClubDocument {
   id: number;
   club_id: number;
   description: string;
-  path: string; 
+  path: string;
   title: string;
   created_at?: string;
 }
@@ -37,10 +37,10 @@ function DocumentCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const dateStr = document.created_at 
+  const dateStr = document.created_at
     ? new Date(document.created_at).toLocaleDateString('en-US', {
-        month: 'short', day: 'numeric', year: 'numeric'
-      })
+      month: 'short', day: 'numeric', year: 'numeric'
+    })
     : null;
 
   const handleDelete = async () => {
@@ -52,7 +52,7 @@ function DocumentCard({
         description: "The document has been permanently removed.",
       });
     } catch (error) {
-      console.error('Failed to delete', error);
+      // console.error('Failed to delete', error);
       toast.error("Failed to delete", {
         description: "An error occurred while deleting the document.",
       });
@@ -67,15 +67,15 @@ function DocumentCard({
 
   return (
     <div className="p-4 gap-2 flex flex-col justify-between items-start m-0 border border-border/70 bg-card rounded-xl shadow-2xs group relative hover:shadow-md transition-shadow duration-300">
-      
+
       {isAdmin && (
         <AlertDialog>
           <AlertDialogTrigger
             render={
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute top-2 right-2 transition-opacity text-destructive hover:bg-destructive/10 z-10" 
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 transition-opacity text-destructive hover:bg-destructive/10 z-10"
               />
             }
           >
@@ -121,7 +121,7 @@ function DocumentCard({
           </div>
         )}
       </div>
-      
+
       <div className="flex items-center justify-between w-full pt-3 mt-2 border-t border-border/40">
         <Link
           href={document.path || "#"}
@@ -169,12 +169,12 @@ export default function DocumentList({
         const docsArray = Array.isArray(res) ? res : (res.data || []);
         setDocuments(docsArray);
       } catch (error) {
-        console.error('Failed to fetch documents:', error);
+        // console.error('Failed to fetch documents:', error);
       } finally {
         setIsLoading(false);
       }
     }
-    fetchDocuments(); 
+    fetchDocuments();
   }, [clubSlug]);
 
   const handleCreateDocument = async (e: React.FormEvent) => {
@@ -182,7 +182,7 @@ export default function DocumentList({
     if (!title.trim() || !path.trim()) return;
 
     setIsSubmitting(true);
-    
+
     try {
       const res = await api<ClubDocument>(`/clubs/${clubSlug}/documents`, {
         method: 'POST',
@@ -192,18 +192,18 @@ export default function DocumentList({
           path,
         }),
       });
-      
+
       setDocuments([res, ...documents]);
       setTitle('');
       setDescription('');
       setPath('');
       setIsAddOpen(false);
-      
+
       toast.success("Document added", {
         description: "Your new document is now available to members.",
       });
     } catch (error) {
-      console.error('Failed to add document', error);
+      // console.error('Failed to add document', error);
       toast.error("Failed to add document", {
         description: "An error occurred while adding the document.",
       });
@@ -223,11 +223,11 @@ export default function DocumentList({
 
   return (
     <div className="flex-1 flex flex-col">
-      
+
       {isAdmin && (
         <div className="flex justify-end mb-4">
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-            <DialogTrigger 
+            <DialogTrigger
               render={
                 <Button size="sm" className="bg-brand-orange hover:bg-brand-orange/90 text-white gap-2" />
               }
@@ -241,8 +241,8 @@ export default function DocumentList({
               <form onSubmit={handleCreateDocument} className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label>Document Title</Label>
-                  <Input 
-                    placeholder="e.g., Club Rules 2026" 
+                  <Input
+                    placeholder="e.g., Club Rules 2026"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
@@ -250,8 +250,8 @@ export default function DocumentList({
                 </div>
                 <div className="space-y-2">
                   <Label>Description (Optional)</Label>
-                  <Textarea 
-                    placeholder="Briefly describe this document..." 
+                  <Textarea
+                    placeholder="Briefly describe this document..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="min-h-[80px]"
@@ -259,9 +259,9 @@ export default function DocumentList({
                 </div>
                 <div className="space-y-2">
                   <Label>File Link</Label>
-                  <Input 
+                  <Input
                     type="url"
-                    placeholder="https://example.com/document.pdf" 
+                    placeholder="https://example.com/document.pdf"
                     value={path}
                     onChange={(e) => setPath(e.target.value)}
                     required
@@ -286,12 +286,12 @@ export default function DocumentList({
       ) : (
         <div className="grid grid-cols-1 gap-4 mt-2">
           {visibleDocuments.map((document) => (
-            <DocumentCard 
-              key={document.id} 
+            <DocumentCard
+              key={document.id}
               clubSlug={clubSlug}
-              document={document} 
-              isAdmin={isAdmin} 
-              onDelete={removeDocumentFromState} 
+              document={document}
+              isAdmin={isAdmin}
+              onDelete={removeDocumentFromState}
             />
           ))}
         </div>

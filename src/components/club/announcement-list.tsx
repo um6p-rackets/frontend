@@ -24,7 +24,7 @@ export interface AnnouncementWithAuthor {
     login: string;
     first_name: string;
     last_name: string;
-  } | null; 
+  } | null;
 }
 
 function Announcement({
@@ -44,7 +44,7 @@ function Announcement({
   const dateStr = new Date(announcement.created_at).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric'
   });
-  
+
   const displayName = [announcement.announcer?.first_name, announcement.announcer?.last_name]
     .filter(Boolean).join(' ') || announcement.announcer?.login || 'Club Admin';
 
@@ -57,7 +57,7 @@ function Announcement({
         description: "The announcement has been permanently removed.",
       });
     } catch (error) {
-      console.error('Failed to delete', error);
+      // console.error('Failed to delete', error);
       toast.error("Failed to delete", {
         description: "An error occurred while deleting the announcement.",
       });
@@ -73,12 +73,12 @@ function Announcement({
     <Card className="p-4 gap-2 flex flex-col justify-between items-start m-0 w-full bg-card border border-border/70 rounded-xl shadow-2xs group relative">
       {isAdmin && (
         <AlertDialog>
-          <AlertDialogTrigger 
+          <AlertDialogTrigger
             render={
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute top-2 right-2 transition-opacity text-destructive hover:bg-destructive/10 z-10" 
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 transition-opacity text-destructive hover:bg-destructive/10 z-10"
               />
             }
           >
@@ -120,7 +120,7 @@ function Announcement({
           </Button>
         )}
       </div>
-      
+
       <div className="flex justify-between w-full text-xs text-muted-foreground/80 pt-1 mt-3 border-t border-border/40">
         <span className="italic font-medium">By {displayName}</span>
         <span className="font-semibold">{dateStr}</span>
@@ -131,7 +131,7 @@ function Announcement({
 
 export default function AnnouncementList({
   clubSlug,
-  isAdmin = false 
+  isAdmin = false
 }: {
   clubSlug: string;
   isAdmin?: boolean;
@@ -139,7 +139,7 @@ export default function AnnouncementList({
   const [announcements, setAnnouncements] = useState<AnnouncementWithAuthor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
-  
+
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newDesc, setNewDesc] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -153,18 +153,18 @@ export default function AnnouncementList({
         const res = await api<{ data: AnnouncementWithAuthor[] }>(`/clubs/${clubSlug}/announcements?limit=20&page=1`);
         setAnnouncements(res.data || []);
       } catch (error) {
-        console.error('Failed to fetch', error);
+        // console.error('Failed to fetch', error);
       } finally {
         setIsLoading(false);
       }
     }
-    fetchAnnouncements(); 
+    fetchAnnouncements();
   }, [clubSlug]);
 
   const handleCreateAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDesc.trim()) return;
-    
+
     setIsSubmitting(true);
     try {
       const res = await api<AnnouncementWithAuthor>(`/clubs/${clubSlug}/announcements`, {
@@ -178,7 +178,7 @@ export default function AnnouncementList({
         description: "Your new announcement is now live.",
       });
     } catch (error) {
-      console.error('Failed to create', error);
+      // console.error('Failed to create', error);
       toast.error("Failed to post", {
         description: "An error occurred while creating the announcement.",
       });
@@ -211,8 +211,8 @@ export default function AnnouncementList({
               <form onSubmit={handleCreateAnnouncement} className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label>Message Content</Label>
-                  <Textarea 
-                    placeholder="Type the announcement here..." 
+                  <Textarea
+                    placeholder="Type the announcement here..."
                     value={newDesc}
                     onChange={(e) => setNewDesc(e.target.value)}
                     className="min-h-25"
@@ -238,12 +238,12 @@ export default function AnnouncementList({
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {visibleAnnouncements.map((announcement) => (
-            <Announcement 
-              key={announcement.id} 
+            <Announcement
+              key={announcement.id}
               clubSlug={clubSlug}
-              announcement={announcement} 
-              isAdmin={isAdmin} 
-              onDelete={removeAnnouncementFromState} 
+              announcement={announcement}
+              isAdmin={isAdmin}
+              onDelete={removeAnnouncementFromState}
             />
           ))}
         </div>
