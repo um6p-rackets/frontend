@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { User, AtSign, Mail, GraduationCap, SlidersHorizontal, AlertCircle, Lock, ArrowRight, Phone, Users, Loader2 } from "lucide-react";
+import { AtSign, Mail, GraduationCap, SlidersHorizontal, AlertCircle, Lock, ArrowRight, Phone, Users, Loader2, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { api } from '@/lib/api/api';
+import { AuthApi } from "@/lib/api/auth";
+import { registerPayload } from "@/types";
 
 export const UM6P_DEPARTMENTS = [
   { code: "1337", name: "1337 Coding School" },
@@ -33,7 +35,7 @@ interface LoginFormProps {
   onSwitchToLogin?: () => void;
 }
 
-export function RegisterForm({ onSuccess ,onSwitchToLogin}: LoginFormProps) {
+export function RegisterForm({ onSuccess, onSwitchToLogin }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -55,7 +57,7 @@ export function RegisterForm({ onSuccess ,onSwitchToLogin}: LoginFormProps) {
     if (!phone.trim()) newErrors.phone = "Required.";
     if (!gender) newErrors.gender = "Select a gender.";
     if (!password.trim() || password.length < 8) newErrors.password = "Min 8 chars.";
-    
+
     if (!department) {
       newErrors.department = "Required.";
     } else if (department === "OTHER" && !customDepartment.trim()) {
@@ -67,31 +69,29 @@ export function RegisterForm({ onSuccess ,onSwitchToLogin}: LoginFormProps) {
   };
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
     if (!validate()) return;
 
     setIsLoading(true);
     try {
-      const payload = {
+      const payload : registerPayload = {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         login: username.trim(),
         email: email.trim(),
         phone_number: phone.trim(),
-        gender: gender === "Male", 
+        gender: gender === "Male",
         password: password,
         department: department === "OTHER" ? customDepartment.trim() : department,
       };
 
-      await api('/auth/register', { 
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
+      await AuthApi.register(payload);
 
-      if (onSuccess) onSuccess();
+      if (onSuccess)
+        onSuccess();
 
     } catch (error) {
-      console.error("Registration failed:", error);
+      // console.error("Registration failed:", error);
       const errorMessage = error instanceof Error ? error.message : "Registration failed. Please try again.";
       setErrors({ email: errorMessage });
     } finally {
@@ -99,7 +99,7 @@ export function RegisterForm({ onSuccess ,onSwitchToLogin}: LoginFormProps) {
     }
   };
 
-return (
+  return (
     <div className="w-full flex flex-col ">
       <div className="border-b border-border/60 bg-muted/20 pb-4 pt-6 sm:pt-8 px-6 sm:px-8 shrink-0">
         <div className="mb-2 inline-flex w-fit items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/40 text-brand-orange border border-orange-200/60 dark:border-orange-900/40 text-[11px] font-black italic tracking-wide uppercase">
@@ -113,11 +113,11 @@ return (
           Set up your athlete profile to start booking matches.
         </p>
       </div>
-      
+
       <div className="p-6 sm:p-8">
         <form onSubmit={handleRegister}>
           <FieldGroup className="space-y-4 sm:space-y-5">
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field className="space-y-1.5">
                 <FieldLabel htmlFor="firstName" className={cn("text-xs font-bold uppercase tracking-wider flex items-center gap-1.5", errors.firstName ? "text-destructive" : "text-muted-foreground")}>

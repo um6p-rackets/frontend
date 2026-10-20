@@ -4,7 +4,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Providers } from '@/components/providers';
 import Navbar from '@/components/navbars/navbar';
-import { Toaster } from '@/components/ui/sonner'; // Add this import
+import { Toaster } from '@/components/ui/sonner';
 
 const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
@@ -43,9 +43,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
     >
       <body className="min-h-full flex flex-col">
         <Providers>
-          <Navbar />
-          {children}
-          <Toaster richColors position="top-center" />
+            <Navbar />
+            {children}
+            <Toaster richColors position="top-center" />
         </Providers>
       </body>
     </html>

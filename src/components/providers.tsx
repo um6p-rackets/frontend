@@ -1,24 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { AuthHydrator } from '@/components/auth/auth-hydrator';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [client] = useState(
-    () =>
-      new QueryClient({ defaultOptions: { queries: { staleTime: 60_000 } } })
-  );
+  const [client] = useState(() => new QueryClient({ defaultOptions: { queries: { staleTime: 60_000 } } }));
+  
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="light"
-      enableSystem
-      disableTransitionOnChange // change theme without transition (black gray lightgray white)
-    >
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
       <QueryClientProvider client={client}>
-        {children}
+        {/* Wrap Hydrator in Suspense to safely useSearchParams */}
+        <Suspense fallback={null}>
+          <AuthHydrator>
+            {children}
+          </AuthHydrator>
+        </Suspense>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </ThemeProvider>
