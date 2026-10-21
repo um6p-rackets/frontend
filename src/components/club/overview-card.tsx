@@ -1,16 +1,19 @@
 import { Users, Whistle } from 'lucide-react';
 import { Card } from '../ui/card';
+import { ReactNode } from 'react';
 
 export default function OverviewCard({
   clubName,
   desc,
   members,
   coach,
+  actions,
 }: {
   clubName?: string;
   desc: string;
   members: number;
   coach: string;
+  actions?: ReactNode;
 }) {
   return (
     <Card className="p-4 sm:p-7 rounded-xl sm:rounded-2xl border border-border/70 shadow-2xs bg-card sm:bg-gray-50 dark:bg-gray-800/80 w-full">
@@ -18,12 +21,12 @@ export default function OverviewCard({
         {clubName ? `${clubName} Club Overview` : 'Official Campus Club'}
       </h2>
 
-      {/* Removed max-w-2xl so description takes the full width of the card */}
       <p className="text-sm sm:text-base text-muted-foreground leading-relaxed w-full mb-5 sm:mb-6 break-words">
         {desc}
       </p>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-border/50">
+      {/* Bottom Footer Row: Stats on the left, Role-gated Action Buttons on the right */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-4 border-t border-border/50">
         <div className="flex items-center gap-6 sm:gap-8 flex-wrap">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center text-accent shrink-0 shadow-2xs">
@@ -49,6 +52,13 @@ export default function OverviewCard({
             </div>
           </div>
         </div>
+
+        {/* Action Buttons Slot */}
+        {actions && (
+          <div className="flex flex-wrap items-center gap-2">
+            {actions}
+          </div>
+        )}
       </div>
     </Card>
   );

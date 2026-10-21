@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Lock, Loader2, CheckCircle } from 'lucide-react';
+import Link from 'next/link';
+import { Lock, Loader2, CheckCircle, Plus, History, CheckCircle2, UserCheck } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import ClubTitle from '@/components/club/club-title';
 import OverviewCard from '@/components/club/overview-card';
@@ -20,17 +21,31 @@ import { getClubStatus, joinClub } from '@/lib/api/club';
 export default function ClubPage() {
   const params = useParams<{ name: string }>();
   const clubSlug = params?.name ?? 'tennis';
+  const queryClient = useQueryClient();
 
   const user = useAuth((state) => state.user);
-
+  
+  // 1. Fetch club info
   const { data: apiClub, isLoading: isClubLoading } = useClub(clubSlug);
 
-  console.log("API Club Data Response:", apiClub);
+  // 2. Fetch membership status using TanStack Query
+  const { data: status, isLoading: isChecking } = useQuery({
+    queryKey: ['club-status', clubSlug, user?.id],
+    queryFn: async () => {
+      const res = await getClubStatus(clubSlug);
+      return res as { is_member: boolean; role?: number };
+    },
+    enabled: !!user, // Only run if user is logged in
+  });
 
-  const [status, setStatus] = useState<{ is_member: boolean; role?: number } | null>(null);
-  const [isChecking, setIsChecking] = useState(true);
-  const [isJoining, setIsJoining] = useState(false);
-  const [joinStatus, setJoinStatus] = useState<"idle" | "pending" | "success">("idle");
+  // 3. Mutation for joining club using TanStack Query
+  const joinMutation = useMutation({
+    mutationFn: () => joinClub(clubSlug),
+    onSuccess: () => {
+      // Invalidate status query to refetch updated membership status
+      queryClient.invalidateQueries({ queryKey: ['club-status', clubSlug, user?.id] });
+    },
+  });
 
   const clubName = apiClub?.name || clubSlug;
   const description = apiClub?.description || 'Welcome to the official campus club.';
@@ -41,35 +56,46 @@ export default function ClubPage() {
     ? ([rawCoach.first_name, rawCoach.last_name].filter(Boolean).join(' ') || rawCoach.login || "Pending")
     : "Pending";
 
-  useEffect(() => {
-    async function checkMembership() {
-      if (!user) {
-        setIsChecking(false);
-        return;
-      }
-      try {
-        const statusData = await getClubStatus(clubSlug);
-        setStatus(statusData as { is_member: boolean; role?: number });
-      } catch (error) {
-        // console.error("Failed to fetch club status", error);
-      } finally {
-        setIsChecking(false);
-      }
-    }
-    checkMembership();
-  }, [clubSlug, user]);
+  const isLoggedIn = !!user;
+  const isMemberOrStaff = isLoggedIn && status?.is_member && (status.role === 0 || status.role === 1 || status.role === 2);
+  const isStaffOnly = isLoggedIn && status?.is_member && (status.role === 1 || status.role === 2);
 
-  const handleJoinClub = async () => {
-    setIsJoining(true);
-    try {
-      await joinClub(clubSlug);
-      setJoinStatus("pending");
-    } catch (error) {
-      // console.error("Failed to join club", error);
-    } finally {
-      setIsJoining(false);
-    }
-  };
+  // Action buttons component bundle to pass into the OverviewCard
+  const actionButtons = isMemberOrStaff ? (
+    <>
+      <Link
+        href={`/clubs/${clubSlug}/match`}
+        className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-teal-800 hover:bg-teal-900 text-white font-bold text-xs tracking-wide shadow-xs transition-colors"
+      >
+        <Plus className="w-3.5 h-3.5" /> Request Match
+      </Link>
+
+      <button
+        onClick={() => { /* TODO */ }}
+        className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-border/70 hover:border-brand-orange bg-card text-foreground font-semibold text-xs transition-colors shadow-xs"
+      >
+        <History className="w-3.5 h-3.5 text-muted-foreground" /> Match History
+      </button>
+
+      {isStaffOnly && (
+        <>
+          <button
+            onClick={() => { /* TODO */ }}
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-border/70 hover:border-brand-orange bg-card text-foreground font-semibold text-xs transition-colors shadow-xs"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Accept Match
+          </button>
+
+          <button
+            onClick={() => { /* TODO */ }}
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-border/70 hover:border-brand-orange bg-card text-foreground font-semibold text-xs transition-colors shadow-xs"
+          >
+            <UserCheck className="w-3.5 h-3.5 text-brand-orange" /> Accept Join Request
+          </button>
+        </>
+      )}
+    </>
+  ) : null;
 
   return (
     <div className="w-[92%] lg:w-[70%] mx-auto">
@@ -81,12 +107,14 @@ export default function ClubPage() {
       ) : (
         <>
           <ClubTitle name={clubName} slug={clubSlug} />
-          <section className="relative mt-4">
+
+          <section className="relative mt-4"> 
             <OverviewCard
               clubName={clubName}
               desc={description}
               coach={coach}
               members={members}
+              actions={actionButtons}
             />
           </section>
 
@@ -129,21 +157,21 @@ export default function ClubPage() {
                 You must be an active member to view sessions, leaderboards, and book matches for {clubName}.
               </p>
 
-              {joinStatus === "pending" ? (
+              {joinMutation.isPending ? (
+                <div className="inline-flex items-center gap-2 px-6 py-4 bg-green-50 text-green-700 border border-green-200 rounded-xl font-bold text-base shadow-sm">
+                  <Loader2 className="size-5 animate-spin" /> Requesting to Join...
+                </div>
+              ) : joinMutation.isSuccess ? (
                 <div className="inline-flex items-center gap-2 px-6 py-4 bg-green-50 text-green-700 border border-green-200 rounded-xl font-bold text-base shadow-sm">
                   <CheckCircle className="size-6" /> Join Request Sent
                 </div>
               ) : (
-                <Button
-                  onClick={handleJoinClub}
-                  disabled={isJoining}
+                <Button 
+                  onClick={() => joinMutation.mutate()} 
+                  disabled={joinMutation.isPending}
                   className="h-12 px-10 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-black italic text-base tracking-wide shadow-md shadow-brand-orange/20"
                 >
-                  {isJoining ? (
-                    <><Loader2 className="size-5 animate-spin mr-2" /> Requesting...</>
-                  ) : (
-                    "Join Club Now"
-                  )}
+                  Join Club Now
                 </Button>
               )}
             </div>
