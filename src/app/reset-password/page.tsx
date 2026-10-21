@@ -105,7 +105,7 @@ export function ResetPasswordForm() {
                     Your password has been successfully updated. You can now use your new password to sign in.
                 </p>
                 <Button
-                    // onClick={() => router.push('/?login=true')} // You can handle this query param to auto-open your login modal!
+                    onClick={() => router.push('/')} // You can handle this query param to auto-open your login modal!
                     className="h-11 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-black italic w-full"
                 >
                     Sign In Now <ArrowRight className="ml-2 size-4" />
