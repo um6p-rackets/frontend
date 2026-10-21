@@ -1001,8 +1001,8 @@ export function getUserMatchHistory(userId: number): UserHistoryMatch[] {
       myTeam.player2_id && userMemberIds.includes(myTeam.player1_id)
         ? getPlayerForMember(myTeam.player2_id)
         : myTeam.player2_id && userMemberIds.includes(myTeam.player2_id)
-        ? getPlayerForMember(myTeam.player1_id)
-        : null;
+          ? getPlayerForMember(myTeam.player1_id)
+          : null;
 
     // Club name
     const club = mockClubs.find((c) => c.id === m.club_id);
@@ -1013,8 +1013,8 @@ export function getUserMatchHistory(userId: number): UserHistoryMatch[] {
     const isWinner = m.winner_id
       ? userTeamIds.includes(m.winner_id)
       : isTeam1
-      ? m.team1_score > m.team2_score
-      : m.team2_score > m.team1_score;
+        ? m.team1_score > m.team2_score
+        : m.team2_score > m.team1_score;
     const result: 'W' | 'L' = isWinner ? 'W' : 'L';
 
     const myScore = isTeam1 ? m.team1_score : m.team2_score;
@@ -1033,7 +1033,8 @@ export function getUserMatchHistory(userId: number): UserHistoryMatch[] {
       my_score: myScore,
       opponent_score: opponentScore,
       points_change: pointsChange,
-      date: m.scheduled_at,
+      // date: m.scheduled_at,
+      date: m.scheduled_at || new Date().toISOString(),
     };
   });
 }
@@ -1055,12 +1056,12 @@ export function getUserClubRanks(userId: number): UserClubRank[] {
 
     const rank =
       userId === 1 ? 1 :
-      userId === 2 ? 2 :
-      userId === 4 ? 3 :
-      userId === 5 ? 4 :
-      userId === 3 ? 5 :
-      userId === 6 ? 6 :
-      userId === 7 ? 10 : 8;
+        userId === 2 ? 2 :
+          userId === 4 ? 3 :
+            userId === 5 ? 4 :
+              userId === 3 ? 5 :
+                userId === 6 ? 6 :
+                  userId === 7 ? 10 : 8;
 
     return {
       club_id: mem.club_id,

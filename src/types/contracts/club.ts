@@ -147,11 +147,11 @@ export type Match = {
   team2_points: number;
   mode: MatchMode;
   status: MatchStatus;
-  location: string | null;
-  scheduled_at: string;
-  cancelled_at: string | null;
-  cancelled_by: number | null; // member id
-  created_at: string;
+  location?: string | null;
+  scheduled_at?: string;
+  cancelled_at?: string | null;
+  cancelled_by?: number | null; // member id
+  created_at?: string;
 };
 
 // ==========================================

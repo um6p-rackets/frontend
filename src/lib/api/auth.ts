@@ -116,4 +116,14 @@ export const AuthApi = {
 		const data = await handleResponse(res);
 		return data.user;
 	},
+
+	// check if login is available
+	checkLoginAvailable: async (login: string) => {
+		const res = await fetch(getUrl(`/auth/login-available?login=${encodeURIComponent(login)}`), {
+			credentials: "include",
+		});
+		if (!res.ok)
+			return { available: false }; 
+		return res.json();
+	},
 };
