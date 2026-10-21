@@ -21,7 +21,7 @@ export function LeaderboardMemberCard({
     >
       <div className="flex flex-row justify-start items-center gap-3 sm:gap-4 min-w-0">
         <Avatar className="w-8 h-8 sm:w-10 sm:h-10 shrink-0">
-          <AvatarImage src={member.avatar_url} alt={member.name} />
+          <AvatarImage src={member.avatar_url} alt={member.name} referrerPolicy="no-referrer" />
           <AvatarFallback className="bg-accent text-accent-foreground text-xs sm:text-sm">
             {rank}
           </AvatarFallback>

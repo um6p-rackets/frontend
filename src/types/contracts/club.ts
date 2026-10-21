@@ -36,6 +36,13 @@ export enum MatchStatus {
   CANCELLED = 3, // cancelled by one of the teams or the referee or system
 }
 
+export enum JoinRequestStatus {
+  PENDING = 0, // waiting for a leader
+  ACCEPTED = 1, // the user became a member
+  REJECTED = 2, // a leader said no
+  CANCELLED = 3, // the user took the request back
+}
+
 // ==========================================
 // 2. Database entities (club service)
 // ==========================================
@@ -66,6 +73,17 @@ export type Announcement = {
   announcer_id: number; // member id
   description: string;
   created_at: string;
+};
+
+// A user's request to join a club. One row per user per club, reopened when they ask again.
+export type JoinRequest = {
+  id: number;
+  club_id: number;
+  user_id: number; // auth service
+  status: JoinRequestStatus;
+  requested_at: string;
+  decided_at: string | null;
+  decided_by: number | null; // member id of the leader who accepted or rejected
 };
 
 export type Achievement = {
@@ -147,11 +165,11 @@ export type Match = {
   team2_points: number;
   mode: MatchMode;
   status: MatchStatus;
-  location: string | null;
-  scheduled_at: string;
-  cancelled_at: string | null;
-  cancelled_by: number | null; // member id
-  created_at: string;
+  location?: string | null;
+  scheduled_at?: string;
+  cancelled_at?: string | null;
+  cancelled_by?: number | null; // member id
+  created_at?: string;
 };
 
 // ==========================================
@@ -186,7 +204,14 @@ export type ClubMemberStatus = {
   is_member: boolean;
   member_id: number | null;
   role: MemberRole | null;
+  has_pending_request: boolean; // true = the button shows "Requested" instead of "Join"
 };
+
+// GET /:slug/join-requests: one pending request with the person who asked.
+export type JoinRequestWithUser = JoinRequest & { user: UserSummary };
+
+// POST /:slug/join
+export type JoinClubResponse = { status: 'pending' };
 
 export type MemberWithUser = Member & { user: UserSummary };
 

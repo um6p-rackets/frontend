@@ -54,7 +54,12 @@ export default function ProfileHeader({ data }: { data: UserProfileData }) {
         {/* Left: Avatar & User Info */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 pr-10 sm:pr-12 lg:pr-0">
           <Avatar className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 border-4 border-background shadow-md shrink-0">
-            <AvatarImage src={currentUser.avatar || undefined} alt={fullName} className="object-cover" />
+            <AvatarImage
+              src={currentUser.avatar || undefined}
+              alt={fullName}
+              className="object-cover"
+              referrerPolicy="no-referrer"
+               />
             <AvatarFallback className="bg-brand-cream text-brand-orange font-black text-2xl">
               {currentUser.first_name.charAt(0)}
               {currentUser.last_name.charAt(0)}

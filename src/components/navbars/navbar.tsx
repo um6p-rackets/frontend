@@ -37,8 +37,7 @@ import {
 import Logo from '../logo';
 import { AuthButton } from '../auth/auth-button';
 import { useAuth } from '@/store/auth';
-import { useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api/api';
+import { useLogout } from '@/hooks/use-logout';
 
 export default function Navbar() {
   const user = useAuth((state) => state.user);
@@ -119,8 +118,6 @@ function VisitorNav() {
 function UserNav() {
   const [isOpen, setIsOpen] = useState(false);
   const user = useAuth((state) => state.user);
-  const logout = useAuth((s) => s.logout);
-  const queryClient = useQueryClient();
   
   const pathname = usePathname(); 
   
@@ -133,17 +130,8 @@ function UserNav() {
                     pathname?.startsWith('/leaderboard') || 
                     pathname?.startsWith('/profile');
 
-  const handleLogout = async () => {
-    try {
-      await api('/auth/logout', { method: 'POST' });
-    } catch (error) {
-      console.warn('Backend logout failed, clearing local state anyway.');
-    } finally {
-      logout();
-      queryClient.clear();
-    }
-  };
-
+  const performLogout = useLogout();
+  
   const fallbackInitial = user?.first_name?.charAt(0)?.toUpperCase() || user?.login?.charAt(0)?.toUpperCase() || 'U';
 
   return (
@@ -226,7 +214,7 @@ function UserNav() {
           <DropdownMenu>
             <DropdownMenuTrigger className={`flex items-center justify-center rounded-full outline-none transition-transform hover:scale-105 cursor-pointer bg-transparent p-0 ml-2 ${pathname?.startsWith('/profile') ? 'ring-2 ring-brand-orange ring-offset-2' : ''}`}>
               <Avatar className="w-10 h-10 border border-border shadow-sm">
-                <AvatarImage src={user?.avatar || undefined} alt={user?.first_name || 'User'} />
+                <AvatarImage src={user?.avatar || undefined} alt={user?.first_name || 'User'}  referrerPolicy="no-referrer" />
                 <AvatarFallback className="bg-brand-cream text-brand-orange font-bold">
                   {fallbackInitial}
                 </AvatarFallback>
@@ -241,7 +229,7 @@ function UserNav() {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem 
-                  onClick={handleLogout} 
+                  onClick={performLogout} 
                   className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-100 dark:focus:bg-red-900/30"
                 >
                   Log out
@@ -312,7 +300,7 @@ function UserNav() {
 
           <Link href="/profile" onClick={() => setIsOpen(false)} className={`px-4 py-2 flex items-center gap-3 text-base font-semibold rounded-lg transition-colors mt-2 border-t border-border pt-4 ${pathname?.startsWith('/profile') ? 'text-brand-orange' : 'hover:bg-muted text-foreground'}`}>
             <Avatar className={`w-8 h-8 border shadow-sm shrink-0 ${pathname?.startsWith('/profile') ? 'border-brand-orange' : 'border-background'}`}>
-              <AvatarImage src={user?.avatar || undefined} alt={user?.first_name || 'User'} />
+              <AvatarImage src={user?.avatar || undefined} alt={user?.first_name || 'User'}  referrerPolicy="no-referrer" />
               <AvatarFallback className="bg-accent text-accent-foreground font-bold text-xs">
                 {fallbackInitial}
               </AvatarFallback>
@@ -321,7 +309,7 @@ function UserNav() {
           </Link>
 
           <div className="px-2 pt-2">
-            <Button onClick={handleLogout} variant="destructive" className="w-full h-11 text-base font-semibold">
+            <Button onClick={performLogout} variant="destructive" className="w-full h-11 text-base font-semibold">
               Log out
             </Button>
           </div>

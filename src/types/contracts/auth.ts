@@ -10,3 +10,30 @@ export type User = {
   avatar: string | null; // text
   joined_at: string; // timestamptz
 };
+
+export type registerPayload = {
+  first_name: string;
+  last_name: string;
+  login: string;
+  gender?: boolean | null;
+  department?: string | null;
+  phone_number?: string | null;
+  email: string;
+  password: string;
+  avatar?: string | null;
+};
+
+export type loginPayload = {
+  email: string;
+  password: string;
+  rememberMe?: boolean; // Optional field for "Remember Me" functionality
+};
+
+export type forgotPasswordPayload = {
+  email: string;
+};
+
+export type resetPasswordPayload = {
+  token: string;
+  newPassword: string;
+};

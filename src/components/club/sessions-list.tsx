@@ -215,11 +215,11 @@ function SessionCard({
       setIsEditOpen(false);
       onDeleteSuccess();
     } catch (error: unknown) {
-      console.error('Failed to update session:', error);
+      // console.error('Failed to update session:', error);
       const errorMessage = error instanceof Error ? error.message : "Failed to update session";
-      
+
       if (
-        errorMessage.toLowerCase().includes("already exists") || 
+        errorMessage.toLowerCase().includes("already exists") ||
         errorMessage.toLowerCase().includes("unique") ||
         errorMessage.toLowerCase().includes("conflict")
       ) {
@@ -239,7 +239,7 @@ function SessionCard({
       toast.success("Session deleted");
       onDeleteSuccess();
     } catch (error) {
-      console.error('Failed to delete session', error);
+      // console.error('Failed to delete session', error);
       toast.error("Failed to delete session");
     } finally {
       setIsDeleting(false);
@@ -266,22 +266,22 @@ function SessionCard({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Start Time</Label>
-                <Input 
-                  type="time" 
-                  value={editStartTime} 
-                  onChange={(e) => setEditStartTime(e.target.value)} 
+                <Input
+                  type="time"
+                  value={editStartTime}
+                  onChange={(e) => setEditStartTime(e.target.value)}
                   className={editStartTime && editEndTime && editStartTime >= editEndTime ? "border-destructive focus-visible:ring-destructive" : ""}
-                  required 
+                  required
                 />
               </div>
               <div className="space-y-2">
                 <Label>End Time</Label>
-                <Input 
-                  type="time" 
-                  value={editEndTime} 
-                  onChange={(e) => setEditEndTime(e.target.value)} 
+                <Input
+                  type="time"
+                  value={editEndTime}
+                  onChange={(e) => setEditEndTime(e.target.value)}
                   className={editStartTime && editEndTime && editStartTime >= editEndTime ? "border-destructive focus-visible:ring-destructive" : ""}
-                  required 
+                  required
                 />
               </div>
             </div>
@@ -405,12 +405,12 @@ export function SessionsSkeleton() {
   );
 }
 
-export default function SessionsList({ 
+export default function SessionsList({
   clubSlug,
-  isAdmin = false 
-}: { 
+  isAdmin = false
+}: {
   clubSlug: string;
-  isAdmin?: boolean; 
+  isAdmin?: boolean;
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -450,7 +450,7 @@ export default function SessionsList({
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
   const [capacity, setCapacity] = useState('20');
-  
+
   const [sessionDate, setSessionDate] = useState<Date>();
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
@@ -478,11 +478,11 @@ export default function SessionsList({
     }
 
     if (startTime >= endTime) {
-      return; 
+      return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const jsDay = sessionDate.getDay();
       const backendWeekday = jsDay === 0 ? 6 : jsDay - 1;
@@ -500,24 +500,24 @@ export default function SessionsList({
           start_time: startTime,
           end_time: endTime,
           week_start: format(mondayDate, 'yyyy-MM-dd'),
-          repeat_weekly: repeatWeekly 
+          repeat_weekly: repeatWeekly
         }),
       });
-      
+
       toast.success("Session created successfully");
       setIsAddOpen(false);
-      
-      setTitle(''); 
-      setLocation(''); 
-      setSessionDate(undefined); 
-      setStartTime(''); 
-      setEndTime(''); 
+
+      setTitle('');
+      setLocation('');
+      setSessionDate(undefined);
+      setStartTime('');
+      setEndTime('');
       setCapacity('20');
       setRepeatWeekly(true);
-      
+
       refetch();
     } catch (error: unknown) {
-      console.error('Failed to create session:', error);
+      // console.error('Failed to create session:', error);
       if (error instanceof Error) {
         toast.error(error.message);
       } else {
@@ -565,7 +565,7 @@ export default function SessionsList({
 
   return (
     <div className="flex-1 flex flex-col">
-      
+
       {isAdmin && (
         <div className="flex justify-end mb-4">
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
@@ -577,7 +577,7 @@ export default function SessionsList({
                 <DialogTitle>Create New Session</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleCreateSession} className="space-y-4 pt-4">
-                
+
                 <div className="space-y-2">
                   <Label>Title</Label>
                   <Input placeholder="e.g., Beginners Training" value={title} onChange={(e) => setTitle(e.target.value)} required />
@@ -607,22 +607,22 @@ export default function SessionsList({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Start Time</Label>
-                      <Input 
-                        type="time" 
-                        value={startTime} 
-                        onChange={(e) => setStartTime(e.target.value)} 
+                      <Input
+                        type="time"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
                         className={startTime && endTime && startTime >= endTime ? "border-destructive focus-visible:ring-destructive" : ""}
-                        required 
+                        required
                       />
                     </div>
                     <div className="space-y-2">
                       <Label>End Time</Label>
-                      <Input 
-                        type="time" 
-                        value={endTime} 
-                        onChange={(e) => setEndTime(e.target.value)} 
+                      <Input
+                        type="time"
+                        value={endTime}
+                        onChange={(e) => setEndTime(e.target.value)}
                         className={startTime && endTime && startTime >= endTime ? "border-destructive focus-visible:ring-destructive" : ""}
-                        required 
+                        required
                       />
                     </div>
                   </div>
@@ -673,10 +673,10 @@ export default function SessionsList({
         <div className="flex flex-col gap-3 mb-4 pb-3 border-b border-border/40">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="icon-sm" 
-                onClick={() => data.prev_week_start && handleWeekChange(data.prev_week_start)} 
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => data.prev_week_start && handleWeekChange(data.prev_week_start)}
                 disabled={!data.prev_week_start || data.prev_week_start < minWeekStr || isPastLimitReached}
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -693,10 +693,10 @@ export default function SessionsList({
                   )}
                 </div>
               </div>
-              <Button 
-                variant="outline" 
-                size="icon-sm" 
-                onClick={() => data.next_week_start && handleWeekChange(data.next_week_start)} 
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => data.next_week_start && handleWeekChange(data.next_week_start)}
                 disabled={!data.next_week_start || isFutureLimitReached}
               >
                 <ChevronRight className="w-4 h-4" />
