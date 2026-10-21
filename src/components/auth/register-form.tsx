@@ -239,7 +239,7 @@ export function RegisterForm({
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup className="space-y-4 sm:space-y-5">
-            {/* Name and Username */}
+            {/* Name Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* First Name Field */}
               <Field className="space-y-1.5">
@@ -267,30 +267,30 @@ export function RegisterForm({
                 <FormError error={errors.firstName} />
               </Field>
 
-              {/* Username Field */}
+              {/* Last Name Field */}
               <Field className="space-y-1.5">
                 <FieldLabel
-                  htmlFor="username"
+                  htmlFor="lastName"
                   className={cn(
                     "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
-                    errors.username
+                    errors.lastName
                       ? "text-destructive"
                       : "text-muted-foreground",
                   )}
                 >
-                  <AtSign className="size-3.5 text-brand-orange" /> Username
+                  <User className="size-3.5 text-brand-orange" /> Last Name
                 </FieldLabel>
                 <Input
-                  id="username"
-                  maxLength={15}
-                  {...register("username")}
+                  id="lastName"
+                  maxLength={50}
+                  {...register("lastName")}
                   className={cn(
                     "h-11 w-full rounded-xl bg-background/60",
-                    errors.username &&
+                    errors.lastName &&
                       "border-destructive focus-visible:ring-destructive/30",
                   )}
                 />
-                <FormError error={errors.username} />
+                <FormError error={errors.lastName} />
               </Field>
             </div>
 
