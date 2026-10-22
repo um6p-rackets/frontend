@@ -5,7 +5,7 @@ import { useAuth } from '@/store/auth';
 
 function useIsLoggedIn() {
   const user = useAuth((state) => state.user);
-  return !!user; 
+  return !!user;
 }
 
 export default function HeroSection() {
@@ -40,13 +40,12 @@ export default function HeroSection() {
         <Image
           src="/hero_decoration_1.png"
           alt="Tennis and badminton rackets on a court"
-          width={535}
-          height={628}
+          width={596}
+          height={632}
           priority
           style={{ width: '100%', height: 'auto' }}
-          className="z-10 mx-auto max-w-133.75 lg:mx-0 hidden lg:block" 
+          className="z-10 mx-auto max-w-133.75 lg:mx-0 hidden lg:block"
         />
-        
 
         {/* content */}
         <div className="relative z-10 flex flex-col md:flex-row lg:flex-col pt-10 lg:pt-37.5 gap-6 lg:gap-0">

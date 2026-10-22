@@ -7,6 +7,7 @@ import DocumentList from './document-list';
 import SessionsList, { SessionsSkeleton } from './sessions-list';
 
 import { cn } from 'cn';
+import { MemberRole } from '@/types/contracts/club';
 
 const tabTriggerClass = cn(
   'flex-1 basis-0 min-w-0 h-9 sm:h-10 px-1.5 sm:px-4 py-1.5 sm:py-2',
@@ -24,7 +25,7 @@ export default function ClubTaps({
   userRole, // 1. Add userRole to the props
 }: { 
   clubSlug: string;
-  userRole?: number; // 2. Add it to the types (Optional because non-members won't have a role)
+  userRole?: MemberRole | null; // 2. Add it to the types (Optional because non-members won't have a role)
 }) {
   
   // 3. Define who is an admin (Role 1 = Leader, Role 2 = Coach)

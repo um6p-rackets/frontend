@@ -1,11 +1,10 @@
 import { api, ApiError } from "@/lib/api/api";
-import type { Club, WeekView } from "@/types/contracts/club";
-import { useAuth } from "@/store/auth";
+import type { Club, ClubMemberStatus, ClubWithMembersCountAndCoachFullName, WeekView } from "@/types/contracts/club";
 
 const CLUBS = "/clubs";
 
 export const getClubs = () => api<Club[]>(CLUBS);
-export const getClub = (slug: string) => api<Club>(`${CLUBS}/${slug}`);
+export const getClub = (slug: string) => api<ClubWithMembersCountAndCoachFullName>(`${CLUBS}/${slug}`);
 
 function getMondayOfDate(dateStr: string): string {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -53,66 +52,18 @@ export const getClubSessions = async (slug: string, week?: string): Promise<Week
 };
 
 // --- Official Contract Type ---
-export type ClubMemberStatus = {
-  is_member: boolean;
-  member_id: number | null;
-  role: number | null;
-};
+export const getClubStatus = (slug: string) =>
+  api<ClubMemberStatus>(`${CLUBS}/${slug}/status`);
 
+export const joinClubSession = (slug: string, sessionId: number) =>
+  api<{ success: boolean }>(`${CLUBS}/${slug}/sessions/${sessionId}/attend`, {
+    method: "POST",
+  });
 
+export const leaveClubSession = (slug: string, sessionId: number) =>
+  api<{ success: boolean }>(`${CLUBS}/${slug}/sessions/${sessionId}/attend`, {
+    method: "DELETE",
+  });
 
-export const getClubStatus = async (slug: string): Promise<ClubMemberStatus> => {
-  // Check if user exists before calling the API
-  const user = useAuth.getState().user;
-  if (!user) {
-    return { is_member: false, member_id: null, role: null };
-  }
-
-  try {
-    return await api<ClubMemberStatus>(`${CLUBS}/${slug}/status`);
-  } catch (error: unknown) {
-    if (error instanceof ApiError && error.status === 401) {
-      return { is_member: false, member_id: null, role: null };
-    }
-    throw error;
-  }
-};
-
-export const joinClubSession = async (slug: string, sessionId: number) => {
-  try {
-    return await api<{ success: boolean; message: string }>(
-      `${CLUBS}/${slug}/sessions/${sessionId}/attend`,
-      {
-        method: "POST",
-      }
-    );
-  } catch (err) {
-    console.warn(`Join session endpoint not available on backend, updating client state for session ${sessionId}:`, err);
-    return { success: true, message: "Joined session" };
-  }
-};
-
-export const leaveClubSession = async (slug: string, sessionId: number) => {
-  try {
-    return await api<{ success: boolean; message: string }>(
-      `${CLUBS}/${slug}/sessions/${sessionId}/attend`,
-      {
-        method: "DELETE",
-      }
-    );
-  } catch (err) {
-    console.warn(`Leave session endpoint not available on backend, updating client state for session ${sessionId}:`, err);
-    return { success: true, message: "Left session" };
-  }
-};
-
-export const joinClub = async (slug: string) => {
-  try {
-    return await api<{ status: string }>(`${CLUBS}/${slug}/join`, { 
-      method: "POST",
-    });
-  } catch (error) { 
-    console.warn(`Backend missing /join route for ${slug}. Mocking success for UI development.`);
-    return { status: 'pending' };
-  }
-};
+export const joinClub = (slug: string) =>
+  api<{ status: "pending" }>(`${CLUBS}/${slug}/join`, { method: "POST" });

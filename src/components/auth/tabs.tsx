@@ -12,7 +12,7 @@ export function AuthTabs() {
   const setTab = useAuthPopupStore((state) => state.setTab);
 
   return (
-    <div className="relative flex flex-col w-[calc(100vw-2rem)] max-w-[600px] max-h-[85vh] mx-auto">
+    <div className="relative flex flex-col w-[calc(100vw-2rem)] max-w-150 max-h-[85vh] mx-auto">
       
       {/* Exit Button */}
       <button 
