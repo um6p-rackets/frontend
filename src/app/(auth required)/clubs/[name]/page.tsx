@@ -19,10 +19,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 import { useClub } from '@/hooks/use-clubs';
-import { mockClubData } from '@/lib/mock-data'; 
+import { mockClubData } from '@/lib/mock-data';
 import { useAuth } from '@/store/auth';
 
-import { getClubStatus, joinClub } from '@/lib/api/club'; 
+import { getClubStatus, joinClub } from '@/lib/api/club';
 
 export default function ClubPage() {
   const params = useParams<{ name: string }>();
@@ -61,10 +61,10 @@ export default function ClubPage() {
 
   const clubName = apiClub?.name || clubSlug;
   const description = apiClub?.description || 'Welcome to the official campus club.';
-  const members = (apiClub as { members_count?: number })?.members_count || 0; 
-  
+  const members = (apiClub as { members_count?: number })?.members_count || 0;
+
   const rawCoach = (apiClub as { coach?: { first_name?: string; last_name?: string; login?: string } | null })?.coach;
-  const coach: string = rawCoach 
+  const coach: string = rawCoach
     ? ([rawCoach.first_name, rawCoach.last_name].filter(Boolean).join(' ') || rawCoach.login || "Pending")
     : "Pending";
 

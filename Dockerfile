@@ -13,7 +13,10 @@ FROM node:24.21.0-alpine3.24 AS deps
 # these glibc-dependent binaries to run smoothly on Alpine's musl environment without 
 # throwing missing library or process.dlopen execution errors.
 
-RUN apk add --no-cache libc6-compat
+# RUN apk add --no-cache libc6-compat
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.edge.kernel.org/g' /etc/apk/repositories && \
+    apk update && \
+    apk add --no-cache libc6-compat
 #####################################
 
 WORKDIR /app

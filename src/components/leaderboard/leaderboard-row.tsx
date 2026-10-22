@@ -70,7 +70,7 @@ export default function LeaderboardRow({
 
             {/* Athlete Avatar */}
             <Avatar className="w-10 h-10 border-2 border-background shadow-xs shrink-0">
-              <AvatarImage src={member.avatar_url} alt={member.name} />
+              <AvatarImage src={member.avatar_url} alt={member.name} referrerPolicy="no-referrer" />
               <AvatarFallback className="bg-brand-cream text-brand-orange font-bold text-sm">
                 {member.name.charAt(0)}
               </AvatarFallback>
@@ -160,7 +160,7 @@ export default function LeaderboardRow({
           {/* Athlete */}
           <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
             <Avatar className="w-8 h-8 sm:w-10 sm:h-10 border-2 border-background shadow-sm shrink-0">
-              <AvatarImage src={member.avatar_url} alt={member.name} />
+              <AvatarImage src={member.avatar_url} alt={member.name}  referrerPolicy="no-referrer" />
               <AvatarFallback className="bg-brand-cream text-brand-orange font-bold text-xs sm:text-base">
                 {member.name.charAt(0)}
               </AvatarFallback>

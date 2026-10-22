@@ -34,12 +34,12 @@ export function SessionsSkeleton() {
   );
 }
 
-export default function SessionsList({ 
+export default function SessionsList({
   clubSlug,
-  isAdmin = false 
-}: { 
+  isAdmin = false
+}: {
   clubSlug: string;
-  isAdmin?: boolean; 
+  isAdmin?: boolean;
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -130,10 +130,10 @@ export default function SessionsList({
         <div className="flex flex-col gap-3 mb-4 pb-3 border-b border-border/40">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="icon-sm" 
-                onClick={() => data.prev_week_start && handleWeekChange(data.prev_week_start)} 
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => data.prev_week_start && handleWeekChange(data.prev_week_start)}
                 disabled={!data.prev_week_start || data.prev_week_start < minWeekStr || isPastLimitReached}
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -150,10 +150,10 @@ export default function SessionsList({
                   )}
                 </div>
               </div>
-              <Button 
-                variant="outline" 
-                size="icon-sm" 
-                onClick={() => data.next_week_start && handleWeekChange(data.next_week_start)} 
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => data.next_week_start && handleWeekChange(data.next_week_start)}
                 disabled={!data.next_week_start || isFutureLimitReached}
               >
                 <ChevronRight className="w-4 h-4" />

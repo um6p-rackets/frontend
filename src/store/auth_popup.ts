@@ -2,10 +2,10 @@ import { create } from 'zustand';
 
 interface AuthPopupState {
   isOpen: boolean;
-  activeTab: "login" | "register";
-  open: (tab?: "login" | "register") => void;
+  activeTab: "login" | "register" | "forgot"; // Added "forgot"
+  open: (tab?: "login" | "register" | "forgot") => void;
   close: () => void;
-  setTab: (tab: "login" | "register") => void;
+  setTab: (tab: "login" | "register" | "forgot") => void;
 }
 
 export const useAuthPopupStore = create<AuthPopupState>((set) => ({

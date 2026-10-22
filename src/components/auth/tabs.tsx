@@ -3,6 +3,7 @@
 import { X } from 'lucide-react';
 import { LoginForm } from './login-form';
 import { RegisterForm } from './register-form';
+import { ForgotPasswordForm } from './forgot-password-form'; // Add this import
 import { useAuthPopupStore } from '@/store/auth_popup';
 
 export function AuthTabs() {
@@ -22,15 +23,24 @@ export function AuthTabs() {
       </button>              
 
       <div className="flex-1 overflow-y-auto w-full custom-scrollbar">
-        {activeTab === "login" ? (
+        {/* Changed from ternary operator to exact matches to support 3 tabs */}
+        {activeTab === "login" && (
           <LoginForm 
-            onSuccess={close} // Keep this as close, so logging in closes the popup
-            onSwitchToRegister={() => setTab("register")} 
+            onSuccess={close}
+            onSwitchToRegister={() => setTab("register")}
+            onSwitchToForgot={() => setTab("forgot")} // Wired up the forgot link!
           />
-        ) : (
+        )}
+
+        {activeTab === "register" && (
           <RegisterForm 
-            // Changed this line so it switches to login instead of closing!
             onSuccess={() => setTab("login")} 
+            onSwitchToLogin={() => setTab("login")} 
+          />
+        )}
+
+        {activeTab === "forgot" && (
+          <ForgotPasswordForm 
             onSwitchToLogin={() => setTab("login")} 
           />
         )}
