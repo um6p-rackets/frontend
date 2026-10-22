@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, Loader2, CheckCircle, Plus, History, CheckCircle2, UserCheck, ShieldCheck } from 'lucide-react';
+import { Lock, Loader2, Plus, History, CheckCircle2, UserCheck, ShieldCheck, MoreVertical, LogOut, UserMinus, UserX } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -17,12 +17,21 @@ import ManageLeadersModal from '@/components/club/manage-leaders-modal';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 import { useClub } from '@/hooks/use-clubs';
 import { mockClubData } from '@/lib/mock-data';
 import { useAuth } from '@/store/auth';
 
 import { getClubStatus, joinClub } from '@/lib/api/club';
+import { api } from '@/lib/api/api';
 
 export default function ClubPage() {
   const params = useParams<{ name: string }>();
@@ -34,6 +43,8 @@ export default function ClubPage() {
   const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
   const [isAcceptJoinModalOpen, setIsAcceptJoinModalOpen] = useState(false);
   const [isSetLeaderModalOpen, setIsSetLeaderModalOpen] = useState(false);
+  const [isRemoveLeaderModalOpen, setIsRemoveLeaderModalOpen] = useState(false);
+  const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState(false);
 
   const { data: apiClub, isLoading: isClubLoading } = useClub(clubSlug);
 
@@ -56,6 +67,33 @@ export default function ClubPage() {
     },
     onError: (err: Error) => {
       toast.error(err.message || 'Failed to send join request.');
+    },
+  });
+
+  const cancelJoinMutation = useMutation({
+    mutationFn: async () => {
+      await api(`/clubs/${clubSlug}/join`, { method: 'DELETE' });
+    },
+    onSuccess: () => {
+      toast.success('Join request cancelled.');
+      queryClient.invalidateQueries({ queryKey: ['club-status', clubSlug, user?.id] });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to cancel join request.');
+    },
+  });
+
+  const leaveClubMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentMemberId) throw new Error('Member ID not found.');
+      await api(`/clubs/${clubSlug}/members/${currentMemberId}`, { method: 'DELETE' });
+    },
+    onSuccess: () => {
+      toast.success('You have left the club.');
+      queryClient.invalidateQueries({ queryKey: ['club-status', clubSlug, user?.id] });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to leave club.');
     },
   });
 
@@ -89,32 +127,59 @@ export default function ClubPage() {
         <History className="w-3.5 h-3.5 text-muted-foreground" /> Match History
       </Link>
 
-      {isStaffOnly && (
-        <>
-          <button
-            onClick={() => setIsAcceptModalOpen(true)}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-border/70 hover:border-brand-orange bg-card text-foreground font-semibold text-xs transition-colors shadow-xs cursor-pointer"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Accept Match
-          </button>
+      {/* DROPDOWN MENU FOR MANAGEMENT & ACTIONS */}
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <button
+              type="button"
+              className="flex items-center justify-center w-9 h-9 rounded-xl border border-border/70 hover:border-brand-orange bg-card text-foreground transition-colors shadow-xs cursor-pointer focus-visible:outline-none"
+            >
+              <MoreVertical className="w-4 h-4 text-muted-foreground" />
+            </button>
+          }
+        />
+        <DropdownMenuContent className="w-52" align="end">
+          <DropdownMenuGroup>
+            {isStaffOnly && (
+              <>
+                <DropdownMenuItem onClick={() => setIsAcceptModalOpen(true)} className="cursor-pointer font-medium text-xs gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Accept Match
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsAcceptJoinModalOpen(true)} className="cursor-pointer font-medium text-xs gap-2">
+                  <UserCheck className="w-4 h-4 text-brand-orange" /> Accept Join Request
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsRemoveMemberModalOpen(true)} className="cursor-pointer font-medium text-xs gap-2">
+                  <UserX className="w-4 h-4 text-red-500" /> Remove Member
+                </DropdownMenuItem>
+              </>
+            )}
 
-          <button
-            onClick={() => setIsAcceptJoinModalOpen(true)}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-border/70 hover:border-brand-orange bg-card text-foreground font-semibold text-xs transition-colors shadow-xs cursor-pointer"
-          >
-            <UserCheck className="w-3.5 h-3.5 text-brand-orange" /> Accept Join Request
-          </button>
-        </>
-      )}
+            {isCoachOnly && (
+              <>
+                <DropdownMenuItem onClick={() => setIsSetLeaderModalOpen(true)} className="cursor-pointer font-medium text-xs gap-2">
+                  <ShieldCheck className="w-4 h-4 text-blue-500" /> Set Leader
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsRemoveLeaderModalOpen(true)} className="cursor-pointer font-medium text-xs gap-2">
+                  <UserMinus className="w-4 h-4 text-amber-500" /> Remove Leader
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuGroup>
 
-      {isCoachOnly && (
-        <button
-          onClick={() => setIsSetLeaderModalOpen(true)}
-          className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-border/70 hover:border-brand-orange bg-card text-foreground font-semibold text-xs transition-colors shadow-xs cursor-pointer"
-        >
-          <ShieldCheck className="w-3.5 h-3.5 text-blue-500" /> Set Leader
-        </button>
-      )}
+          <DropdownMenuSeparator />
+
+          <DropdownMenuGroup>
+            <DropdownMenuItem 
+              onClick={() => leaveClubMutation.mutate()} 
+              disabled={leaveClubMutation.isPending}
+              className="cursor-pointer font-semibold text-xs text-destructive hover:text-white hover:bg-destructive focus:text-white focus:bg-destructive gap-2 transition-colors"
+            >
+              <LogOut className="w-4 h-4" /> Leave Club
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </>
   ) : null;
 
@@ -169,14 +234,18 @@ export default function ClubPage() {
                 You must be an active member to view sessions, leaderboards, and book matches for {clubName}.
               </p>
 
-              {joinMutation.isPending ? (
-                <div className="inline-flex items-center gap-2 px-6 py-4 bg-green-50 text-green-700 border border-green-200 rounded-xl font-bold text-base shadow-sm">
-                  <Loader2 className="size-5 animate-spin" /> Requesting to Join...
+              {joinMutation.isPending || cancelJoinMutation.isPending ? (
+                <div className="inline-flex items-center gap-2 px-6 py-4 bg-orange-50 text-brand-orange border border-orange-200 rounded-xl font-bold text-base shadow-sm">
+                  <Loader2 className="size-5 animate-spin" /> Processing...
                 </div>
               ) : status?.has_pending_request ? (
-                <div className="inline-flex items-center gap-2 px-6 py-4 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl font-bold text-base shadow-sm">
-                  Requested
-                </div>
+                <Button 
+                  onClick={() => cancelJoinMutation.mutate()} 
+                  disabled={cancelJoinMutation.isPending}
+                  className="h-12 px-8 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 font-bold text-base transition-all shadow-sm cursor-pointer"
+                >
+                  Cancel Request
+                </Button>
               ) : (
                 <Button 
                   onClick={() => joinMutation.mutate()} 
@@ -191,7 +260,7 @@ export default function ClubPage() {
         </>
       )}
 
-      {/* MODAL COMPONENTS */}
+      {/* MODAL / SHEET COMPONENTS */}
       <AcceptMatchModal
         clubSlug={clubSlug}
         currentMemberId={currentMemberId}
@@ -205,11 +274,31 @@ export default function ClubPage() {
         onClose={() => setIsAcceptJoinModalOpen(false)}
       />
 
+      {/* Set Leader Sheet */}
       <ManageLeadersModal
         clubSlug={clubSlug}
         currentMemberId={currentMemberId}
         isOpen={isSetLeaderModalOpen}
         onClose={() => setIsSetLeaderModalOpen(false)}
+        mode="set"
+      />
+
+      {/* Remove Leader Sheet */}
+      <ManageLeadersModal
+        clubSlug={clubSlug}
+        currentMemberId={currentMemberId}
+        isOpen={isRemoveLeaderModalOpen}
+        onClose={() => setIsRemoveLeaderModalOpen(false)}
+        mode="remove"
+      />
+
+      {/* Remove Member Sheet */}
+      <ManageLeadersModal
+        clubSlug={clubSlug}
+        currentMemberId={currentMemberId}
+        isOpen={isRemoveMemberModalOpen}
+        onClose={() => setIsRemoveMemberModalOpen(false)}
+        mode="remove-member"
       />
     </div>
   );
