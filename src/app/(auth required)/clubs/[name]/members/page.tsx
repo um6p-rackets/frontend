@@ -113,7 +113,7 @@ export default function ClubMembersPage() {
 
         {/* Role Select Dropdown (Using text values) */}
         <Select value={role} onValueChange={(val) => val && setRole(val)}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-card shadow-sm border-border font-semibold">
+          <SelectTrigger className="w-full sm:w-45 bg-card shadow-sm border-border font-semibold">
             <SelectValue placeholder="Select role" />
           </SelectTrigger>
           <SelectContent>

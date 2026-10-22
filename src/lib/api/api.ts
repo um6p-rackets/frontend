@@ -1,8 +1,33 @@
 import { ErrorBody } from "@/types/error";
 import { useAuth } from "@/store/auth";
 import { getUrl } from "../utils";
-import { AuthApi } from "./auth";
 
+// Raw fetch on purpose: it must not go through api() (no refresh loop)
+async function refreshTokens() {
+  const res = await fetch(getUrl("/auth/refresh"), {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new ApiError(res.status, "Session expired");
+}
+
+let refreshPromise: Promise<void> | null = null;
+
+function refreshOnce() {
+  refreshPromise ??= refreshTokens().finally(() => {
+    refreshPromise = null;
+  });
+  return refreshPromise;
+}
+
+// Shortcut for JSON POST requests
+export const post = <T>(path: string, body?: unknown) =>
+  api<T>(path, {
+    method: "POST",
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+const TIMEOUT_MS = 8000;
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -10,89 +35,53 @@ export class ApiError extends Error {
   }
 }
 
-// This methode called 
-let isRefreshing = false;
-let refreshSubscribers: Array<() => void> = [];
-let errorSubscribers: Array<(error: Error) => void> = [];
+// One network call: cookies, JSON header (only with a body), timeout
+function send(path: string, init?: RequestInit) {
+  const timeout = AbortSignal.timeout(TIMEOUT_MS);
+  const headers = new Headers(init?.headers);
+  if (init?.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
 
-const onTokenRefreshed = () => {
-  refreshSubscribers.forEach((callback) => callback());
-  refreshSubscribers = [];
-  errorSubscribers = [];
-}
-
-const onRefreshFailed =(error: Error) => {
-  errorSubscribers.forEach((callback) => callback(error));
-  refreshSubscribers = [];
-  errorSubscribers = [];
+  return fetch(getUrl(path), {
+    credentials: "include",
+    ...init,
+    headers,
+    // keep the caller's signal (TanStack cancel) and add our timeout
+    signal: init?.signal ? AbortSignal.any([init.signal, timeout]) : timeout,
+  });
 }
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-  const headers = new Headers(init?.headers);
-  headers.set("Content-Type", "application/json");
-
   try {
-    let res = await fetch(getUrl(path), {
-      credentials: "include",
-      signal: init?.signal ?? controller.signal,
-      ...init,
-      headers,
-    });
+    let res = await send(path, init);
 
-    if (res.status === 401) {
-      if (path.includes('/auth/')) {
-        throw new ApiError(401, "Authentication failed.");
+    // Expired access token: refresh once, retry once (never for /auth/ routes)
+    if (res.status === 401 && !path.includes("/auth/")) {
+      try {
+        await refreshOnce();
+      } catch {
+        useAuth.getState().logout();
+        throw new ApiError(401, "Session expired. Please log in again.");
       }
-
-      // Attempt to refresh the token
-      if (!isRefreshing) {
-        isRefreshing = true;
-
-        try {
-            await AuthApi.refreshToken();
-            // Unlock and process the queue
-            isRefreshing = false;
-            onTokenRefreshed();
-
-            res = await fetch(getUrl(path), { ...init, headers, credentials: "include" });
-        } catch (refreshError) {
-            isRefreshing = false;
-            onRefreshFailed(refreshError as Error);
-            useAuth.getState().logout();
-            throw new ApiError(401, "Session expired. Please log in again.");
-        }
-        // If the token was refreshed successfully, retry the original request
-      } else {
-        // Wait for the token to be refreshed and then retry the request
-        const retryWithNewToken = new Promise<Response>((resolve, reject) => {
-          refreshSubscribers.push(async () => {
-            resolve(await fetch(getUrl(path), { ...init, headers, credentials: "include" }));
-          });
-          errorSubscribers.push((err: Error) => reject(err));
-        });
-        res = await retryWithNewToken;
-      }
+      res = await send(path, init);
     }
 
     if (!res.ok) {
       const body: ErrorBody | null = await res.json().catch(() => null);
-      const message = Array.isArray(body?.message) 
-        ? body.message.join(", ") 
+      const message = Array.isArray(body?.message)
+        ? body.message.join(", ")
         : body?.message ?? `API error ${res.status}`;
       throw new ApiError(res.status, message);
     }
 
-    return res.json() as Promise<T>;
-
-  } catch (err: unknown) {
-    if (err instanceof Error && err.name === "AbortError") {
+    // 204 or empty body: nothing to parse
+    const text = await res.text();
+    return (text ? JSON.parse(text) : undefined) as T;
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "TimeoutError") {
       throw new ApiError(504, "Request timed out.");
     }
     throw err;
-  } finally {
-    clearTimeout(timeoutId);
   }
 }
