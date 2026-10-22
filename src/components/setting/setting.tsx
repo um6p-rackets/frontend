@@ -34,18 +34,13 @@ import {
 } from "@/components/ui/select";
 
 export const UM6P_DEPARTMENTS = [
-  { code: "1337", name: "1337 Coding School" },
-  { code: "CAES", name: "Center for Advanced Economy Studies" },
-  { code: "GTI", name: "Green Tech Institute" },
-  { code: "CS", name: "Computer Science" },
-  { code: "SAP-D", name: "School of Architecture, Planning & Design" },
-  { code: "EMINES", name: "School of Industrial Management" },
-  { code: "SASE", name: "School of Agricultural & Environmental Sciences" },
-  { code: "IADT", name: "Institute of Applied Digital Technologies" },
-  { code: "ISTI", name: "Institute of Science, Technology & Innovation" },
-  { code: "SHBM", name: "School of Hospitality Business & Management" },
-  { code: "SCI", name: "Science & Chemical Engineering" },
-  { code: "ABS", name: "Africa Business School" },
+  { code: "1337", name: "1337" },
+  { code: "EMINES", name: "EMINES" },
+  { code: "FMS", name: "FMS" },
+  { code: "CS", name: "CS" },
+  { code: "SAP-D", name: "SAP-D" },
+  { code: "GUP+", name: "GUP+" },
+  { code: "OTHER", name: "Other" },
 ] as const;
 
 export type Um6pDepartmentCode = (typeof UM6P_DEPARTMENTS)[number]["code"];
@@ -58,7 +53,7 @@ export interface ProfileFormData {
   email: string;
   avatar?: string | null;
   department: string;
-  // bio?: string
+  customDepartment?: string;
 }
 
 export interface SettingsProfile1Props {
@@ -74,6 +69,7 @@ interface FormErrors {
   username?: string;
   email?: string;
   department?: string;
+  customDepartment?: string;
 }
 
 const SettingsProfile1 = ({
@@ -84,6 +80,7 @@ const SettingsProfile1 = ({
     email: "alex.morgan@um6p.ma",
     username: "alexmorgan",
     department: "1337",
+    customDepartment: "",
     avatar: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/avatar/avatar8.jpg",
   },
   onSave,
@@ -97,6 +94,9 @@ const SettingsProfile1 = ({
     defaultValues.last_name ??
     (defaultValues.name ? defaultValues.name.split(" ").slice(1).join(" ") : "Morgan");
 
+  const isPresetDepartment = (dept?: string) =>
+    dept ? UM6P_DEPARTMENTS.some((d) => d.code === dept) : true;
+
   const [avatarFiles, setAvatarFiles] = useState<File[]>([]);
   const [currentAvatar, setCurrentAvatar] = useState<string | null | undefined>(
     defaultValues.avatar
@@ -105,9 +105,15 @@ const SettingsProfile1 = ({
   const [lastName, setLastName] = useState(initialLastName);
   const [email, setEmail] = useState(defaultValues.email ?? "");
   const [username, setUsername] = useState(defaultValues.username ?? "");
+
+  const initialDeptValue = defaultValues.department || "1337";
   const [department, setDepartment] = useState(
-    defaultValues.department || "1337"
+    isPresetDepartment(initialDeptValue) ? initialDeptValue : "OTHER"
   );
+  const [customDepartment, setCustomDepartment] = useState(
+    isPresetDepartment(initialDeptValue) ? (defaultValues.customDepartment || "") : initialDeptValue
+  );
+
   const [errors, setErrors] = useState<FormErrors>({});
 
   const initials = (
@@ -150,6 +156,8 @@ const SettingsProfile1 = ({
 
     if (!department) {
       newErrors.department = "Please select your UM6P department.";
+    } else if (department === "OTHER" && (!customDepartment || customDepartment.trim().length < 2)) {
+      newErrors.customDepartment = "Please specify your department (min 2 characters).";
     }
 
     setErrors(newErrors);
@@ -162,15 +170,17 @@ const SettingsProfile1 = ({
     }
 
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+    const finalDepartment = department === "OTHER" ? customDepartment.trim() : department;
+
     onSave?.({
       first_name: firstName.trim(),
       last_name: lastName.trim(),
       name: fullName || username,
       username: username.trim(),
       email: email.trim(),
-      department: department,
+      department: finalDepartment,
+      customDepartment: department === "OTHER" ? customDepartment.trim() : undefined,
       avatar: avatarFiles.length > 0 ? avatarPreview : (currentAvatar || null),
-      // bio: `Department ${department}`,
     });
   };
 
@@ -356,7 +366,7 @@ const SettingsProfile1 = ({
           </div>
         </div>
 
-        {/* Username & Email */}
+        {/* Username & UM6P Department Select */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label
@@ -396,132 +406,153 @@ const SettingsProfile1 = ({
           </div>
 
           <div className="space-y-1.5">
-            <Label
-              htmlFor="email"
-              className={cn(
-                "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
-                errors.email ? "text-destructive" : "text-muted-foreground"
-              )}
-            >
-              <Mail className="size-3.5 text-brand-orange" />
-              Email Address *
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="user@um6p.ma"
-              value={email}
-              aria-invalid={!!errors.email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (errors.email) {
-                  setErrors((prev) => ({ ...prev, email: undefined }));
+            <div className="flex items-center justify-between">
+              <Label
+                htmlFor="department"
+                className={cn(
+                  "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
+                  errors.department || errors.customDepartment ? "text-destructive" : "text-muted-foreground"
+                )}
+              >
+                <GraduationCap className="size-3.5 text-brand-orange" />
+                Department *
+              </Label>
+              <span className="text-[11px] font-bold italic text-brand-orange">
+                Required
+              </span>
+            </div>
+            <Select
+              value={department}
+              onValueChange={(val) => {
+                if (val) {
+                  setDepartment(val);
+                  if (errors.department) {
+                    setErrors((prev) => ({ ...prev, department: undefined }));
+                  }
+                  if (val !== "OTHER" && errors.customDepartment) {
+                    setErrors((prev) => ({ ...prev, customDepartment: undefined }));
+                  }
                 }
               }}
-              className={cn(
-                "h-10.5 rounded-xl bg-background/60 focus-visible:ring-2 font-medium text-sm transition-all",
-                errors.email
-                  ? "border-destructive focus-visible:ring-destructive/30"
-                  : "border-border/80 focus-visible:ring-brand-orange/40"
-              )}
-            />
-            {errors.email && (
+            >
+              <SelectTrigger
+                id="department"
+                aria-invalid={!!errors.department}
+                className={cn(
+                  "w-full h-10.5 data-[size=default]:h-10.5 rounded-xl bg-background/60 px-3.5 text-sm font-medium focus-visible:ring-2 transition-all",
+                  (errors.department || errors.customDepartment)
+                    ? "border-destructive focus-visible:ring-destructive/30"
+                    : "border-border/80 focus-visible:ring-brand-orange/40"
+                )}
+              >
+                <SelectValue placeholder="Select Department">
+                  {(val) => {
+                    if (!val) return "Select Department";
+                    const found = UM6P_DEPARTMENTS.find((d) => d.code === val);
+                    if (!found) return val;
+                    return (
+                      <span 
+                        title={found.name}
+                        className="font-semibold text-brand-ink dark:text-white cursor-help"
+                      >
+                        {found.code}
+                      </span>
+                    );
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="max-h-60 rounded-xl border border-border/80 shadow-2xl bg-popover z-100">
+                <SelectGroup>
+                  <SelectLabel className="text-[11px] font-black italic uppercase tracking-wider text-muted-foreground px-2.5 py-1.5">
+                    UM6P Schools & Departments
+                  </SelectLabel>
+                  {UM6P_DEPARTMENTS.map((dept) => (
+                    <SelectItem
+                      key={dept.code}
+                      value={dept.code}
+                      className="py-2.5 px-3.5 rounded-lg cursor-pointer"
+                    >
+                      <span 
+                        title={dept.name}
+                        className="font-semibold text-xs text-brand-ink dark:text-gray-200 cursor-help"
+                      >
+                        {dept.code}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            {department === "OTHER" && (
+              <Input
+                value={customDepartment}
+                maxLength={50}
+                placeholder="Specify your department..."
+                onChange={(e) => {
+                  setCustomDepartment(e.target.value);
+                  if (errors.customDepartment) {
+                    setErrors((prev) => ({ ...prev, customDepartment: undefined }));
+                  }
+                }}
+                className={cn(
+                  "mt-3 h-10.5 w-full rounded-xl bg-background/60 animate-in fade-in slide-in-from-top-2 duration-200",
+                  errors.customDepartment
+                    ? "border-destructive focus-visible:ring-destructive/30"
+                    : "border-border/80 focus-visible:ring-brand-orange/40"
+                )}
+              />
+            )}
+
+            {errors.department ? (
               <p className="text-[11px] font-semibold text-destructive mt-1 flex items-center gap-1">
                 <AlertCircle className="size-3 shrink-0" />
-                {errors.email}
+                {errors.department}
               </p>
-            )}
+            ) : errors.customDepartment ? (
+              <p className="text-[11px] font-semibold text-destructive mt-1 flex items-center gap-1">
+                <AlertCircle className="size-3 shrink-0" />
+                {errors.customDepartment}
+              </p>
+            ) : null}
           </div>
         </div>
 
-        {/* UM6P Department Select */}
+        {/* Email Address */}
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label
-              htmlFor="department"
-              className={cn(
-                "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
-                errors.department ? "text-destructive" : "text-muted-foreground"
-              )}
-            >
-              <GraduationCap className="size-3.5 text-brand-orange" />
-              UM6P Department *
-            </Label>
-            <span className="text-[11px] font-bold italic text-brand-orange">
-              Required
-            </span>
-          </div>
-          <Select
-            value={department}
-            onValueChange={(val) => {
-              if (val) {
-                setDepartment(val);
-                if (errors.department) {
-                  setErrors((prev) => ({ ...prev, department: undefined }));
-                }
+          <Label
+            htmlFor="email"
+            className={cn(
+              "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
+              errors.email ? "text-destructive" : "text-muted-foreground"
+            )}
+          >
+            <Mail className="size-3.5 text-brand-orange" />
+            Email Address *
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="user@um6p.ma"
+            value={email}
+            aria-invalid={!!errors.email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errors.email) {
+                setErrors((prev) => ({ ...prev, email: undefined }));
               }
             }}
-          >
-            <SelectTrigger
-              id="department"
-              aria-invalid={!!errors.department}
-              className={cn(
-                "w-full h-10.5 data-[size=default]:h-10.5 rounded-xl bg-background/60 px-3.5 text-sm font-medium focus-visible:ring-2 transition-all",
-                errors.department
-                  ? "border-destructive focus-visible:ring-destructive/30"
-                  : "border-border/80 focus-visible:ring-brand-orange/40"
-              )}
-            >
-              <SelectValue placeholder="Select your UM6P department">
-                {(val) => {
-                  if (!val) return "Select your UM6P department";
-                  const found = UM6P_DEPARTMENTS.find((d) => d.code === val);
-                  if (!found) return val;
-                  return (
-                    <span className="flex items-center gap-2">
-                      <span className="px-1.5 py-0.5 rounded-md bg-orange-50 dark:bg-orange-950/40 text-brand-orange border border-orange-200/60 dark:border-orange-900/40 text-xs font-black italic">
-                        {found.code}
-                      </span>
-                      <span className="font-semibold text-brand-ink dark:text-white">
-                        {found.name}
-                      </span>
-                    </span>
-                  );
-                }}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="max-h-60 rounded-xl border border-border/80 shadow-2xl bg-popover z-100">
-              <SelectGroup>
-                <SelectLabel className="text-[11px] font-black italic uppercase tracking-wider text-muted-foreground px-2.5 py-1.5">
-                  UM6P Schools & Departments
-                </SelectLabel>
-                {UM6P_DEPARTMENTS.map((dept) => (
-                  <SelectItem
-                    key={dept.code}
-                    value={dept.code}
-                    className="py-2 px-3 rounded-lg cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="px-2 py-0.5 rounded-md text-xs font-black italic shrink-0 transition-colors bg-orange-50 dark:bg-orange-950/40 text-brand-orange border border-orange-200/60 dark:border-orange-900/40 group-focus/select-item:bg-white group-focus/select-item:text-brand-orange group-focus/select-item:border-white group-data-[highlighted]/select-item:bg-white group-data-[highlighted]/select-item:text-brand-orange group-data-[highlighted]/select-item:border-white shadow-2xs">
-                        {dept.code}
-                      </span>
-                      <span className="text-xs font-semibold text-brand-ink dark:text-gray-200 group-focus/select-item:text-white group-data-[highlighted]/select-item:text-white transition-colors">
-                        {dept.name}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          {errors.department ? (
+            className={cn(
+              "h-10.5 rounded-xl bg-background/60 focus-visible:ring-2 font-medium text-sm transition-all",
+              errors.email
+                ? "border-destructive focus-visible:ring-destructive/30"
+                : "border-border/80 focus-visible:ring-brand-orange/40"
+            )}
+          />
+          {errors.email && (
             <p className="text-[11px] font-semibold text-destructive mt-1 flex items-center gap-1">
               <AlertCircle className="size-3 shrink-0" />
-              {errors.department}
-            </p>
-          ) : (
-            <p className="text-[11px] text-muted-foreground italic">
-              Affiliated UM6P department for campus competitions and leaderboards.
+              {errors.email}
             </p>
           )}
         </div>

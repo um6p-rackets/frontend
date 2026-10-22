@@ -12,9 +12,12 @@ export default function OverviewCard({
   clubName?: string;
   desc: string;
   members: number;
-  coach: string;
+  coach?: string | null;
   actions?: ReactNode;
 }) {
+  // Use database coach full name or fallback to "Pending" if not assigned
+  const coachDisplay = coach && coach.trim() !== '' ? coach : 'Pending';
+
   return (
     <Card className="p-4 sm:p-7 rounded-xl sm:rounded-2xl border border-border/70 shadow-2xs bg-card sm:bg-gray-50 dark:bg-gray-800/80 w-full">
       <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
@@ -46,7 +49,7 @@ export default function OverviewCard({
             </div>
             <div>
               <div className="font-bold text-sm sm:text-base text-foreground leading-tight whitespace-nowrap">
-                {coach}
+                {coachDisplay}
               </div>
               <div className="text-xs text-muted-foreground font-medium">Head Coach</div>
             </div>
