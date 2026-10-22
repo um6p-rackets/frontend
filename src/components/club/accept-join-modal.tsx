@@ -1,10 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Loader2, UserPlus, Calendar, X, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, UserPlus, Calendar, CheckCircle2, XCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/api';
 import { toast } from 'sonner';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 
 interface UserSummary {
     id: number;
@@ -75,26 +76,20 @@ interface UserSummary {
 
     const pendingJoinRequests = pendingJoinData?.data || [];
 
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs px-4">
-        <div className="bg-card w-full max-w-xl rounded-3xl border border-border shadow-lg overflow-hidden flex flex-col max-h-[85vh]">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
+        <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto flex flex-col">
+            <SheetHeader className="pb-4 border-b border-border/60">
             <div className="flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-brand-orange" />
-                <h3 className="text-lg font-bold text-foreground">Pending Join Requests</h3>
+                <SheetTitle>Pending Join Requests</SheetTitle>
             </div>
-            <button
-                type="button"
-                onClick={onClose}
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            >
-                <X className="w-4 h-4" />
-            </button>
-            </div>
+            <SheetDescription>
+                Approve or decline new member join requests.
+            </SheetDescription>
+            </SheetHeader>
 
-            <div className="p-6 overflow-y-auto space-y-3 flex-1">
+            <div className="py-6 space-y-3 flex-1 overflow-y-auto">
             {isLoadingJoinPending ? (
                 <div className="flex justify-center py-16">
                 <Loader2 className="w-6 h-6 animate-spin text-brand-orange" />
@@ -162,17 +157,7 @@ interface UserSummary {
                 })
             )}
             </div>
-
-            <div className="px-6 py-4 border-t border-border/60 bg-muted/20 flex justify-end">
-            <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 rounded-xl border border-border/70 text-xs font-semibold hover:bg-muted transition-colors cursor-pointer"
-            >
-                Close
-            </button>
-            </div>
-        </div>
-        </div>
+        </SheetContent>
+        </Sheet>
     );
 }
