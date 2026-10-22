@@ -70,6 +70,19 @@ export default function ClubPage() {
     },
   });
 
+  const cancelJoinMutation = useMutation({
+    mutationFn: async () => {
+      await api(`/clubs/${clubSlug}/join`, { method: 'DELETE' });
+    },
+    onSuccess: () => {
+      toast.success('Join request cancelled.');
+      queryClient.invalidateQueries({ queryKey: ['club-status', clubSlug, user?.id] });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to cancel join request.');
+    },
+  });
+
   const leaveClubMutation = useMutation({
     mutationFn: async () => {
       if (!currentMemberId) throw new Error('Member ID not found.');
@@ -221,14 +234,18 @@ export default function ClubPage() {
                 You must be an active member to view sessions, leaderboards, and book matches for {clubName}.
               </p>
 
-              {joinMutation.isPending ? (
-                <div className="inline-flex items-center gap-2 px-6 py-4 bg-green-50 text-green-700 border border-green-200 rounded-xl font-bold text-base shadow-sm">
-                  <Loader2 className="size-5 animate-spin" /> Requesting to Join...
+              {joinMutation.isPending || cancelJoinMutation.isPending ? (
+                <div className="inline-flex items-center gap-2 px-6 py-4 bg-orange-50 text-brand-orange border border-orange-200 rounded-xl font-bold text-base shadow-sm">
+                  <Loader2 className="size-5 animate-spin" /> Processing...
                 </div>
               ) : status?.has_pending_request ? (
-                <div className="inline-flex items-center gap-2 px-6 py-4 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl font-bold text-base shadow-sm">
-                  Requested
-                </div>
+                <Button 
+                  onClick={() => cancelJoinMutation.mutate()} 
+                  disabled={cancelJoinMutation.isPending}
+                  className="h-12 px-8 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 font-bold text-base transition-all shadow-sm cursor-pointer"
+                >
+                  Cancel Request
+                </Button>
               ) : (
                 <Button 
                   onClick={() => joinMutation.mutate()} 
