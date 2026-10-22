@@ -97,14 +97,18 @@ export default function ClubPage() {
     },
   });
 
-  const clubName = apiClub?.name || clubSlug;
-  const description = apiClub?.description || 'Welcome to the official campus club.';
-  const members = (apiClub as { members_count?: number })?.members_count || 0;
+  // Extract club details including coach full name from the database response
+  const clubData = apiClub as { 
+    name?: string; 
+    description?: string; 
+    members_count?: number; 
+    coach_full_name?: string | null; 
+  } | undefined;
 
-  const rawCoach = (apiClub as { coach?: { first_name?: string; last_name?: string; login?: string } | null })?.coach;
-  const coach: string = rawCoach
-    ? ([rawCoach.first_name, rawCoach.last_name].filter(Boolean).join(' ') || rawCoach.login || "Pending")
-    : "Pending";
+  const clubName = clubData?.name || clubSlug;
+  const description = clubData?.description || 'Welcome to the official campus club.';
+  const members = clubData?.members_count || 0;
+  const coach = clubData?.coach_full_name || 'Pending';
 
   const isLoggedIn = !!user;
   const isMemberOrStaff = isLoggedIn && status?.is_member && (status.role === 0 || status.role === 1 || status.role === 2);
