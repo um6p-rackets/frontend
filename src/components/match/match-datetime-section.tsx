@@ -15,8 +15,6 @@ export default function MatchDateTimeSection({
     setStartTime,
     endTime,
     setEndTime,
-    location,
-    setLocation,
     }: {
     matchDate: Date;
     setMatchDate: (date: Date) => void;
@@ -24,8 +22,6 @@ export default function MatchDateTimeSection({
     setStartTime: (time: string) => void;
     endTime: string;
     setEndTime: (time: string) => void;
-    location: string;
-    setLocation: (loc: string) => void;
     }) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
@@ -81,15 +77,12 @@ export default function MatchDateTimeSection({
             <Label className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
             <MapPin className="w-3.5 h-3.5 text-brand-orange" /> Place / Court
             </Label>
-            <select
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            <input
+            type="text"
+            maxLength={100}
+            placeholder="Enter court or location"
             className="w-full h-11 px-3 border border-border/70 rounded-xl bg-background text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-            <option value="Court 1 - Central Glass Court (UM6P Sports Pavilion)">Court 1 - Central Glass Court (UM6P Sports Pavilion)</option>
-            <option value="Court 2 - Outdoor Hard Court">Court 2 - Outdoor Hard Court</option>
-            <option value="Court 3 - Indoor Training Hall">Court 3 - Indoor Training Hall</option>
-            </select>
+            />
         </div>
 
         {/* End Time */}

@@ -41,7 +41,6 @@ export default function MatchRequestForm({
   const [opponentDepts, setOpponentDepts] = useState<string[]>([]);
   const [opponentAvatars, setOpponentAvatars] = useState<(string | null)[]>([]);
 
-  const [location, setLocation] = useState<string>('Court 1 - Central Glass Court (UM6P Sports Pavilion)');
   
   // Date & Time states
   const [matchDate, setMatchDate] = useState<Date>(new Date());
@@ -109,7 +108,6 @@ export default function MatchRequestForm({
         mode: matchMode,
         partner_id: matchMode === MatchMode.DOUBLES ? partnerId : undefined,
         opponent_ids: opponentIds.slice(0, requiredOpponentsCount),
-        location,
         scheduled_at: scheduledDateTime.toISOString(),
       };
 
@@ -142,7 +140,7 @@ export default function MatchRequestForm({
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
       <div className="mb-8">
         <h1 className="text-3xl sm:text-4xl font-black italic tracking-tight text-foreground">
-          Schedule <span className="text-brand-orange">A</span> Match
+          Schedule A <span className="text-brand-orange">Match</span>
         </h1>
         <p className="text-muted-foreground mt-2 text-sm sm:text-base">
           Challenge fellow campus athletes, set your match format, and climb the UM6P Elo ladder on official campus courts.
@@ -157,7 +155,6 @@ export default function MatchRequestForm({
             <div className="w-8 h-8 rounded-full bg-brand-orange text-white font-bold flex items-center justify-center text-sm">1</div>
             <div>
               <h2 className="font-bold text-lg text-foreground">Select Match Discipline</h2>
-              <p className="text-xs sm:text-sm text-muted-foreground">Choose your match structure to calibrate official Elo point redistribution.</p>
             </div>
           </div>
 
@@ -165,8 +162,7 @@ export default function MatchRequestForm({
             <MatchDisciplineCard
               mode={MatchMode.SINGLES}
               currentMode={matchMode}
-              title="Single Match"
-              description="Fast 1-on-1 ranking duel against one campus opponent on singles ladder."
+              title="Solo Match"
               onSelect={() => {
                 setMatchMode(MatchMode.SINGLES);
                 setPartnerId(undefined);
@@ -182,8 +178,7 @@ export default function MatchRequestForm({
             <MatchDisciplineCard
               mode={MatchMode.DOUBLES}
               currentMode={matchMode}
-              title="Double Match"
-              description="Collaborative 2-on-2 campus duel calibrated for pairs ladder rating."
+              title="Duo Match"
               onSelect={() => setMatchMode(MatchMode.DOUBLES)}
             />
           </div>
@@ -195,7 +190,6 @@ export default function MatchRequestForm({
             <div className="w-8 h-8 rounded-full bg-brand-orange text-white font-bold flex items-center justify-center text-sm">2</div>
             <div>
               <h2 className="font-bold text-lg text-foreground">Select Players & Teams</h2>
-              <p className="text-xs sm:text-sm text-muted-foreground">Lock your position and recruit your opponent(s) from campus rankings.</p>
             </div>
           </div>
 
@@ -262,7 +256,6 @@ export default function MatchRequestForm({
             <div className="w-8 h-8 rounded-full bg-brand-orange text-white font-bold flex items-center justify-center text-sm">3</div>
             <div>
               <h2 className="font-bold text-lg text-foreground">Select Date & Time</h2>
-              <p className="text-xs sm:text-sm text-muted-foreground">Pick match session timing and official UM6P campus court venue.</p>
             </div>
           </div>
 
@@ -273,17 +266,11 @@ export default function MatchRequestForm({
             setStartTime={setStartTime}
             endTime={endTime}
             setEndTime={setEndTime}
-            location={location}
-            setLocation={setLocation}
           />
         </div>
 
         {/* Footer Notice & Submit Button */}
-        <div className="pt-4 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
-            <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>Official Elo match rating will automatically update upon match validation.</span>
-          </div>
+        <div className="pt-4 border-t border-border/40 flex flex-col items-end justify-between gap-4">
 
           <Button
             type="submit"

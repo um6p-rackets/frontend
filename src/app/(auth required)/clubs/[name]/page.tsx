@@ -70,12 +70,12 @@ export default function ClubPage() {
         <Plus className="w-3.5 h-3.5" /> Request Match
       </Link>
 
-      <button
-        onClick={() => { /* TODO */ }}
+      <Link
+        href={`/clubs/${clubSlug}/match/history`}
         className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-border/70 hover:border-brand-orange bg-card text-foreground font-semibold text-xs transition-colors shadow-xs"
       >
         <History className="w-3.5 h-3.5 text-muted-foreground" /> Match History
-      </button>
+      </Link>
 
       {isStaffOnly && (
         <>
