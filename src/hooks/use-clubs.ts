@@ -37,6 +37,7 @@ export function useClub(slug: string) {
 
 import { useAuth } from '@/store/auth';
 import { getClubStatus, joinClub } from '@/lib/api/club';
+import { cancelJoinRequest, leaveClub } from '@/lib/api/api';
 
 export function useClubStatus(slug: string) {
   const userId = useAuth((s) => s.user?.id);
@@ -54,11 +55,10 @@ export function useJoinClub(slug: string) {
   return useMutation({
     mutationFn: () => joinClub(slug),
     onSuccess: () => {
-      // partial key: matches the status for any user id
-      queryClient.invalidateQueries({ queryKey: ['clubs', slug, 'status'] });
       toast.success('Join request sent');
+      return queryClient.invalidateQueries({ queryKey: clubKeys.detail(slug) });
     },
-    onError: (err) => toast.error(err.message)
+    onError: (err) => toast.error(err.message || 'Failed to send join request.')
   });
 }
 
@@ -187,5 +187,35 @@ export function useLeaveClubSession(slug: string) {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['clubs', slug, 'sessions'] });
     }
+  });
+}
+
+export function useCancelJoinClub(slug: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => cancelJoinRequest(slug),
+    onSuccess: () => {
+      toast.success('Join request cancelled');
+      return queryClient.invalidateQueries({ queryKey: clubKeys.detail(slug) });
+    },
+    onError: (err) =>
+      toast.error(err.message || 'Failed to cancel join request.')
+  });
+}
+
+export function useLeaveClub(slug: string, memberId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => {
+      if (!memberId) throw new Error('Member ID not found.');
+      return leaveClub(slug, memberId);
+    },
+    onSuccess: () => {
+      toast.success('You have left the club');
+      return queryClient.invalidateQueries({ queryKey: clubKeys.detail(slug) });
+    },
+    onError: (err) => toast.error(err.message || 'Failed to leave club.')
   });
 }

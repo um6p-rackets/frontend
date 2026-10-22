@@ -3,9 +3,19 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, Loader2, Plus, History, CheckCircle2, UserCheck, ShieldCheck, MoreVertical, LogOut, UserMinus, UserX } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import {
+  Lock,
+  Loader2,
+  Plus,
+  History,
+  CheckCircle2,
+  UserCheck,
+  ShieldCheck,
+  MoreVertical,
+  LogOut,
+  UserMinus,
+  UserX
+} from 'lucide-react';
 
 import ClubTitle from '@/components/club/club-title';
 import OverviewCard from '@/components/club/overview-card';
@@ -16,106 +26,82 @@ import AcceptJoinModal from '@/components/club/accept-join-modal';
 import ManageLeadersModal from '@/components/club/manage-leaders-modal';
 
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 
-import { useClub } from '@/hooks/use-clubs';
-import { mockClubData } from '@/lib/mock-data';
-import { useAuth } from '@/store/auth';
-
-import { getClubStatus, joinClub } from '@/lib/api/club';
-import { api } from '@/lib/api/api';
+import {
+  useClub,
+  useClubStatus,
+  useJoinClub,
+  useCancelJoinClub,
+  useLeaveClub
+} from '@/hooks/use-clubs';
+import { ApiError } from '@/lib/api/api';
+import { mockClubData } from '@/lib/mock-data'; // TODO: remove when the leaderboard API is ready
 
 export default function ClubPage() {
-  const params = useParams<{ name: string }>();
-  const clubSlug = params?.name ?? 'tennis';
-  const queryClient = useQueryClient();
+  const { name: clubSlug } = useParams<{ name: string }>();
 
-  const user = useAuth((state) => state.user);
-  
   const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
   const [isAcceptJoinModalOpen, setIsAcceptJoinModalOpen] = useState(false);
   const [isSetLeaderModalOpen, setIsSetLeaderModalOpen] = useState(false);
   const [isRemoveLeaderModalOpen, setIsRemoveLeaderModalOpen] = useState(false);
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState(false);
 
-  const { data: apiClub, isLoading: isClubLoading } = useClub(clubSlug);
+  const {
+    data: club,
+    isLoading: isClubLoading,
+    isError,
+    error,
+    refetch
+  } = useClub(clubSlug);
 
-  const { data: status, isLoading: isChecking } = useQuery({
-    queryKey: ['club-status', clubSlug, user?.id],
-    queryFn: async () => {
-      const res = await getClubStatus(clubSlug);
-      return res as { is_member: boolean; role?: number; member_id?: number; has_pending_request?: boolean };
-    },
-    enabled: !!user,
-  });
+  const {
+    data: status,
+    isLoading: isChecking,
+    isError: isStatusError,
+    refetch: refetchStatus
+  } = useClubStatus(clubSlug);
 
   const currentMemberId = status?.member_id ?? 0;
 
-  const joinMutation = useMutation({
-    mutationFn: () => joinClub(clubSlug),
-    onSuccess: () => {
-      toast.success('Join request sent successfully.');
-      queryClient.invalidateQueries({ queryKey: ['club-status', clubSlug, user?.id] });
-    },
-    onError: (err: Error) => {
-      toast.error(err.message || 'Failed to send join request.');
-    },
-  });
+  const join = useJoinClub(clubSlug);
+  const cancelJoin = useCancelJoinClub(clubSlug);
+  const leave = useLeaveClub(clubSlug, currentMemberId);
 
-  const cancelJoinMutation = useMutation({
-    mutationFn: async () => {
-      await api(`/clubs/${clubSlug}/join`, { method: 'DELETE' });
-    },
-    onSuccess: () => {
-      toast.success('Join request cancelled.');
-      queryClient.invalidateQueries({ queryKey: ['club-status', clubSlug, user?.id] });
-    },
-    onError: (err: Error) => {
-      toast.error(err.message || 'Failed to cancel join request.');
-    },
-  });
+  if (isError) {
+    const notFound = error instanceof ApiError && error.status === 404;
+    return (
+      <div className="w-[92%] lg:w-[70%] mx-auto py-24 text-center">
+        <h2 className="text-2xl font-black mb-2">
+          {notFound ? 'Club not found' : 'Could not load this club'}
+        </h2>
+        {!notFound && (
+          <Button variant="outline" onClick={() => refetch()}>
+            Retry
+          </Button>
+        )}
+      </div>
+    );
+  }
 
-  const leaveClubMutation = useMutation({
-    mutationFn: async () => {
-      if (!currentMemberId) throw new Error('Member ID not found.');
-      await api(`/clubs/${clubSlug}/members/${currentMemberId}`, { method: 'DELETE' });
-    },
-    onSuccess: () => {
-      toast.success('You have left the club.');
-      queryClient.invalidateQueries({ queryKey: ['club-status', clubSlug, user?.id] });
-    },
-    onError: (err: Error) => {
-      toast.error(err.message || 'Failed to leave club.');
-    },
-  });
+  const clubName = club?.name ?? clubSlug;
+  const membersCount = club?.members_count ?? 0;
+  const description =
+    club?.description ?? `Welcome to ${clubName} campus club.`;
+  const coachFullName = club?.coach_full_name ?? 'N/A';
 
-  // Extract club details including coach full name from the database response
-  const clubData = apiClub as { 
-    name?: string; 
-    description?: string; 
-    members_count?: number; 
-    coach_full_name?: string | null; 
-  } | undefined;
+  const isMember = !!status?.is_member;
+  const isStaffOnly = isMember && (status?.role === 1 || status?.role === 2);
+  const isCoachOnly = isMember && status?.role === 2;
 
-  const clubName = clubData?.name || clubSlug;
-  const description = clubData?.description || 'Welcome to the official campus club.';
-  const members = clubData?.members_count || 0;
-  const coach = clubData?.coach_full_name || 'Pending';
-
-  const isLoggedIn = !!user;
-  const isMemberOrStaff = isLoggedIn && status?.is_member && (status.role === 0 || status.role === 1 || status.role === 2);
-  const isStaffOnly = isLoggedIn && status?.is_member && (status.role === 1 || status.role === 2);
-  const isCoachOnly = isLoggedIn && status?.is_member && status.role === 2;
-
-  const actionButtons = isMemberOrStaff ? (
+  const actionButtons = isMember ? (
     <>
       <Link
         href={`/clubs/${clubSlug}/match`}
@@ -131,7 +117,7 @@ export default function ClubPage() {
         <History className="w-3.5 h-3.5 text-muted-foreground" /> Match History
       </Link>
 
-      {/* DROPDOWN MENU FOR MANAGEMENT & ACTIONS */}
+      {/* Management and member actions */}
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
@@ -147,13 +133,24 @@ export default function ClubPage() {
           <DropdownMenuGroup>
             {isStaffOnly && (
               <>
-                <DropdownMenuItem onClick={() => setIsAcceptModalOpen(true)} className="cursor-pointer font-medium text-xs gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Accept Match
+                <DropdownMenuItem
+                  onClick={() => setIsAcceptModalOpen(true)}
+                  className="cursor-pointer font-medium text-xs gap-2"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Accept
+                  Match
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsAcceptJoinModalOpen(true)} className="cursor-pointer font-medium text-xs gap-2">
-                  <UserCheck className="w-4 h-4 text-brand-orange" /> Accept Join Request
+                <DropdownMenuItem
+                  onClick={() => setIsAcceptJoinModalOpen(true)}
+                  className="cursor-pointer font-medium text-xs gap-2"
+                >
+                  <UserCheck className="w-4 h-4 text-brand-orange" /> Accept
+                  Join Request
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsRemoveMemberModalOpen(true)} className="cursor-pointer font-medium text-xs gap-2">
+                <DropdownMenuItem
+                  onClick={() => setIsRemoveMemberModalOpen(true)}
+                  className="cursor-pointer font-medium text-xs gap-2"
+                >
                   <UserX className="w-4 h-4 text-red-500" /> Remove Member
                 </DropdownMenuItem>
               </>
@@ -161,10 +158,16 @@ export default function ClubPage() {
 
             {isCoachOnly && (
               <>
-                <DropdownMenuItem onClick={() => setIsSetLeaderModalOpen(true)} className="cursor-pointer font-medium text-xs gap-2">
+                <DropdownMenuItem
+                  onClick={() => setIsSetLeaderModalOpen(true)}
+                  className="cursor-pointer font-medium text-xs gap-2"
+                >
                   <ShieldCheck className="w-4 h-4 text-blue-500" /> Set Leader
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsRemoveLeaderModalOpen(true)} className="cursor-pointer font-medium text-xs gap-2">
+                <DropdownMenuItem
+                  onClick={() => setIsRemoveLeaderModalOpen(true)}
+                  className="cursor-pointer font-medium text-xs gap-2"
+                >
                   <UserMinus className="w-4 h-4 text-amber-500" /> Remove Leader
                 </DropdownMenuItem>
               </>
@@ -174,9 +177,9 @@ export default function ClubPage() {
           <DropdownMenuSeparator />
 
           <DropdownMenuGroup>
-            <DropdownMenuItem 
-              onClick={() => leaveClubMutation.mutate()} 
-              disabled={leaveClubMutation.isPending}
+            <DropdownMenuItem
+              onClick={() => leave.mutate()}
+              disabled={leave.isPending}
               className="cursor-pointer font-semibold text-xs text-destructive hover:text-white hover:bg-destructive focus:text-white focus:bg-destructive gap-2 transition-colors"
             >
               <LogOut className="w-4 h-4" /> Leave Club
@@ -197,12 +200,12 @@ export default function ClubPage() {
         <>
           <ClubTitle name={clubName} slug={clubSlug} />
 
-          <section className="relative mt-4"> 
+          <section className="relative mt-4">
             <OverviewCard
               clubName={clubName}
               desc={description}
-              coach={coach}
-              members={members}
+              coach={coachFullName}
+              members={membersCount}
               actions={actionButtons}
             />
           </section>
@@ -211,14 +214,17 @@ export default function ClubPage() {
             <div className="flex justify-center items-center py-24">
               <Loader2 className="size-10 animate-spin text-brand-orange" />
             </div>
+          ) : isStatusError ? (
+            <div className="mt-10 text-center">
+              <p className="text-muted-foreground mb-4">
+                Could not check your membership.
+              </p>
+              <Button variant="outline" onClick={() => refetchStatus()}>
+                Retry
+              </Button>
+            </div>
           ) : status?.is_member ? (
             <div className="w-full flex flex-col items-center justify-center mt-10 sm:mt-12">
-              <div className="w-full flex justify-start mb-4 gap-2">
-                {status.role === 2 && <Badge className="bg-blue-500 text-white">Coach Access</Badge>}
-                {status.role === 1 && <Badge className="bg-purple-500 text-white">Leader Access</Badge>}
-                {status.role === 0 && <Badge className="bg-green-500 text-white">Active Member</Badge>}
-              </div>
-
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch justify-center w-full animate-in fade-in duration-500">
                 <section className="lg:h-full flex flex-col min-w-0">
                   <ClubTaps clubSlug={clubSlug} userRole={status.role} />
@@ -230,30 +236,31 @@ export default function ClubPage() {
             </div>
           ) : (
             <div className="mt-10 sm:mt-12 flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-border/60 rounded-3xl bg-muted/10 animate-in fade-in zoom-in-95 duration-500">
-              <div className="w-20 h-20 bg-orange-50 text-brand-orange rounded-full flex items-center justify-center mb-6 shadow-sm border border-orange-200/60">
+              <div className="w-20 h-20 bg-orange-50 dark:bg-orange-950/40 text-brand-orange rounded-full flex items-center justify-center mb-6 shadow-sm border border-orange-200/60 dark:border-orange-900/40">
                 <Lock className="w-10 h-10" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black italic text-brand-ink mb-3">Members Only</h2>
+              <h2 className="text-2xl sm:text-3xl font-black italic text-brand-ink dark:text-white mb-3">
+                Members Only
+              </h2>
               <p className="text-muted-foreground font-medium max-w-md mb-8 text-sm sm:text-base">
-                You must be an active member to view sessions, leaderboards, and book matches for {clubName}.
+                You must be an active member to view sessions, leaderboards, and
+                book matches for {clubName}.
               </p>
 
-              {joinMutation.isPending || cancelJoinMutation.isPending ? (
+              {join.isPending || cancelJoin.isPending ? (
                 <div className="inline-flex items-center gap-2 px-6 py-4 bg-orange-50 text-brand-orange border border-orange-200 rounded-xl font-bold text-base shadow-sm">
                   <Loader2 className="size-5 animate-spin" /> Processing...
                 </div>
               ) : status?.has_pending_request ? (
-                <Button 
-                  onClick={() => cancelJoinMutation.mutate()} 
-                  disabled={cancelJoinMutation.isPending}
+                <Button
+                  onClick={() => cancelJoin.mutate()}
                   className="h-12 px-8 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 font-bold text-base transition-all shadow-sm cursor-pointer"
                 >
                   Cancel Request
                 </Button>
               ) : (
-                <Button 
-                  onClick={() => joinMutation.mutate()} 
-                  disabled={joinMutation.isPending}
+                <Button
+                  onClick={() => join.mutate()}
                   className="h-12 px-10 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-black italic text-base tracking-wide shadow-md shadow-brand-orange/20 cursor-pointer"
                 >
                   Join Club Now
@@ -264,7 +271,7 @@ export default function ClubPage() {
         </>
       )}
 
-      {/* MODAL / SHEET COMPONENTS */}
+      {/* Modals */}
       <AcceptMatchModal
         clubSlug={clubSlug}
         currentMemberId={currentMemberId}
@@ -278,7 +285,6 @@ export default function ClubPage() {
         onClose={() => setIsAcceptJoinModalOpen(false)}
       />
 
-      {/* Set Leader Sheet */}
       <ManageLeadersModal
         clubSlug={clubSlug}
         currentMemberId={currentMemberId}
@@ -287,7 +293,6 @@ export default function ClubPage() {
         mode="set"
       />
 
-      {/* Remove Leader Sheet */}
       <ManageLeadersModal
         clubSlug={clubSlug}
         currentMemberId={currentMemberId}
@@ -296,7 +301,6 @@ export default function ClubPage() {
         mode="remove"
       />
 
-      {/* Remove Member Sheet */}
       <ManageLeadersModal
         clubSlug={clubSlug}
         currentMemberId={currentMemberId}
