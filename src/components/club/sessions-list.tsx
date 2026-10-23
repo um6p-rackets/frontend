@@ -74,7 +74,15 @@ export default function SessionsList({
   const isFutureLimitReached = currentWeekStart >= maxWeekStr;
 
   const INITIAL_VISIBLE_COUNT = 3;
-  const sessions = data?.sessions || [];
+  
+  // Sort sessions by newest first using start_at
+  const rawSessions = data?.sessions || [];
+  const sessions = [...rawSessions].sort((a, b) => {
+    const timeA = new Date(a.start_at || 0).getTime();
+    const timeB = new Date(b.start_at || 0).getTime();
+    return timeB - timeA; // Newest first
+  });
+
   const visibleSessions = showAll ? sessions : sessions.slice(0, INITIAL_VISIBLE_COUNT);
   const hasMore = sessions.length > INITIAL_VISIBLE_COUNT;
 

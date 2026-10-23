@@ -8,13 +8,6 @@ import {
   Loader2,
   Plus,
   History,
-  CheckCircle2,
-  UserCheck,
-  ShieldCheck,
-  MoreVertical,
-  LogOut,
-  UserMinus,
-  UserX,
 } from "lucide-react";
 
 import ClubTitle from '@/components/club/club-title';
@@ -25,16 +18,9 @@ import AcceptMatchModal from '@/components/club/accept-match-modal';
 import AcceptJoinModal from '@/components/club/accept-join-modal';
 import ManageLeadersModal from '@/components/club/manage-leaders-modal';
 import EditClubModal from '@/components/club/edit-club-modal';
+import ClubDropdownMenu from '@/components/club/club-dropdown-menu';
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import {
   useClub,
@@ -44,7 +30,7 @@ import {
   useLeaveClub,
 } from "@/hooks/use-clubs";
 import { ApiError } from "@/lib/api/api";
-import { mockClubData } from "@/lib/mock-data"; // TODO: remove when the leaderboard API is ready
+import { mockClubData } from "@/lib/mock-data";
 
 export default function ClubPage() {
   const { name: clubSlug } = useParams<{ name: string }>();
@@ -112,74 +98,17 @@ export default function ClubPage() {
         <History className="w-3.5 h-3.5 text-muted-foreground" /> Match History
       </Link>
 
-      {/* Management and member actions */}
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <button
-              type="button"
-              className="flex items-center justify-center w-9 h-9 rounded-xl border border-border/70 hover:border-brand-orange bg-card text-foreground transition-colors shadow-xs cursor-pointer focus-visible:outline-none"
-            >
-              <MoreVertical className="w-4 h-4 text-muted-foreground" />
-            </button>
-          }
-        />
-        <DropdownMenuContent className="w-52" align="end">
-          <DropdownMenuGroup>
-            {isStaffOnly && (
-              <>
-                <DropdownMenuItem
-                  onClick={() => setIsAcceptModalOpen(true)}
-                  className="cursor-pointer font-medium text-xs gap-2"
-                >
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> pending Match Requests
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setIsAcceptJoinModalOpen(true)}
-                  className="cursor-pointer font-medium text-xs gap-2"
-                >
-                  <UserCheck className="w-4 h-4 text-brand-orange" /> Pending Join Requests
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setIsRemoveMemberModalOpen(true)}
-                  className="cursor-pointer font-medium text-xs gap-2"
-                >
-                  <UserX className="w-4 h-4 text-red-500" /> Remove Member
-                </DropdownMenuItem>
-              </>
-            )}
-
-            {isCoachOnly && (
-              <>
-                <DropdownMenuItem
-                  onClick={() => setIsSetLeaderModalOpen(true)}
-                  className="cursor-pointer font-medium text-xs gap-2"
-                >
-                  <ShieldCheck className="w-4 h-4 text-blue-500" /> upgrade to Leader
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setIsRemoveLeaderModalOpen(true)}
-                  className="cursor-pointer font-medium text-xs gap-2"
-                >
-                  <UserMinus className="w-4 h-4 text-amber-500" /> downgrade to Member
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuGroup>
-
-          <DropdownMenuSeparator />
-
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              onClick={() => leave.mutate()}
-              disabled={leave.isPending}
-              className="cursor-pointer font-semibold text-xs text-destructive hover:text-white hover:bg-destructive focus:text-white focus:bg-destructive gap-2 transition-colors"
-            >
-              <LogOut className="w-4 h-4" /> Leave Club
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ClubDropdownMenu
+        isStaffOnly={isStaffOnly}
+        isCoachOnly={isCoachOnly}
+        isLeavePending={leave.isPending}
+        onOpenAcceptModal={() => setIsAcceptModalOpen(true)}
+        onOpenAcceptJoinModal={() => setIsAcceptJoinModalOpen(true)}
+        onOpenRemoveMemberModal={() => setIsRemoveMemberModalOpen(true)}
+        onOpenSetLeaderModal={() => setIsSetLeaderModalOpen(true)}
+        onOpenRemoveLeaderModal={() => setIsRemoveLeaderModalOpen(true)}
+        onLeaveClub={() => leave.mutate()}
+      />
     </>
   ) : null;
 
@@ -192,7 +121,7 @@ export default function ClubPage() {
   ) : null;
 
   return (
-    <div className="w-[92%]  xl:w-[80%] mx-auto pb-20">
+    <div className="w-[92%] xl:w-[80%] mx-auto pb-20">
       {isClubLoading ? (
         <div className="flex justify-center items-center py-24">
           <Loader2 className="size-10 animate-spin text-brand-orange" />
