@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner'; // <--- 1. IMPORT TOAST HERE
+import { toast } from 'sonner';
 import {
   getClub,
   getClubs,
@@ -7,6 +7,7 @@ import {
   joinClubSession,
   leaveClubSession
 } from '@/lib/api/club';
+import { api } from '@/lib/api/api';
 
 import type { WeekView } from '@/types/contracts/club';
 
@@ -18,6 +19,7 @@ export const clubKeys = {
   status: (slug: string, userId?: number) =>
     ['clubs', slug, 'status', userId] as const
 };
+
 export function useClubs() {
   return useQuery({
     queryKey: clubKeys.all,
@@ -45,7 +47,7 @@ export function useClubStatus(slug: string) {
   return useQuery({
     queryKey: clubKeys.status(slug, userId),
     queryFn: () => getClubStatus(slug),
-    enabled: Boolean(slug) && Boolean(userId) // replaces the old Zustand check in the API layer
+    enabled: Boolean(slug) && Boolean(userId)
   });
 }
 
@@ -58,7 +60,34 @@ export function useJoinClub(slug: string) {
       toast.success('Join request sent');
       return queryClient.invalidateQueries({ queryKey: clubKeys.detail(slug) });
     },
-    onError: (err) => toast.error(err.message || 'Failed to send join request.')
+    onError: (err: Error) => toast.error(err.message || 'Failed to send join request.')
+  });
+}
+
+// ==========================================
+// NEW: Update Club Hook (No `any`)
+// ==========================================
+export function useUpdateClub(slug: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { name?: string; description?: string }) => {
+      return api<unknown>(`/clubs/${slug}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success('Club updated successfully!');
+      queryClient.invalidateQueries({ queryKey: clubKeys.detail(slug) });
+      queryClient.invalidateQueries({ queryKey: clubKeys.all });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to update club information.');
+    }
   });
 }
 
@@ -110,7 +139,6 @@ export function useJoinClubSession(slug: string) {
     onSuccess: () => {
       toast.success('You have successfully joined the session!');
     },
-    // Replaced 'any' with unknown / Error type guard
     onError: (err: unknown, _sessionId, context) => {
       if (context?.previousData) {
         context.previousData.forEach(([queryKey, data]) => {
@@ -173,7 +201,6 @@ export function useLeaveClubSession(slug: string) {
     onSuccess: () => {
       toast.success('You have left the session.');
     },
-    // Replaced 'any' with unknown / Error type guard
     onError: (err: unknown, _sessionId, context) => {
       if (context?.previousData) {
         context.previousData.forEach(([queryKey, data]) => {
@@ -199,7 +226,7 @@ export function useCancelJoinClub(slug: string) {
       toast.success('Join request cancelled');
       return queryClient.invalidateQueries({ queryKey: clubKeys.detail(slug) });
     },
-    onError: (err) =>
+    onError: (err: Error) =>
       toast.error(err.message || 'Failed to cancel join request.')
   });
 }
@@ -216,6 +243,6 @@ export function useLeaveClub(slug: string, memberId: number) {
       toast.success('You have left the club');
       return queryClient.invalidateQueries({ queryKey: clubKeys.detail(slug) });
     },
-    onError: (err) => toast.error(err.message || 'Failed to leave club.')
+    onError: (err: Error) => toast.error(err.message || 'Failed to leave club.')
   });
 }
