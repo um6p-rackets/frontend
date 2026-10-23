@@ -22,7 +22,7 @@ export function useClubs() {
   return useQuery({
     queryKey: clubKeys.all,
     queryFn: getClubs,
-    staleTime: 5 * 60 * 1000
+    staleTime: 10 * 60 * 1000
   });
 }
 
@@ -31,7 +31,7 @@ export function useClub(slug: string) {
     queryKey: clubKeys.detail(slug),
     queryFn: () => getClub(slug),
     enabled: Boolean(slug),
-    staleTime: 5 * 60 * 1000
+    staleTime: 10 * 60 * 1000
   });
 }
 
@@ -45,7 +45,8 @@ export function useClubStatus(slug: string) {
   return useQuery({
     queryKey: clubKeys.status(slug, userId),
     queryFn: () => getClubStatus(slug),
-    enabled: Boolean(slug) && Boolean(userId) // replaces the old Zustand check in the API layer
+    staleTime: 5 * 60 * 1000,
+    enabled: Boolean(slug) && Boolean(userId)
   });
 }
 
