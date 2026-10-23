@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api/api';
-import { Loader2, Calendar, XCircle, ChevronLeft, ChevronRight, Whistle, UserCheck } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Loader2, Calendar, Clock, MapPin, XCircle, ChevronLeft, ChevronRight, Whistle, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { useClubStatus } from '@/hooks/use-clubs';
+import { useClubMatches, useCancelMatch } from '@/hooks/use-matches';
 
 interface Player {
   member_id: number;
@@ -28,7 +29,7 @@ interface MatchItem {
   status: number; // 0: pending, 1: upcoming, 2: completed, 3: cancelled
   mode: number; // 1: singles, 2: doubles
   location?: string | null;
-  scheduled_at: string;
+  scheduled_at?: string | null; // Safe optional type matching contract definitions
   cancelled_at?: string | null;
   team1: Team;
   team2: Team;
@@ -45,75 +46,68 @@ interface MatchItem {
 export default function MatchHistorySection({
   clubSlug,
   currentMemberId,
+  userRole, 
 }: {
   clubSlug: string;
   currentMemberId: number;
+  userRole?: number;
 }) {
   const queryClient = useQueryClient();
+
+  const { data: status } = useClubStatus(clubSlug);
+  const effectiveRole = userRole ?? status?.role;
+
+  const numericRole = Number(effectiveRole);
+  const isStaffOrCoach = numericRole === 1 || numericRole === 2;
+
   const [activeTab, setActiveTab] = useState<'mine' | 'referee' | 'club'>('mine');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [page, setPage] = useState<number>(1);
   const limit = 10;
 
-  // Fetch matches with pagination and filters
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['club-matches', clubSlug, activeTab, statusFilter, page],
-    queryFn: async () => {
-      // Both 'mine' and 'referee' tabs query mine=true for now
-      const mineParam = activeTab === 'club' ? 'false' : 'true';
-      const statusParam = statusFilter !== 'all' ? `&status=${statusFilter}` : '';
-      const res = await api<{ data: MatchItem[]; total: number; page: number; limit: number }>(
-        `/clubs/${clubSlug}/matches?mine=${mineParam}${statusParam}&page=${page}&limit=${limit}`
-      );
-      return res;
-    },
-  });
+  // Fetch matches using the custom useClubMatches hook
+  const mineParam = activeTab === 'club' ? 'false' : 'true';
+  const { data, isLoading, error } = useClubMatches(
+    clubSlug,
+    mineParam,
+    statusFilter,
+    page,
+    limit
+  );
 
-  // Cancel match mutation
-  const cancelMutation = useMutation({
-    mutationFn: async (matchId: number) => {
-      await api(`/clubs/${clubSlug}/matches/${matchId}/cancel`, {
-        method: 'POST',
-      });
-    },
-    onSuccess: () => {
-      toast.success('Match cancelled successfully.');
-      queryClient.invalidateQueries({ queryKey: ['club-matches', clubSlug] });
-    },
-    onError: (err: Error) => {
-      toast.error(err.message || 'Failed to cancel match.');
-    },
-  });
+  // Cancel match mutation using the custom useCancelMatch hook
+  const cancelMutation = useCancelMatch(clubSlug);
 
   const rawMatches = data?.data || [];
 
-  // Helper function to check if you are playing in the match
   const checkIfPlayer = (match: MatchItem) => {
     const isTeam1Member = 
-      match.team1.player1?.member_id === currentMemberId || 
-      Boolean(match.team1.player2 && match.team1.player2.member_id === currentMemberId);
+      Number(match.team1.player1?.member_id) === Number(currentMemberId) || 
+      Boolean(match.team1.player2 && Number(match.team1.player2.member_id) === Number(currentMemberId));
 
     const isTeam2Member = 
-      match.team2.player1?.member_id === currentMemberId || 
-      Boolean(match.team2.player2 && match.team2.player2.member_id === currentMemberId);
+      Number(match.team2.player1?.member_id) === Number(currentMemberId) || 
+      Boolean(match.team2.player2 && Number(match.team2.player2.member_id) === Number(currentMemberId));
 
     return isTeam1Member || isTeam2Member;
   };
 
-  // Helper function to check if you are the referee of the match
   const checkIfReferee = (match: MatchItem) => {
     const refId = match.ref_id ?? match.referee_id ?? match.referee?.member_id ?? match.referee?.id;
     return Boolean(refId && Number(refId) === Number(currentMemberId));
   };
 
-  // Temporarily show all raw matches for both 'mine' and 'referee' tabs as requested
-  const filteredMatches = rawMatches;
+  const filteredMatches = rawMatches as MatchItem[];
 
   const totalItems = data?.total || 0;
   const totalPages = Math.ceil(totalItems / limit) || 1;
 
   const matches = [...filteredMatches].sort(
-    (a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime()
+    (a, b) => {
+      const dateA = a.scheduled_at ? new Date(a.scheduled_at).getTime() : 0;
+      const dateB = b.scheduled_at ? new Date(b.scheduled_at).getTime() : 0;
+      return dateB - dateA;
+    }
   );
 
   const getTeamNames = (team: Team) => {
@@ -146,15 +140,20 @@ export default function MatchHistorySection({
           >
             My Matches
           </button>
-          <button
-            onClick={() => { setActiveTab('referee'); setPage(1); }}
-            className={cn(
-              "px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer",
-              activeTab === 'referee' ? "bg-brand-orange text-white shadow-xs" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Referee Matches
-          </button>
+
+          {/* Visible ONLY to Leader/Coach (Roles 1 or 2) */}
+          {isStaffOrCoach && (
+            <button
+              onClick={() => { setActiveTab('referee'); setPage(1); }}
+              className={cn(
+                "px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                activeTab === 'referee' ? "bg-brand-orange text-white shadow-xs" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Referee Matches
+            </button>
+          )}
+
           <button
             onClick={() => { setActiveTab('club'); setPage(1); }}
             className={cn(
@@ -193,31 +192,29 @@ export default function MatchHistorySection({
         ) : (
           matches.map((match) => {
             const isTeam1Member = 
-              match.team1.player1?.member_id === currentMemberId || 
-              Boolean(match.team1.player2 && match.team1.player2.member_id === currentMemberId);
+              Number(match.team1.player1?.member_id) === Number(currentMemberId) || 
+              Boolean(match.team1.player2 && Number(match.team1.player2.member_id) === Number(currentMemberId));
 
             const isTeam2Member = 
-              match.team2.player1?.member_id === currentMemberId || 
-              Boolean(match.team2.player2 && match.team2.player2.member_id === currentMemberId);
+              Number(match.team2.player1?.member_id) === Number(currentMemberId) || 
+              Boolean(match.team2.player2 && Number(match.team2.player2.member_id) === Number(currentMemberId));
 
             const isPlayerInMatch = isTeam1Member || isTeam2Member;
             const isReferee = checkIfReferee(match);
-            const isMyMatch = isPlayerInMatch || isReferee;
 
             let titleText = '';
             let avatarUrl: string | null | undefined = null;
-            let displayDept = 'Sport Department';
 
             if (isPlayerInMatch && activeTab !== 'referee') {
               const userIsTeam1 = isTeam1Member;
               const myTeam = userIsTeam1 ? match.team1 : match.team2;
               const enemyTeam = userIsTeam1 ? match.team2 : match.team1;
 
-              const teammate = myTeam.player1?.member_id === currentMemberId ? myTeam.player2 : myTeam.player1;
               const op1 = enemyTeam.player1;
               const op2 = enemyTeam.player2;
 
               if (match.mode === 2) {
+                const teammate = Number(myTeam.player1?.member_id) === Number(currentMemberId) ? myTeam.player2 : myTeam.player1;
                 const teammateName = teammate ? `${teammate.first_name} ${teammate.last_name}` : 'Teammate';
                 const op1Name = op1 ? `${op1.first_name} ${op1.last_name}` : 'Opponent';
                 const op2Name = op2 ? `${op2.first_name} ${op2.last_name}` : 'Opponent';
@@ -228,7 +225,6 @@ export default function MatchHistorySection({
               }
 
               avatarUrl = op1?.avatar;
-              displayDept = op1?.department || 'Sport Department';
             } else {
               const team1Names = getTeamNames(match.team1);
               const team2Names = getTeamNames(match.team2);
@@ -241,6 +237,14 @@ export default function MatchHistorySection({
             const isUpcoming = match.status === 1;
             const isCompleted = match.status === 2;
 
+            // Cancellation permissions:
+            // - Coaches/Leaders can cancel any active match.
+            // - In 'mine' or 'referee' tabs, any pending match shown is your match, so show cancel if pending.
+            // - In 'club' tab, members can cancel if it's explicitly their match and pending.
+            const canCancelAsStaff = isStaffOrCoach && match.status !== 2 && match.status !== 3;
+            const isMyPendingMatch = (activeTab === 'mine' || activeTab === 'referee' || isPlayerInMatch) && isPending;
+            const showCancelButton = canCancelAsStaff || (isMyPendingMatch && match.status !== 3);
+
             let userWon = false;
             if (isCompleted && match.winner_id && isPlayerInMatch) {
               const winningTeamIsTeam1 = 
@@ -248,6 +252,11 @@ export default function MatchHistorySection({
                 Boolean(match.team1.player2 && match.winner_id === match.team1.player2.member_id);
               userWon = Boolean(isTeam1Member ? winningTeamIsTeam1 : !winningTeamIsTeam1);
             }
+
+            const scheduledDate = match.scheduled_at ? new Date(match.scheduled_at) : new Date();
+            const dateStr = scheduledDate.toLocaleDateString();
+            const timeStr = scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const locationStr = match.location || 'Sport Department';
 
             return (
               <div
@@ -311,7 +320,9 @@ export default function MatchHistorySection({
                         {titleText} {match.mode === 2 && <span className="text-xs text-muted-foreground font-normal">(Doubles)</span>}
                       </div>
                       <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5 flex-wrap">
-                        <span>{displayDept}</span>
+                        <span className="flex items-center gap-1 text-foreground font-medium">
+                          <MapPin className="w-3 h-3 text-brand-orange" /> {locationStr}
+                        </span>
                         {isCompleted && match.team1_score !== null && match.team2_score !== null && (
                           <>
                             <span>•</span>
@@ -322,7 +333,11 @@ export default function MatchHistorySection({
                         )}
                         <span>•</span>
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" /> {new Date(match.scheduled_at).toLocaleDateString()}
+                          <Calendar className="w-3 h-3" /> {dateStr}
+                        </span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {timeStr}
                         </span>
                       </div>
                     </div>
@@ -330,7 +345,7 @@ export default function MatchHistorySection({
                 </div>
 
                 <div className="flex items-center gap-3 self-end sm:self-center">
-                  {isMyMatch && (isPending || isUpcoming) && (
+                  {showCancelButton && (
                     <button
                       type="button"
                       disabled={cancelMutation.isPending}

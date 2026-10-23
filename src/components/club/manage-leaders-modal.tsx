@@ -134,7 +134,7 @@ export default function ManageLeadersModal({
     return (
         <>
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-                <SheetContent className="w-full sm:max-w-lg overflow-y-auto flex flex-col">
+                <SheetContent className="w-full sm:max-w-lg overflow-y-auto flex flex-col px-4 sm:px-6">
                     <SheetHeader className="pb-4 border-b border-border/60">
                         <div className="flex items-center gap-2">
                             <config.HeaderIcon className={`w-5 h-5 ${config.headerIconClass}`} />
