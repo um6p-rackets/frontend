@@ -10,8 +10,8 @@ export default function ProfileTabs({
   onTabChange,
 }: ProfileTabsProps) {
   const tabs: { id: ProfileTabType; label: string }[] = [
-    { id: 'statistics', label: 'Statistics' },
-    { id: 'history', label: 'History' },
+    { id: 'statistics', label: 'Performance by Sport' },
+    { id: 'history', label: 'Match History' },
   ];
 
   return (
@@ -22,7 +22,7 @@ export default function ProfileTabs({
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`px-5 sm:px-7 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-bold italic transition-all cursor-pointer ${
+            className={`px-5 py-2 rounded-lg text-xs sm:text-sm font-bold italic transition-all cursor-pointer ${
               isActive
                 ? 'bg-brand-orange text-white shadow-xs'
                 : 'text-muted-foreground hover:text-brand-ink dark:hover:text-white hover:bg-muted/50'

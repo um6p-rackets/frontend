@@ -11,66 +11,25 @@ interface SportRankCardProps {
   department?: string | null;
 }
 
-// Global catalog of sports icons and default names
+// Global catalog of sports names (icons removed)
 const sportsCatalog: Record<
   string,
-  { name: string; icon: React.ReactNode }
+  { name: string }
 > = {
   padel: {
-    name: 'Padel Club',
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" stroke="currentColor" strokeWidth="1.5">
-        <ellipse cx="10" cy="9" rx="6" ry="6.5" fill="none" />
-        <line x1="14.5" y1="13.5" x2="21" y2="20" strokeWidth="2.5" strokeLinecap="round" />
-        <circle cx="8" cy="8" r="0.8" fill="currentColor" />
-        <circle cx="10" cy="8" r="0.8" fill="currentColor" />
-        <circle cx="12" cy="8" r="0.8" fill="currentColor" />
-        <circle cx="9" cy="10.5" r="0.8" fill="currentColor" />
-        <circle cx="11" cy="10.5" r="0.8" fill="currentColor" />
-      </svg>
-    ),
+    name: 'Padel',
   },
   tennis: {
-    name: 'Tennis Club',
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-none" stroke="currentColor" strokeWidth="1.7">
-        <ellipse cx="10" cy="9" rx="6.5" ry="6.5" />
-        <line x1="10" y1="2.5" x2="10" y2="15.5" strokeWidth="0.8" strokeDasharray="1 1" />
-        <line x1="3.5" y1="9" x2="16.5" y2="9" strokeWidth="0.8" strokeDasharray="1 1" />
-        <line x1="14.5" y1="13.5" x2="21" y2="20" strokeWidth="2.5" strokeLinecap="round" />
-        <circle cx="19" cy="5" r="2.2" fill="currentColor" stroke="none" />
-      </svg>
-    ),
+    name: 'Tennis',
   },
   badminton: {
-    name: 'Badminton Club',
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-none" stroke="currentColor" strokeWidth="1.6">
-        <ellipse cx="10" cy="8" rx="5" ry="6.5" />
-        <line x1="10" y1="1.5" x2="10" y2="14.5" strokeWidth="0.8" strokeDasharray="1 1" />
-        <line x1="13.5" y1="13" x2="21" y2="20.5" strokeWidth="2.5" strokeLinecap="round" />
-      </svg>
-    ),
+    name: 'Badminton',
   },
   'table-tennis': {
-    name: 'Table Tennis Club',
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-none" stroke="currentColor" strokeWidth="1.7">
-        <circle cx="10" cy="9" r="6" />
-        <line x1="14" y1="13.5" x2="20.5" y2="20" strokeWidth="2.5" strokeLinecap="round" />
-        <circle cx="19.5" cy="5" r="2" fill="currentColor" stroke="none" />
-      </svg>
-    ),
+    name: 'Table Tennis',
   },
   squash: {
-    name: 'Squash Club',
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-none" stroke="currentColor" strokeWidth="1.7">
-        <path d="M6 13C4 10 4 6 7 4C10 2 13 4 14 7C15 9 14 12 11 13.5" />
-        <line x1="11" y1="13.5" x2="19.5" y2="21" strokeWidth="2.5" strokeLinecap="round" />
-        <circle cx="19" cy="5" r="2.5" fill="currentColor" stroke="none" />
-      </svg>
-    ),
+    name: 'Squash',
   },
 };
 
@@ -85,24 +44,16 @@ function normalizeSportKey(sport: string): string {
 }
 
 export default function SportRankCard({ clubRanks, userName, department }: SportRankCardProps) {
-  // Dynamically map ONLY the clubs that this user actually has
   const availableSports = (clubRanks || []).map((rank) => {
     const key = normalizeSportKey(rank.club_name);
     const catalogItem = sportsCatalog[key] || {
       name: rank.club_name,
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-none" stroke="currentColor" strokeWidth="1.7">
-          <circle cx="10" cy="9" r="6" />
-          <line x1="14" y1="13.5" x2="20.5" y2="20" strokeWidth="2.5" strokeLinecap="round" />
-        </svg>
-      ),
     };
 
     return {
       id: key,
       sport: rank.club_name,
       name: catalogItem.name,
-      icon: catalogItem.icon,
       rankInfo: rank,
     };
   });
@@ -111,7 +62,6 @@ export default function SportRankCard({ clubRanks, userName, department }: Sport
     availableSports[0]?.id || ''
   );
 
-  // If user has no club ranks, render a placeholder card
   if (availableSports.length === 0) {
     return (
       <div className="w-full flex flex-col rounded-2xl overflow-hidden shadow-xs border border-border/80 bg-card p-6 text-center">
@@ -132,29 +82,27 @@ export default function SportRankCard({ clubRanks, userName, department }: Sport
     );
   }
 
-  // Active sport
   const currentSport =
     availableSports.find((s) => s.id === selectedSport) || availableSports[0];
   const currentRankInfo = currentSport.rankInfo;
 
   return (
     <div className="w-full flex flex-col rounded-2xl overflow-hidden shadow-xs border border-border/80">
-      {/* Orange Sport Selector Header Bar - only renders buttons for user's sports */}
-      <div className="bg-brand-orange text-white py-3.5 px-3 flex items-center justify-around divide-x divide-white/30">
+      {/* Orange Sport Selector Header Bar with text names only */}
+      <div className="bg-brand-orange text-white py-3 px-3 flex items-center justify-around gap-1 divide-x divide-white/25 overflow-x-auto">
         {availableSports.map((sport) => {
           const isSelected = currentSport.id === sport.id;
           return (
             <button
               key={sport.id}
               onClick={() => setSelectedSport(sport.id)}
-              title={sport.name}
-              className={`flex-1 flex items-center justify-center py-1 transition-all cursor-pointer ${
+              className={`flex-1 flex items-center justify-center px-4 py-1.5 transition-all cursor-pointer whitespace-nowrap ${
                 isSelected
-                  ? 'text-white scale-110 drop-shadow-md'
-                  : 'text-white/70 hover:text-white hover:scale-105'
+                  ? 'text-white font-black scale-105 drop-shadow-xs'
+                  : 'text-white/75 hover:text-white font-semibold'
               }`}
             >
-              {sport.icon}
+              <span className="text-xs sm:text-sm italic">{sport.name}</span>
             </button>
           );
         })}
@@ -167,14 +115,13 @@ export default function SportRankCard({ clubRanks, userName, department }: Sport
             Rank
           </h2>
           <p className="text-sm font-semibold italic text-muted-foreground mt-0.5">
-            {currentSport.name}
+            {currentSport.name} Club
           </p>
         </div>
 
         {/* User Rank Box */}
         <div className="bg-secondary/50 dark:bg-[#121417] rounded-xl p-3.5 sm:p-4 flex items-center justify-between border border-border/60 dark:border-border/40">
           <div className="flex items-center gap-3 min-w-0">
-            {/* Rank badge circle */}
             <div className="w-8 h-8 rounded-full bg-brand-orange text-white font-black italic flex items-center justify-center text-sm shrink-0 shadow-2xs">
               {currentRankInfo.rank}
             </div>
