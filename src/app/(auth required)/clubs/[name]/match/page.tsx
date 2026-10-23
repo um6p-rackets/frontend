@@ -27,9 +27,6 @@ export default function MatchPage() {
                 currentUserDepartment={currentUserDepartment}
                 currentUserAvatar={currentUserAvatar}
             />
-
-            {/* Section to review and accept pending match requests */}
-            <MatchAcceptSection clubSlug={clubSlug} />
         </div>
     );
 }

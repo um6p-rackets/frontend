@@ -24,7 +24,7 @@ export default function OverviewCard({
       {/* Top Header Row: Title on left with right padding, Edit Pencil fixed on top right */}
       <div className="relative flex items-start justify-between gap-4 mb-2 pr-14">
         <h2 className="text-xl sm:text-2xl font-bold text-foreground wrap-break-word">
-          {clubName ? `${clubName} Club Overview` : 'Official Campus Club'}
+          Club Overview
         </h2>
 
         {topAction && (
