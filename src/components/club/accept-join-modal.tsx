@@ -34,7 +34,7 @@ export default function AcceptJoinModal({ clubSlug, isOpen, onClose }: AcceptJoi
 
     return (
         <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <SheetContent className="w-full sm:max-w-lg overflow-y-auto flex flex-col">
+            <SheetContent className="w-full sm:max-w-lg overflow-y-auto flex flex-col px-4 sm:px-6">
                 <SheetHeader className="pb-4 border-b border-border/60">
                     <div className="flex items-center gap-2">
                         <UserPlus className="w-5 h-5 text-brand-orange" />
@@ -92,12 +92,12 @@ export default function AcceptJoinModal({ clubSlug, isOpen, onClose }: AcceptJoi
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex flex-col gap-2 w-28">
                                         <button
                                             type="button"
                                             disabled={busy}
                                             onClick={() => accept.mutate(req.user_id)}
-                                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50"
+                                            className="w-full flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50"
                                         >
                                             {isAccepting ? (
                                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -111,7 +111,7 @@ export default function AcceptJoinModal({ clubSlug, isOpen, onClose }: AcceptJoi
                                             type="button"
                                             disabled={busy}
                                             onClick={() => reject.mutate(req.id)}
-                                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50"
+                                            className="w-full flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 text-xs font-bold transition-all shadow-2xs cursor-pointer disabled:opacity-50"
                                         >
                                             {isRejecting ? (
                                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
