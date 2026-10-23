@@ -38,6 +38,7 @@ import Logo from '../logo';
 import { AuthButton } from '../auth/auth-button';
 import { useAuth } from '@/store/auth';
 import { useLogout } from '@/hooks/use-logout';
+import { useNotifications } from '@/providers/NotificationProvider';
 
 export default function Navbar() {
   const user = useAuth((state) => state.user);
@@ -120,7 +121,8 @@ function UserNav() {
   const user = useAuth((state) => state.user);
   
   const pathname = usePathname(); 
-  
+   // still testing 
+  const { notifications } = useNotifications();
   // 1. Extract the club slug from the URL (e.g., "/clubs/badminton" -> "badminton")
   const pathParts = pathname?.split('/').filter(Boolean) || [];
   const clubsIndex = pathParts.indexOf('clubs');
@@ -133,6 +135,7 @@ function UserNav() {
   const performLogout = useLogout();
   
   const fallbackInitial = user?.first_name?.charAt(0)?.toUpperCase() || user?.login?.charAt(0)?.toUpperCase() || 'U';
+ 
 
   return (
     <header className="absolute top-0 left-0 w-full z-50 bg-transparent pt-6 px-6 md:px-12 lg:px-16">
@@ -193,8 +196,31 @@ function UserNav() {
                   Stay updated with your club activity and matches.
                 </SheetDescription>
               </SheetHeader>
-              <div className="py-6 flex flex-col gap-4">
-                <p className="text-sm text-muted-foreground text-center mt-10">No new notifications</p>
+                <div className="py-6 flex flex-col gap-4">
+                {notifications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center mt-10">
+                    No new notifications
+                  </p>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.notification_id}
+                      className="rounded-lg border p-3"
+                    >
+                      <p className="text-sm font-medium">
+                        {notification.type.replaceAll('_', ' ')}
+                      </p>
+
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(notification.sent_at).toLocaleString()}
+                      </p>
+
+                      {!notification.is_read && (
+                        <span className="text-xs">Unread</span>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </SheetContent>
           </Sheet>
@@ -285,8 +311,31 @@ function UserNav() {
               <SheetHeader>
                 <SheetTitle>Notifications</SheetTitle>
               </SheetHeader>
-              <div className="py-6">
-                <p className="text-sm text-muted-foreground">No new notifications</p>
+              <div className="py-6 flex flex-col gap-4">
+                {notifications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center">
+                    No new notifications
+                  </p>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.notification_id}
+                      className="rounded-lg border p-3"
+                    >
+                      <p className="text-sm font-medium">
+                        {notification.type.replaceAll('_', ' ')}
+                      </p>
+
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(notification.sent_at).toLocaleString()}
+                      </p>
+
+                      {!notification.is_read && (
+                        <span className="text-xs text-primary">Unread</span>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </SheetContent>
           </Sheet>

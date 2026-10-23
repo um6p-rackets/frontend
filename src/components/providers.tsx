@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthHydrator } from '@/components/auth/auth-hydrator';
+import { NotificationProvider } from '@/providers/NotificationProvider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(() => new QueryClient({ defaultOptions: { queries: { staleTime: 60_000 } } }));
@@ -15,7 +16,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         {/* Wrap Hydrator in Suspense to safely useSearchParams */}
         <Suspense fallback={null}>
           <AuthHydrator>
+            <NotificationProvider>
             {children}
+            </NotificationProvider>
           </AuthHydrator>
         </Suspense>
         <ReactQueryDevtools initialIsOpen={false} />
