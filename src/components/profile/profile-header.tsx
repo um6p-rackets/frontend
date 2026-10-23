@@ -96,20 +96,12 @@ export default function ProfileHeader({ data }: { data: UserProfileData }) {
 
             {/* Joined Clubs / Sports Tags */}
             <div className="flex flex-wrap items-center gap-2 mt-3.5">
-              {sortedClubs.map((jc, idx) => {
-                const isMainSport = idx === 0;
+              {sortedClubs.map((jc) => {
                 return (
                   <span
                     key={jc.club.id}
-                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold italic transition-all ${
-                      isMainSport
-                        ? 'bg-[#FFF3EC] dark:bg-orange-950/40 text-brand-orange border border-orange-200/80 shadow-2xs'
-                        : 'bg-[#F4F2EE] dark:bg-muted/40 text-muted-foreground border border-border/40'
-                    }`}
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold italic transition-all bg-[#F4F2EE] dark:bg-muted/40 text-muted-foreground border border-border/40"
                   >
-                    {isMainSport && (
-                      <span className="w-2 h-2 rounded-full bg-brand-orange shrink-0" />
-                    )}
                     {jc.club.name}
                   </span>
                 );

@@ -8,27 +8,37 @@ export default function OverviewCard({
   members,
   coach,
   actions,
+  topAction,
 }: {
   clubName?: string;
   desc: string;
   members: number;
   coach?: string | null;
   actions?: ReactNode;
+  topAction?: ReactNode; // <--- 1. Type it
 }) {
-  // Use database coach full name or fallback to "Pending" if not assigned
   const coachDisplay = coach && coach.trim() !== '' ? coach : 'Pending';
 
   return (
     <Card className="p-4 sm:p-7 rounded-xl sm:rounded-2xl border border-border/70 shadow-2xs bg-card sm:bg-gray-50 dark:bg-gray-800/80 w-full">
-      <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
-        {clubName ? `${clubName} Club Overview` : 'Official Campus Club'}
-      </h2>
+      {/* Top Header Row: Title on left with right padding, Edit Pencil fixed on top right */}
+      <div className="relative flex items-start justify-between gap-4 mb-2 pr-14">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground wrap-break-word">
+          {clubName ? `${clubName} Club Overview` : 'Official Campus Club'}
+        </h2>
 
-      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed w-full mb-5 sm:mb-6 break-words">
+        {topAction && (
+          <div className="absolute top-0 right-0">
+            {topAction}
+          </div>
+        )}
+      </div>
+
+      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed w-full mb-5 sm:mb-6 wrap-break-word">
         {desc}
       </p>
 
-      {/* Bottom Footer Row: Stats on the left, Role-gated Action Buttons on the right */}
+      {/* Bottom Footer Row: Stats & Bottom Action Buttons */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-4 border-t border-border/50">
         <div className="flex items-center gap-6 sm:gap-8 flex-wrap">
           <div className="flex items-center gap-3">
@@ -56,7 +66,7 @@ export default function OverviewCard({
           </div>
         </div>
 
-        {/* Action Buttons Slot */}
+        {/* Bottom Action Buttons Slot (Request Match, History, Dropdown) */}
         {actions && (
           <div className="flex flex-wrap items-center gap-2">
             {actions}

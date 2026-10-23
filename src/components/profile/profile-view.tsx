@@ -61,9 +61,9 @@ export default function ProfileView({ data }: ProfileViewProps) {
               Current Run
             </span>
             <div className="mt-3">
-              <div className="text-3xl font-black italic text-emerald-600 dark:text-emerald-400 flex items-baseline gap-2">
+              <div className="text-3xl font-black italic text-brand-orange flex items-baseline gap-2">
                 <span>{stats.current_win_streak}W</span>
-                <span className="text-xs font-bold text-emerald-600/80 dark:text-emerald-400/80 uppercase not-italic">Unbroken</span>
+                <span className="text-xs font-bold text-brand-orange/80 uppercase not-italic">Unbroken</span>
               </div>
               <p className="text-xs font-semibold italic text-muted-foreground mt-0.5">
                 Active winning streak

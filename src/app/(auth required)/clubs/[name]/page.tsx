@@ -17,13 +17,14 @@ import {
   UserX,
 } from "lucide-react";
 
-import ClubTitle from "@/components/club/club-title";
-import OverviewCard from "@/components/club/overview-card";
-import ClubTaps from "@/components/club/taps";
-import Leaderboard from "@/components/club/leaderboard";
-import AcceptMatchModal from "@/components/club/accept-match-modal";
-import AcceptJoinModal from "@/components/club/accept-join-modal";
-import ManageLeadersModal from "@/components/club/manage-leaders-modal";
+import ClubTitle from '@/components/club/club-title';
+import OverviewCard from '@/components/club/overview-card';
+import ClubTaps from '@/components/club/taps';
+import Leaderboard from '@/components/club/leaderboard';
+import AcceptMatchModal from '@/components/club/accept-match-modal';
+import AcceptJoinModal from '@/components/club/accept-join-modal';
+import ManageLeadersModal from '@/components/club/manage-leaders-modal';
+import EditClubModal from '@/components/club/edit-club-modal';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -94,6 +95,7 @@ export default function ClubPage() {
   const isStaffOnly = isMember && (status?.role === 1 || status?.role === 2);
   const isCoachOnly = isMember && status?.role === 2;
 
+  // Bottom action buttons (Request Match, Match History, Dropdown)
   const actionButtons = isMember ? (
     <>
       <Link
@@ -181,6 +183,14 @@ export default function ClubPage() {
     </>
   ) : null;
 
+  const topActionSlot = isCoachOnly ? (
+    <EditClubModal
+      clubSlug={clubSlug}
+      currentName={clubName}
+      currentDescription={description}
+    />
+  ) : null;
+
   return (
     <div className="w-[92%]  xl:w-[80%] mx-auto pb-20">
       {isClubLoading ? (
@@ -198,6 +208,7 @@ export default function ClubPage() {
               coach={coachFullName}
               members={membersCount}
               actions={actionButtons}
+              topAction={topActionSlot}
             />
           </section>
 

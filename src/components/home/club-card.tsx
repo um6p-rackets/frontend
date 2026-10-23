@@ -8,18 +8,32 @@ type ClubCardProps = {
   link: string;
 };
 
+// Helper function to format title: Capitalize first letter only, lowercase the rest, and limit to 12 chars
+const formatClubName = (text: string) => {
+  if (!text) return '';
+  
+  // Truncate to 12 characters max
+  const trimmed = text.length > 12 ? text.substring(0, 12) + '...' : text;
+
+  // Format case: Make first letter uppercase, rest lowercase
+  const lower = trimmed.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+};
+
 export default function ClubCard({ name, imageUrl, link }: ClubCardProps) {
+  const formattedName = formatClubName(name);
+
   return (
     <Link
       href={link}
       className="group relative block w-full max-w-85 sm:max-w-100 md:max-w-115 h-42.5 md:h-52.5 rounded-none shadow-md border-0 bg-white overflow-visible transition-all duration-500 hover:shadow-xl cursor-pointer"
     >
-      <div className="absolute top-0 right-20 sm:right-32 md:right-20 w-14 md:w-18 h-full bg-accent z-0 transition-all duration-500 ease-out group-hover:w-full group-hover:right-0" />
+      <div className="absolute top-0 right-20 sm:right-20 md:right-15 w-14 md:w-18 h-full bg-accent z-0 transition-all duration-500 ease-out group-hover:w-full group-hover:right-0" />
 
       <div className="relative z-10 flex flex-col justify-between h-full p-5 sm:p-7 md:p-8">
         <div>
-          <h3 className="text-2xl sm:text-3xl md:text-[36px] font-black italic text-accent leading-none tracking-tight transition-colors duration-500 group-hover:text-white">
-            {name}
+          <h3 className="text-2xl sm:text-3xl md:text-[36px] font-black italic text-accent leading-none tracking-tight transition-colors duration-500 group-hover:text-white truncate">
+            {formattedName}
           </h3>
           <p className="text-lg sm:text-xl md:text-2xl italic font-semibold text-brand-ink mt-0.5 transition-colors duration-500 group-hover:text-white">
             club

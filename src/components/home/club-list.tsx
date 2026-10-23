@@ -1,34 +1,6 @@
 import ClubCard from "@/components/home/club-card";
 import { useClubs } from "@/hooks/use-clubs";
 
-// const clubs = [
-//   {
-//     name: "Padel",
-//     imageUrl: "/clubs/padel.png",
-//     link: "/clubs/padel",
-//   },
-//   {
-//     name: "Squash",
-//     imageUrl: "/clubs/squash.png",
-//     link: "/clubs/squash",
-//   },
-//   {
-//     name: "Badminton",
-//     imageUrl: "/clubs/badminton.png",
-//     link: "/clubs/badminton",
-//   },
-//   {
-//     name: "Table Tennis",
-//     imageUrl: "/clubs/table-tennis.png",
-//     link: "/clubs/table-tennis",
-//   },
-//   {
-//     name: "Tennis",
-//     imageUrl: "/clubs/tennis.png",
-//     link: "/clubs/tennis",
-//   }
-// ];
-
 export default function ClubList() {
   const { data: clubs, isPending, isError, error } = useClubs();
 
