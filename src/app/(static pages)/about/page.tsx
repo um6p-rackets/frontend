@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "About | UM6P Rackets",
@@ -70,8 +70,9 @@ export default function AboutPage() {
             arrange matches, and follow the rankings. It covers tennis, padel, badminton, squash,
             table tennis, and pickleball.
           </p>
-          <Button render={<Link href="/#clubs">See the clubs</Link>}>
-          </Button>
+          <Link href="/#clubs" className={buttonVariants({ variant: "default", size: "sm" })}>
+            See the clubs
+          </Link>
         </div>
         <CourtLines />
       </section>
