@@ -8,11 +8,14 @@ import type {
 
 const CLUBS = '/clubs';
 
-// role omitted = all members
-export const getClubMembers = (slug: string, role?: MemberRole) =>
-  api<Paginated<MemberWithUser>>(
-    `${CLUBS}/${slug}/members${role === undefined ? '' : `?role=${role}`}`
-  );
+const MEMBERS_LIMIT = 50; // maximum allowed by the contract
+
+// no role = all members
+export const getClubMembers = (slug: string, role?: MemberRole) => {
+  const query = new URLSearchParams({ limit: String(MEMBERS_LIMIT) });
+  if (role !== undefined) query.set("role", String(role));
+  return api<Paginated<MemberWithUser>>(`${CLUBS}/${slug}/members?${query}`);
+};
 
 export const getJoinRequests = (slug: string) =>
   api<Paginated<JoinRequestWithUser>>(`${CLUBS}/${slug}/join-requests`);

@@ -25,7 +25,7 @@ export const memberKeys = {
 export function useClubMembers(
   slug: string,
   role: MemberRole | undefined,
-  enabled: boolean
+  enabled: boolean = true
 ) {
   return useQuery({
     queryKey: memberKeys.list(slug, role),
