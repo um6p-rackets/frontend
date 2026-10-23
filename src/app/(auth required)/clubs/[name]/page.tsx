@@ -137,15 +137,13 @@ export default function ClubPage() {
                   onClick={() => setIsAcceptModalOpen(true)}
                   className="cursor-pointer font-medium text-xs gap-2"
                 >
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Accept
-                  Match
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> pending Match Requests
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setIsAcceptJoinModalOpen(true)}
                   className="cursor-pointer font-medium text-xs gap-2"
                 >
-                  <UserCheck className="w-4 h-4 text-brand-orange" /> Accept
-                  Join Request
+                  <UserCheck className="w-4 h-4 text-brand-orange" /> Pending Join Requests
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setIsRemoveMemberModalOpen(true)}
@@ -162,13 +160,13 @@ export default function ClubPage() {
                   onClick={() => setIsSetLeaderModalOpen(true)}
                   className="cursor-pointer font-medium text-xs gap-2"
                 >
-                  <ShieldCheck className="w-4 h-4 text-blue-500" /> Set Leader
+                  <ShieldCheck className="w-4 h-4 text-blue-500" /> upgrade to Leader
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setIsRemoveLeaderModalOpen(true)}
                   className="cursor-pointer font-medium text-xs gap-2"
                 >
-                  <UserMinus className="w-4 h-4 text-amber-500" /> Remove Leader
+                  <UserMinus className="w-4 h-4 text-amber-500" /> downgrade to Member
                 </DropdownMenuItem>
               </>
             )}
