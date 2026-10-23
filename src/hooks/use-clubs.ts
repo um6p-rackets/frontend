@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner'; // <--- 1. IMPORT TOAST HERE
 import {
+  cancelJoinRequest,
   getClub,
   getClubs,
   getClubSessions,
   joinClubSession,
+  leaveClub,
   leaveClubSession
 } from '@/lib/api/club';
 
@@ -37,7 +39,6 @@ export function useClub(slug: string) {
 
 import { useAuth } from '@/store/auth';
 import { getClubStatus, joinClub } from '@/lib/api/club';
-import { cancelJoinRequest, leaveClub } from '@/lib/api/api';
 
 export function useClubStatus(slug: string) {
   const userId = useAuth((s) => s.user?.id);
@@ -205,18 +206,21 @@ export function useCancelJoinClub(slug: string) {
   });
 }
 
-export function useLeaveClub(slug: string, memberId: number) {
+export function useLeaveClub(slug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: () => {
-      if (!memberId) throw new Error('Member ID not found.');
-      return leaveClub(slug, memberId);
+      return leaveClub(slug);
     },
-    onSuccess: () => {
-      toast.success('You have left the club');
+    onSuccess: (result: { success: boolean; message: string }) => {
+      if (!result.success) {
+        toast.error(result.message || 'Failed to leave the club.');
+        return;
+      }
+      toast.success(result.message || 'You have left the club.');
       return queryClient.invalidateQueries({ queryKey: clubKeys.detail(slug) });
     },
-    onError: (err) => toast.error(err.message || 'Failed to leave club.')
+    onError: (err) => toast.error(err.message || 'Failed to leave the club.')
   });
 }

@@ -3,7 +3,6 @@ import { useAuth } from '@/store/auth';
 import { getUrl } from '../utils';
 
 
-const CLUBS = '/clubs';
 
 // Raw fetch on purpose: it must not go through api() (no refresh loop)
 async function refreshTokens() {
@@ -92,10 +91,3 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   }
 }
 
-export const cancelJoinRequest = (slug: string) =>
-  api<{ success: boolean }>(`${CLUBS}/${slug}/join`, { method: 'DELETE' });
-
-export const leaveClub = (slug: string, memberId: number) =>
-  api<{ success: boolean }>(`${CLUBS}/${slug}/members/${memberId}`, {
-    method: 'DELETE'
-  });
