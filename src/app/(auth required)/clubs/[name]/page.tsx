@@ -182,7 +182,7 @@ export default function ClubPage() {
   ) : null;
 
   return (
-    <div className="w-[92%] lg:w-[70%] mx-auto pb-20">
+    <div className="w-[92%]  xl:w-[80%] mx-auto pb-20">
       {isClubLoading ? (
         <div className="flex justify-center items-center py-24">
           <Loader2 className="size-10 animate-spin text-brand-orange" />
