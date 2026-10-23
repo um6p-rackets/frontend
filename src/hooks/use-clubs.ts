@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
+  cancelJoinRequest,
   getClub,
   getClubs,
   getClubSessions,
   joinClubSession,
+  leaveClub,
   leaveClubSession
 } from '@/lib/api/club';
 import { api } from '@/lib/api/api';
@@ -24,7 +26,7 @@ export function useClubs() {
   return useQuery({
     queryKey: clubKeys.all,
     queryFn: getClubs,
-    staleTime: 5 * 60 * 1000
+    staleTime: 10 * 60 * 1000
   });
 }
 
@@ -33,13 +35,12 @@ export function useClub(slug: string) {
     queryKey: clubKeys.detail(slug),
     queryFn: () => getClub(slug),
     enabled: Boolean(slug),
-    staleTime: 5 * 60 * 1000
+    staleTime: 10 * 60 * 1000
   });
 }
 
 import { useAuth } from '@/store/auth';
 import { getClubStatus, joinClub } from '@/lib/api/club';
-import { cancelJoinRequest, leaveClub } from '@/lib/api/api';
 
 export function useClubStatus(slug: string) {
   const userId = useAuth((s) => s.user?.id);
@@ -47,6 +48,7 @@ export function useClubStatus(slug: string) {
   return useQuery({
     queryKey: clubKeys.status(slug, userId),
     queryFn: () => getClubStatus(slug),
+    staleTime: 5 * 60 * 1000,
     enabled: Boolean(slug) && Boolean(userId)
   });
 }
@@ -231,16 +233,19 @@ export function useCancelJoinClub(slug: string) {
   });
 }
 
-export function useLeaveClub(slug: string, memberId: number) {
+export function useLeaveClub(slug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: () => {
-      if (!memberId) throw new Error('Member ID not found.');
-      return leaveClub(slug, memberId);
+      return leaveClub(slug);
     },
-    onSuccess: () => {
-      toast.success('You have left the club');
+    onSuccess: (result: { success: boolean; message: string }) => {
+      if (!result.success) {
+        toast.error(result.message || 'Failed to leave the club.');
+        return;
+      }
+      toast.success(result.message || 'You have left the club.');
       return queryClient.invalidateQueries({ queryKey: clubKeys.detail(slug) });
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to leave club.')
