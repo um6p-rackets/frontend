@@ -88,9 +88,6 @@ import {
             <DialogTitle className="text-xl font-black italic">
                 Edit Club Info
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-                Update your club name (max 12 characters) or description. Changing the name will automatically update its URL slug.
-            </DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">

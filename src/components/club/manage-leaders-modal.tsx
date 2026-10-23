@@ -193,11 +193,6 @@ export default function ManageLeadersModal({
                                                 <span className="text-xs font-bold text-brand-orange">
                                                     {dept}
                                                 </span>
-                                                {isLeader && (
-                                                    <Badge className="bg-purple-500 text-white text-[10px] px-1.5 py-0">
-                                                        Leader
-                                                    </Badge>
-                                                )}
                                             </div>
                                             <div className="text-sm font-bold text-foreground group-hover:text-brand-orange transition-colors">
                                                 {name}
