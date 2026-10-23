@@ -1,12 +1,13 @@
-'use client';
+import { useState } from "react";
+import MembersRow from "./members-row";
+import Pagination from "@/components/leaderboard/pagination";
+import type { MemberWithUser } from "@/types/contracts/club";
 
-import { useState } from 'react';
-import MembersRow, { ClubMember } from './members-row';
-import Pagination from '@/components/leaderboard/pagination'; 
+const ITEMS_PER_PAGE = 10;
 
-export default function MembersTable({ members }: { members: ClubMember[] }) {
+export default function MembersTable({ members }: { members: MemberWithUser[] }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = ITEMS_PER_PAGE;
 
   const totalPages = Math.ceil(members.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -14,12 +15,6 @@ export default function MembersTable({ members }: { members: ClubMember[] }) {
 
   return (
     <div className="w-full max-w-6xl bg-card shadow-sm rounded-xl sm:rounded-2xl p-3 sm:p-8 border border-border">
-      <div className="mb-4 px-2">
-        <p className="text-[10px] sm:text-xs text-muted-foreground italic mt-1">
-          Active roster of all campus athletes and coaches.
-        </p>
-      </div>
-
       <div className="w-full md:overflow-x-auto md:pb-4 scrollbar-thin">
         <div className="w-full md:min-w-187.5">
           {/* Desktop Table Header - Added DEPARTMENT and updated grid cols */}
@@ -37,7 +32,7 @@ export default function MembersTable({ members }: { members: ClubMember[] }) {
               <MembersRow key={member.id} member={member} />
             ))}
           </div>
-          
+
           {currentMembers.length === 0 && (
             <div className="text-center py-10 text-muted-foreground italic font-semibold">
               No members found.
@@ -49,9 +44,8 @@ export default function MembersTable({ members }: { members: ClubMember[] }) {
       {totalPages > 0 && (
         <div className="mt-4 sm:mt-8 flex flex-col md:flex-row justify-between items-center gap-4 px-2 sm:px-4 text-[10px] sm:text-xs font-bold text-muted-foreground italic">
           <p className="text-center md:text-left">
-            Displaying {startIndex + 1}–
-            {Math.min(startIndex + itemsPerPage, members.length)} of{' '}
-            {members.length} total members
+            Displaying {startIndex + 1}–{Math.min(startIndex + itemsPerPage, members.length)} of{" "}
+            {members.length} members
           </p>
 
           <div className="flex flex-wrap justify-center items-center gap-1.5 sm:gap-2">
