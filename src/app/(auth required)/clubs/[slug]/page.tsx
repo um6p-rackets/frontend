@@ -33,7 +33,7 @@ import { ApiError } from "@/lib/api/api";
 import { mockClubData } from "@/lib/mock-data";
 
 export default function ClubPage() {
-  const { name: clubSlug } = useParams<{ name: string }>();
+  const { slug: clubSlug } = useParams<{ slug: string }>();
 
   const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
   const [isAcceptJoinModalOpen, setIsAcceptJoinModalOpen] = useState(false);
@@ -132,7 +132,6 @@ export default function ClubPage() {
 
           <section className="relative mt-4">
             <OverviewCard
-              clubName={clubName}
               desc={description}
               coach={coachFullName}
               members={membersCount}

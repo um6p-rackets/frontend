@@ -4,8 +4,8 @@ import { useState, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { AuthHydrator } from '@/components/auth/auth-hydrator';
 import { NotificationProvider } from '@/providers/NotificationProvider';
+import { AuthHydrator } from '@/providers/auth-hydrator';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(() => new QueryClient({ defaultOptions: { queries: { staleTime: 60_000 } } }));
