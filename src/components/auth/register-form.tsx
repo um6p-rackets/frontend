@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
 import {
   AtSign,
   Mail,
@@ -33,6 +32,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useLoginAvailable } from "@/hooks/use-login-available";
 import { registerSchema, type RegisterValues } from "@/lib/schemas/auth";
 import type { registerPayload } from "@/types";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 export const UM6P_DEPARTMENTS = [
   { code: "1337", name: "1337" },
@@ -70,7 +70,6 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
     register,
     handleSubmit,
     control,
-    watch,
     clearErrors,
     formState: { errors },
   } = useForm<RegisterValues>({
@@ -88,10 +87,9 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
     },
   });
 
-  const department = watch("department");
-
+  const department = useWatch({ control, name: "department" });
   // Username availability: wait until the user stops typing, then ask the backend
-  const username = watch("username").trim();
+  const username = useWatch({ control, name: "username" }).trim();
   const debouncedUsername = useDebouncedValue(username);
   const availability = useLoginAvailable(debouncedUsername);
 
@@ -131,7 +129,12 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FieldGroup className="space-y-4 sm:space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <AuthField id="firstName" label="First Name" icon={User} error={errors.firstName?.message}>
+              <AuthField
+                id="firstName"
+                label="First Name"
+                icon={User}
+                error={errors.firstName?.message}
+              >
                 <Input
                   id="firstName"
                   maxLength={50}
@@ -141,7 +144,12 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
                 />
               </AuthField>
 
-              <AuthField id="lastName" label="Last Name" icon={User} error={errors.lastName?.message}>
+              <AuthField
+                id="lastName"
+                label="Last Name"
+                icon={User}
+                error={errors.lastName?.message}
+              >
                 <Input
                   id="lastName"
                   maxLength={50}
@@ -157,7 +165,10 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
                 id="username"
                 label="Username"
                 icon={AtSign}
-                error={errors.username?.message ?? (isTaken ? "This username is already taken" : undefined)}
+                error={
+                  errors.username?.message ??
+                  (isTaken ? "This username is already taken" : undefined)
+                }
               >
                 <div className="relative">
                   <Input
@@ -168,7 +179,9 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
                     {...register("username")}
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    {isChecking && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+                    {isChecking && (
+                      <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                    )}
                     {isFree && <CheckCircle2 className="size-4 text-green-500" />}
                   </div>
                 </div>
@@ -198,7 +211,12 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
                 />
               </AuthField>
 
-              <AuthField id="reg-password" label="Password" icon={Lock} error={errors.password?.message}>
+              <AuthField
+                id="reg-password"
+                label="Password"
+                icon={Lock}
+                error={errors.password?.message}
+              >
                 <Input
                   id="reg-password"
                   type="password"
@@ -228,10 +246,13 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
                         if (value !== "OTHER") clearErrors("customDepartment");
                       }}
                     >
-                      <SelectTrigger id="department" className={authSelectClass(!!errors.department)}>
+                      <SelectTrigger
+                        id="department"
+                        className={authSelectClass(!!errors.department)}
+                      >
                         <SelectValue placeholder="Select Department" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl max-h-60 z-[100]">
+                      <SelectContent className="rounded-xl max-h-60 z-100">
                         {UM6P_DEPARTMENTS.map((dept) => (
                           <SelectItem key={dept.code} value={dept.code}>
                             {dept.name}
@@ -265,7 +286,7 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
                       <SelectTrigger id="gender" className={authSelectClass(!!errors.gender)}>
                         <SelectValue placeholder="Select Gender" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl z-[100]">
+                      <SelectContent className="rounded-xl z-100">
                         <SelectItem value="Male">Male</SelectItem>
                         <SelectItem value="Female">Female</SelectItem>
                       </SelectContent>

@@ -132,7 +132,6 @@ export default function ClubPage() {
 
           <section className="relative mt-4">
             <OverviewCard
-              clubName={clubName}
               desc={description}
               coach={coachFullName}
               members={membersCount}
