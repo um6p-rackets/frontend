@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { AuthApi } from "@/lib/api/auth";
 import { SESSION_EXPIRED_EVENT } from "@/lib/api/api";
 import { authKeys } from "@/hooks/use-me";
+import { broadcastAuthChange, useAuthSync } from "@/hooks/use-auth-sync";
 
 // App-wide auth plumbing. Who is logged in lives only in useMe; this file only:
 //   1. handles the return from Google login (?oauth=success)
@@ -16,6 +17,8 @@ export function AuthHydrator({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const isOauthSuccess = searchParams.get("oauth") === "success";
+
+  useAuthSync();
 
   // 1. Return from Google login
   useEffect(() => {
@@ -26,6 +29,7 @@ export function AuthHydrator({ children }: { children: React.ReactNode }) {
       .fetchQuery({ queryKey: authKeys.me, queryFn: AuthApi.getMe, staleTime: 0 })
       .catch(() => undefined) // if it fails, useMe will show the real state
       .finally(() => {
+        broadcastAuthChange();
         // Remove ?oauth=success from the address bar
         const url = new URL(window.location.href);
         url.searchParams.delete("oauth");
