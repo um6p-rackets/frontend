@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { cn } from "@/lib/utils";
+import { Controller, useForm } from "react-hook-form";
 import {
   AtSign,
   Mail,
@@ -22,7 +19,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { FieldGroup } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -30,8 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AuthApi } from "@/lib/api/auth";
-import { registerPayload } from "@/types";
+import { AuthField, authInputClass, authSelectClass } from "@/components/auth/form-parts";
+import { useRegister } from "@/hooks/use-auth-mutations";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useLoginAvailable } from "@/hooks/use-login-available";
+import { registerSchema, type RegisterValues } from "@/lib/schemas/auth";
+import type { registerPayload } from "@/types";
 
 export const UM6P_DEPARTMENTS = [
   { code: "1337", name: "1337" },
@@ -43,90 +44,36 @@ export const UM6P_DEPARTMENTS = [
   { code: "OTHER", name: "Other" },
 ] as const;
 
-function FormError({ error }: { error?: { message?: string } }) {
-  if (!error?.message) return null; // Returns absolutely nothing if there is no error
-  return (
-    <p className="text-[11px] font-semibold text-destructive mt-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1">
-      <AlertCircle className="size-3 shrink-0" />
-      {error.message}
-    </p>
-  );
+// Form values (camelCase) -> what the backend expects
+function toRegisterPayload(values: RegisterValues): registerPayload {
+  return {
+    first_name: values.firstName,
+    last_name: values.lastName,
+    login: values.username,
+    email: values.email,
+    phone_number: values.phone,
+    gender: values.gender === "Male",
+    password: values.password,
+    department: values.department === "OTHER" ? values.customDepartment! : values.department,
+  };
 }
-
-// 1. Define Zod Schema
-const registerSchema = z
-  .object({
-    firstName: z
-      .string()
-      .min(1, "First name is required")
-      .max(50, "First name is too long"),
-    lastName: z
-      .string()
-      .min(1, "Last name is required")
-      .max(50, "Last name is too long"),
-    username: z
-      .string()
-      .min(3, "Username must be at least 3 characters")
-      .max(15, "Username is too long"),
-    email: z.email("Invalid email address").max(50, "Email is too long"),
-    phone: z
-      .string()
-      .min(10, "Phone number is required")
-      .max(15, "Phone number is too long"),
-    gender: z.enum(["Male", "Female"], "Gender is required"),
-    department: z.string().min(1, "Department is required"),
-    // Must be optional here, otherwise it throws errors when department is NOT "OTHER"
-    customDepartment: z
-      .string()
-      .max(50, "Department name is too long")
-      .optional(),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .max(20, "Password is too long"),
-  })
-  .refine(
-    (data) => {
-      if (data.department === "OTHER") {
-        // Enforce the min(2) requirement ONLY if OTHER is selected
-        return (
-          data.customDepartment && data.customDepartment.trim().length >= 2
-        );
-      }
-      return true;
-    },
-    {
-      message: "Please specify your department (min 2 characters)",
-      path: ["customDepartment"],
-    },
-  );
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
 
 interface RegisterFormProps {
   onSuccess?: () => void;
   onSwitchToLogin?: () => void;
 }
 
-export function RegisterForm({
-  onSuccess,
-  onSwitchToLogin,
-}: RegisterFormProps) {
-  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(
-    null,
-  );
+export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) {
+  const signUp = useRegister();
 
-  // 2. Initialize React Hook Form
   const {
     register,
     handleSubmit,
     control,
     watch,
-    setError,
     clearErrors,
-    formState: { errors, isSubmitting },
-  } = useForm<RegisterFormValues>({
+    formState: { errors },
+  } = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       firstName: "",
@@ -139,78 +86,22 @@ export function RegisterForm({
       customDepartment: "",
       password: "",
     },
-    mode: "onSubmit",
   });
 
-  const watchUsername = watch("username");
-  const watchDepartment = watch("department");
+  const department = watch("department");
 
-  // 3. Debounced Username Availability Check
-  useEffect(() => {
-    if (!watchUsername || watchUsername.length < 3) {
-      setUsernameAvailable(null);
-      return;
-    }
+  // Username availability: wait until the user stops typing, then ask the backend
+  const username = watch("username").trim();
+  const debouncedUsername = useDebouncedValue(username);
+  const availability = useLoginAvailable(debouncedUsername);
 
-    const timer = setTimeout(async () => {
-      setIsCheckingUsername(true);
-      try {
-        const { available } = await AuthApi.checkLoginAvailable(watchUsername);
-        setUsernameAvailable(available);
-        if (!available) {
-          setError("username", {
-            type: "manual",
-            message: "This username is already taken",
-          });
-        } else if (errors.username?.type === "manual") {
-          clearErrors("username");
-        }
-      } catch (error) {
-        setUsernameAvailable(null);
-      } finally {
-        setIsCheckingUsername(false);
-      }
-    }, 500); // 500ms debounce
+  const canCheck = username.length >= 3;
+  const isChecking = canCheck && (username !== debouncedUsername || availability.isFetching);
+  const isTaken = canCheck && !isChecking && availability.data?.available === false;
+  const isFree = canCheck && !isChecking && availability.data?.available === true;
 
-    return () => clearTimeout(timer);
-  }, [watchUsername, setError, clearErrors, errors.username?.type]);
-
-  // 4. Form Submission
-  const onSubmit = async (data: RegisterFormValues) => {
-    if (usernameAvailable === false) {
-      setError("username", {
-        type: "manual",
-        message: "Please choose an available username",
-      });
-      return;
-    }
-
-    try {
-      clearErrors("root.serverError");
-      const payload: registerPayload = {
-        first_name: data.firstName.trim(),
-        last_name: data.lastName.trim(),
-        login: data.username.trim(),
-        email: data.email.trim(),
-        phone_number: data.phone.trim(),
-        gender: data.gender === "Male",
-        password: data.password,
-        department:
-          data.department === "OTHER"
-            ? data.customDepartment!.trim()
-            : data.department,
-      };
-
-      await AuthApi.register(payload);
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Registration failed. Please try again.";
-      // Set a dedicated root error to avoid falsely highlighting input fields
-      setError("root.serverError", { type: "server", message: errorMessage });
-    }
+  const onSubmit = (values: RegisterValues) => {
+    signUp.mutate(toRegisterPayload(values), { onSuccess: () => onSuccess?.() });
   };
 
   return (
@@ -229,222 +120,115 @@ export function RegisterForm({
       </div>
 
       <div className="p-6 sm:p-8">
-        {/* Dedicated Server Error Display */}
-        {errors.root?.serverError && (
+        {/* Error from the backend (email already used, server down...) */}
+        {signUp.isError && (
           <div className="mb-6 bg-destructive/10 text-destructive text-xs font-semibold p-3.5 rounded-xl flex items-start gap-2.5 animate-in fade-in slide-in-from-top-2">
             <AlertCircle className="size-4 shrink-0 mt-0.5" />
-            <p>{errors.root.serverError.message}</p>
+            <p>{signUp.error.message}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FieldGroup className="space-y-4 sm:space-y-5">
-            {/* Name Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* First Name Field */}
-              <Field className="space-y-1.5">
-                <FieldLabel
-                  htmlFor="firstName"
-                  className={cn(
-                    "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
-                    errors.firstName
-                      ? "text-destructive"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  <User className="size-3.5 text-brand-orange" /> First Name
-                </FieldLabel>
+              <AuthField id="firstName" label="First Name" icon={User} error={errors.firstName?.message}>
                 <Input
                   id="firstName"
                   maxLength={50}
+                  autoComplete="given-name"
+                  className={authInputClass(!!errors.firstName)}
                   {...register("firstName")}
-                  className={cn(
-                    "h-11 w-full rounded-xl bg-background/60",
-                    errors.firstName &&
-                      "border-destructive focus-visible:ring-destructive/30",
-                  )}
                 />
-                <FormError error={errors.firstName} />
-              </Field>
+              </AuthField>
 
-              {/* Last Name Field */}
-              <Field className="space-y-1.5">
-                <FieldLabel
-                  htmlFor="lastName"
-                  className={cn(
-                    "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
-                    errors.lastName
-                      ? "text-destructive"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  <User className="size-3.5 text-brand-orange" /> Last Name
-                </FieldLabel>
+              <AuthField id="lastName" label="Last Name" icon={User} error={errors.lastName?.message}>
                 <Input
                   id="lastName"
                   maxLength={50}
+                  autoComplete="family-name"
+                  className={authInputClass(!!errors.lastName)}
                   {...register("lastName")}
-                  className={cn(
-                    "h-11 w-full rounded-xl bg-background/60",
-                    errors.lastName &&
-                      "border-destructive focus-visible:ring-destructive/30",
-                  )}
                 />
-                <FormError error={errors.lastName} />
-              </Field>
+              </AuthField>
             </div>
 
-            {/* Username and Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field className="space-y-1.5">
-                <FieldLabel
-                  htmlFor="username"
-                  className={cn(
-                    "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
-                    errors.username
-                      ? "text-destructive"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  <AtSign className="size-3.5 text-brand-orange" /> Username
-                </FieldLabel>
+              <AuthField
+                id="username"
+                label="Username"
+                icon={AtSign}
+                error={errors.username?.message ?? (isTaken ? "This username is already taken" : undefined)}
+              >
                 <div className="relative">
                   <Input
                     id="username"
                     maxLength={15}
+                    autoComplete="username"
+                    className={authInputClass(!!errors.username || isTaken) + " pr-10"}
                     {...register("username")}
-                    className={cn(
-                      "h-11 w-full rounded-xl bg-background/60 pr-10",
-                      errors.username &&
-                        "border-destructive focus-visible:ring-destructive/30",
-                    )}
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    {isCheckingUsername ? (
-                      <Loader2 className="size-4 animate-spin text-muted-foreground" />
-                    ) : usernameAvailable === true ? (
-                      <CheckCircle2 className="size-4 text-green-500" />
-                    ) : null}
+                    {isChecking && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+                    {isFree && <CheckCircle2 className="size-4 text-green-500" />}
                   </div>
                 </div>
-                <FormError error={errors.username} />
-              </Field>
+              </AuthField>
 
-              <Field className="space-y-1.5">
-                <FieldLabel
-                  htmlFor="phone"
-                  className={cn(
-                    "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
-                    errors.phone ? "text-destructive" : "text-muted-foreground",
-                  )}
-                >
-                  <Phone className="size-3.5 text-brand-orange" /> Phone
-                </FieldLabel>
+              <AuthField id="phone" label="Phone" icon={Phone} error={errors.phone?.message}>
                 <Input
                   id="phone"
                   type="tel"
                   maxLength={15}
+                  autoComplete="tel"
+                  className={authInputClass(!!errors.phone)}
                   {...register("phone")}
-                  className={cn(
-                    "h-11 w-full rounded-xl bg-background/60",
-                    errors.phone &&
-                      "border-destructive focus-visible:ring-destructive/30",
-                  )}
                 />
-                <FormError error={errors.phone} />
-              </Field>
+              </AuthField>
             </div>
 
-            {/* Email and Password */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field className="space-y-1.5">
-                <FieldLabel
-                  htmlFor="email"
-                  className={cn(
-                    "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
-                    errors.email ? "text-destructive" : "text-muted-foreground",
-                  )}
-                >
-                  <Mail className="size-3.5 text-brand-orange" /> Email
-                </FieldLabel>
+              <AuthField id="email" label="Email" icon={Mail} error={errors.email?.message}>
                 <Input
                   id="email"
                   type="email"
                   maxLength={50}
+                  autoComplete="email"
+                  className={authInputClass(!!errors.email)}
                   {...register("email")}
-                  className={cn(
-                    "h-11 w-full rounded-xl bg-background/60",
-                    errors.email &&
-                      "border-destructive focus-visible:ring-destructive/30",
-                  )}
                 />
-                <FormError error={errors.email} />
-              </Field>
+              </AuthField>
 
-              <Field className="space-y-1.5">
-                <FieldLabel
-                  htmlFor="reg-password"
-                  className={cn(
-                    "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
-                    errors.password
-                      ? "text-destructive"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  <Lock className="size-3.5 text-brand-orange" /> Password
-                </FieldLabel>
+              <AuthField id="reg-password" label="Password" icon={Lock} error={errors.password?.message}>
                 <Input
                   id="reg-password"
                   type="password"
                   maxLength={20}
+                  autoComplete="new-password"
+                  className={authInputClass(!!errors.password)}
                   {...register("password")}
-                  className={cn(
-                    "h-11 w-full rounded-xl bg-background/60",
-                    errors.password &&
-                      "border-destructive focus-visible:ring-destructive/30",
-                  )}
                 />
-                <FormError error={errors.password} />
-              </Field>
+              </AuthField>
             </div>
 
-            {/* Department and Gender */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field className="space-y-1.5">
-                <FieldLabel
-                  htmlFor="department"
-                  className={cn(
-                    "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
-                    errors.department
-                      ? "text-destructive"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  <GraduationCap className="size-3.5 text-brand-orange" />{" "}
-                  Department
-                </FieldLabel>
+              <AuthField
+                id="department"
+                label="Department"
+                icon={GraduationCap}
+                error={errors.department?.message ?? errors.customDepartment?.message}
+              >
                 <Controller
                   name="department"
                   control={control}
                   render={({ field }) => (
                     <Select
-                      onValueChange={(val) => {
-                        field.onChange(val);
-                        clearErrors("department");
-                        if (val !== "OTHER") {
-                          clearErrors("customDepartment");
-                        }
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        if (value !== "OTHER") clearErrors("customDepartment");
                       }}
-                      value={field.value || ""}
                     >
-                      <SelectTrigger
-                        id="department"
-                        className={cn(
-                          "h-11 w-full rounded-xl bg-background/60",
-                          errors.department &&
-                            "border-destructive focus:ring-destructive/30",
-                        )}
-                      >
+                      <SelectTrigger id="department" className={authSelectClass(!!errors.department)}>
                         <SelectValue placeholder="Select Department" />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl max-h-60 z-[100]">
@@ -457,56 +241,28 @@ export function RegisterForm({
                     </Select>
                   )}
                 />
-                {watchDepartment === "OTHER" && (
+                {department === "OTHER" && (
                   <Input
+                    maxLength={50}
+                    placeholder="Specify your department..."
+                    className={
+                      authInputClass(!!errors.customDepartment) +
+                      " mt-3 animate-in fade-in slide-in-from-top-2 duration-200"
+                    }
                     {...register("customDepartment", {
                       onChange: () => clearErrors("customDepartment"),
                     })}
-                    maxLength={50}
-                    placeholder="Specify your department..."
-                    className={cn(
-                      "mt-3 h-11 w-full rounded-xl bg-background/60 animate-in fade-in slide-in-from-top-2 duration-200",
-                      errors.customDepartment &&
-                        "border-destructive focus-visible:ring-destructive/30",
-                    )}
                   />
                 )}
-                <FormError
-                  error={errors.department || errors.customDepartment}
-                />
-              </Field>
+              </AuthField>
 
-              <Field className="space-y-1.5">
-                <FieldLabel
-                  htmlFor="gender"
-                  className={cn(
-                    "text-xs font-bold uppercase tracking-wider flex items-center gap-1.5",
-                    errors.gender
-                      ? "text-destructive"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  <Users className="size-3.5 text-brand-orange" /> Gender
-                </FieldLabel>
+              <AuthField id="gender" label="Gender" icon={Users} error={errors.gender?.message}>
                 <Controller
                   name="gender"
                   control={control}
                   render={({ field }) => (
-                    <Select
-                      onValueChange={(val) => {
-                        field.onChange(val);
-                        clearErrors("gender"); // Clears the gender error immediately on selection
-                      }}
-                      value={field.value || ""}
-                    >
-                      <SelectTrigger
-                        id="gender"
-                        className={cn(
-                          "h-11 w-full rounded-xl bg-background/60",
-                          errors.gender &&
-                            "border-destructive focus:ring-destructive/30",
-                        )}
-                      >
+                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <SelectTrigger id="gender" className={authSelectClass(!!errors.gender)}>
                         <SelectValue placeholder="Select Gender" />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl z-[100]">
@@ -516,20 +272,18 @@ export function RegisterForm({
                     </Select>
                   )}
                 />
-                <FormError error={errors.gender} />
-              </Field>
+              </AuthField>
             </div>
 
-            <Field className="pt-4 border-t border-border/60">
+            <div className="pt-4 border-t border-border/60">
               <Button
                 type="submit"
-                disabled={isSubmitting || usernameAvailable === false}
+                disabled={signUp.isPending || isTaken}
                 className="h-11 w-full rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-black italic text-sm tracking-wide shadow-md shadow-brand-orange/20 flex items-center justify-center gap-2"
               >
-                {isSubmitting ? (
+                {signUp.isPending ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" /> Creating
-                    Account...
+                    <Loader2 className="size-4 animate-spin" /> Creating Account...
                   </>
                 ) : (
                   <>
@@ -537,7 +291,7 @@ export function RegisterForm({
                   </>
                 )}
               </Button>
-            </Field>
+            </div>
 
             <p className="text-center text-[13px] font-medium text-muted-foreground mt-3">
               Already have an account?{" "}

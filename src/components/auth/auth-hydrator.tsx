@@ -1,56 +1,63 @@
-'use client';
+"use client";
+
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 import { AuthApi } from "@/lib/api/auth";
-import { useAuth } from "@/store/auth";
-import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { SESSION_EXPIRED_EVENT } from "@/lib/api/api";
+import { authKeys } from "@/hooks/use-me";
 
+// App-wide auth plumbing. Who is logged in lives only in useMe; this file only:
+//   1. handles the return from Google login (?oauth=success)
+//   2. marks the user as logged out when the session can no longer be renewed
 export function AuthHydrator({ children }: { children: React.ReactNode }) {
-    const searchParams = useSearchParams();
-    const setUser = useAuth((s) => s.setAuth);
-    const isOauthSuccess = searchParams.get('oauth') === 'success';
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
+  const isOauthSuccess = searchParams.get("oauth") === "success";
 
-    const [isMounted, setIsMounted] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // 1. Return from Google login
+  useEffect(() => {
+    if (!isOauthSuccess) return;
 
-    useEffect(() => {
-        setIsMounted(true);
-        if (localStorage.getItem('is_authenticated') === 'true') {
-            setIsAuthenticated(true);
-        }
-    }, []);
+    // The backend just set the cookies, so a cached "not logged in" answer is outdated
+    queryClient
+      .fetchQuery({ queryKey: authKeys.me, queryFn: AuthApi.getMe, staleTime: 0 })
+      .catch(() => undefined) // if it fails, useMe will show the real state
+      .finally(() => {
+        // Remove ?oauth=success from the address bar
+        const url = new URL(window.location.href);
+        url.searchParams.delete("oauth");
+        window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+      });
+  }, [isOauthSuccess, queryClient]);
 
-    const { data: userProfile, isLoading } = useQuery({
-        queryKey: ['auth', 'me'],
-        queryFn: AuthApi.getMe,
-        enabled: isMounted && (isOauthSuccess || isAuthenticated),
-        staleTime: Infinity,
-        retry: false,
-    });
+  // 2. Session expired: api() could not refresh the token
+  useEffect(() => {
+    const onExpired = () => queryClient.setQueryData(authKeys.me, null);
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
+  }, [queryClient]);
 
-    useEffect(() => {
-        if (!userProfile) return;
-
-        localStorage.setItem('is_authenticated', 'true');
-        setUser(userProfile);
-        
-        if (isOauthSuccess) {
-            const url = new URL(window.location.href);
-            url.searchParams.delete('oauth');
-            window.history.replaceState(null, '', url.pathname + url.search + url.hash);
-        }
-    }, [userProfile, isOauthSuccess, setUser]);
-
-
-    if (isMounted && isOauthSuccess && isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
-                <Loader2 className="size-8 animate-spin text-brand-orange" />
-            </div>
-        );
+  // TEMPORARY: remove keys the old auth store left in people's browsers (delete after a few weeks)
+  useEffect(() => {
+    try {
+      localStorage.removeItem("auth-storage");
+      localStorage.removeItem("is_authenticated");
+    } catch {
+      // localStorage can be blocked: nothing to clean then
     }
+  }, []);
 
-    return <>{children}</>;
+  // Keep the spinner until the answer is in and the URL is clean
+  if (isOauthSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="size-8 animate-spin text-brand-orange" />
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 }

@@ -36,12 +36,27 @@ import {
 
 import Logo from '../logo';
 import { AuthButton } from '../auth/auth-button';
-import { useAuth } from '@/store/auth';
 import { useLogout } from '@/hooks/use-logout';
+import { User } from '@/types/contracts/auth';
+import { useMe } from '@/hooks/use-me';
 
 export default function Navbar() {
-  const user = useAuth((state) => state.user);
-  return user ? <UserNav /> : <VisitorNav />;
+  const { data: user, isPending } = useMe();
+
+  // Still asking the backend who is logged in: show only the logo, no wrong buttons
+  if (isPending) return <PendingNav />;
+
+  return user ? <UserNav user={user} /> : <VisitorNav />;
+}
+
+function PendingNav() {
+  return (
+    <header className="absolute top-0 left-0 w-full z-50 bg-transparent pt-6 px-6 md:px-12 lg:px-16">
+      <div className="max-w-7xl mx-auto flex items-center w-full">
+        <Logo />
+      </div>
+    </header>
+  );
 }
 
 function VisitorNav() {
@@ -115,9 +130,10 @@ function VisitorNav() {
   );
 }
 
-function UserNav() {
+
+function UserNav({ user }: { user: User }) {
   const [isOpen, setIsOpen] = useState(false);
-  const user = useAuth((state) => state.user);
+  // (delete the old `const user = useAuth(...)` line)
   
   const pathname = usePathname(); 
   

@@ -1,39 +1,24 @@
+'use client';
+
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { AuthButton } from '../auth/auth-button';
-import { useAuth } from '@/store/auth';
+import { useMe } from '@/hooks/use-me';
 
-function useIsLoggedIn() {
-  const user = useAuth((state) => state.user);
-  return !!user;
-}
+
 
 export default function HeroSection() {
+  const { data: user } = useMe();
   return (
     <section
       className={cn(
         'relative overflow-hidden bg-secondary/50 font-(family-name:--font-poppins) dark:bg-[#121417] pt-27'
       )}
     >
-      {/* decorative bars (desktop only) */}
-      {/* <span
-        aria-hidden
-        className="absolute bottom-[75px] left-[460px] hidden h-2.5 w-[335px] bg-[#2B2F33] dark:bg-white lg:block"
-      /> */}
       <span
         aria-hidden
         className="absolute right-0 top-98 hidden h-2.5 w-[18%]   bg-[#2B2F33] dark:bg-white lg:block"
       />
-
-      {/* tennis ball */}
-      {/* <Image
-        src="/tenis_ball.png"
-        alt=""
-        width={135}
-        height={135}
-        priority
-        className="pointer-events-none absolute right-4 top-4 z-20 w-[48px] sm:w-[110px] lg:right-[100px] lg:top-[72px] lg:w-[135px]"
-      /> */}
 
       <div className="relative mx-auto grid max-w-360 items-start gap-10 px-5 pb-10 pt-20 sm:py-10 lg:grid-cols-[535px_1fr] lg:gap-17.5 lg:px-0 lg:py-0 lg:pl-5.5">
         {/* court + rackets image (hidden on phones) */}
@@ -57,7 +42,7 @@ export default function HeroSection() {
             <p className="mt-8 text-lg text-[#2B2F33] dark:text-white sm:text-[22px] truncate">
               All Rackets Sport In One Place
             </p>
-            {!useIsLoggedIn() && (
+            {user === null && (
               <AuthButton
                 title="Get Started"
                 className="mt-8 h-14.25 w-fit rounded-md bg-primary px-10 text-xl font-normal text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-primary/80"
