@@ -25,9 +25,12 @@ function mapInboxItem(item: InboxItem): NotificationRealtimePayload {
     event_id: item.notification.event_id,
     sender_type: item.notification.sender_type,
     sender_id: item.notification.sender_id,
+    sender_name: item.notification.sender_name,
+    sender_avatar_url: item.notification.sender_avatar_url,
     category: item.notification.category,
     type: item.notification.type,
     club_id: item.notification.club_id,
+    club_name: item.notification.club_name,
     sent_at: item.notification.sent_at,
     is_read: item.is_read,
   };
@@ -93,6 +96,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   // Connect to Socket.IO and listen for new notifications.
   useEffect(() => {
     if (!userId) {
+      setNotifications([]);
       setConnected(false);
       return;
     }
