@@ -6,8 +6,7 @@ import MatchRequestForm from "@/components/match/match-request-form";
 import { useMe } from "@/hooks/use-me";
 
 export default function MatchPage() {
-  const params = useParams<{ name: string }>();
-  const clubSlug = params?.name ?? "";
+  const { slug: clubSlug } = useParams<{ slug: string }>();
 
   const { data: user } = useMe();
   const fullName = `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim();
