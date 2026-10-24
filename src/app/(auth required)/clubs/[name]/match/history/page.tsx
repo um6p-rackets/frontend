@@ -1,20 +1,16 @@
-'use client';
+"use client";
 
-import { useParams } from 'next/navigation';
-import { useAuth } from '@/store/auth';
-import MatchHistorySection from '@/components/club/match-history-section';
+import { useParams } from "next/navigation";
+import { MemberGate } from "@/components/club/member-gate";
+import MatchHistorySection from "@/components/club/match-history-section";
 
 export default function MatchHistoryPage() {
   const params = useParams<{ name: string }>();
-  const clubSlug = params?.name ?? 'tennis';
-  const user = useAuth((state) => state.user);
-
-  const currentMemberId = user?.id ? Number(user.id) : 1;
+  const clubSlug = params?.name ?? "";
 
   return (
-    <MatchHistorySection
-      clubSlug={clubSlug}
-      currentMemberId={currentMemberId}
-    />
+    <MemberGate slug={clubSlug}>
+      {(memberId) => <MatchHistorySection clubSlug={clubSlug} currentMemberId={memberId} />}
+    </MemberGate>
   );
 }

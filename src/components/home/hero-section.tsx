@@ -1,14 +1,14 @@
+'use client';
+
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { AuthButton } from '../auth/auth-button';
-import { useAuth } from '@/store/auth';
+import { useMe } from '@/hooks/use-me';
 
-function useIsLoggedIn() {
-  const user = useAuth((state) => state.user);
-  return !!user;
-}
+
 
 export default function HeroSection() {
+  const { data: user } = useMe();
   return (
     <section
       className={cn(
@@ -42,7 +42,7 @@ export default function HeroSection() {
             <p className="mt-8 text-lg text-[#2B2F33] dark:text-white sm:text-[22px] truncate">
               All Rackets Sport In One Place
             </p>
-            {!useIsLoggedIn() && (
+            {user === null && (
               <AuthButton
                 title="Get Started"
                 className="mt-8 h-14.25 w-fit rounded-md bg-primary px-10 text-xl font-normal text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-primary/80"
