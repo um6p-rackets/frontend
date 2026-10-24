@@ -2,7 +2,12 @@ import { api, post, ApiError } from "./api";
 import { useAuth } from "@/store/auth";
 import { getUrl } from "../utils";
 import type { User } from "@/types"; // adjust to your real user type name
-import { forgotPasswordPayload, loginPayload, registerPayload, resetPasswordPayload } from "@/types";
+import {
+  forgotPasswordPayload,
+  loginPayload,
+  registerPayload,
+  resetPasswordPayload,
+} from "@/types";
 
 type AuthResponse = { user: User };
 
@@ -26,13 +31,14 @@ export const AuthApi = {
   },
 
   logout: async () => {
-    await post("/auth/logout");
-    localStorage.removeItem("is_authenticated");
-    return true;
+    try {
+      await post("/auth/logout");
+    } finally {
+      localStorage.removeItem("is_authenticated");
+    }
   },
 
-  forgotPassword: (payload: forgotPasswordPayload) =>
-    post("/auth/forget-password", payload),
+  forgotPassword: (payload: forgotPasswordPayload) => post("/auth/forget-password", payload),
 
   resetPassword: (payload: resetPasswordPayload) =>
     post("/auth/reset-password", {

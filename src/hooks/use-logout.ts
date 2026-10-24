@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import { useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
-import { AuthApi } from '@/lib/api/auth';
-import { useAuth } from '@/store/auth';
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { AuthApi } from "@/lib/api/auth";
+import { authKeys } from "@/hooks/use-me";
+import { useAuth } from "@/store/auth";
 
 export function useLogout() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const clearAuth = useAuth((state) => state.logout);
 
-  const performLogout = async () => {
+  return async () => {
     try {
-      await AuthApi.logout(); // Clears HttpOnly cookies & localStorage flag
-    } catch (error) {
-      console.warn('Backend logout failed, clearing local state anyway.');
+      await AuthApi.logout(); // clears the HttpOnly cookies
+    } catch {
+      // if server fails we just sigout locally, we can do nothing for that
     } finally {
-      queryClient.clear(); // Wipes sensitive data from React Query memory
-      clearAuth(); // Clears Zustand user state
-      router.push('/'); // Redirects to home
+      queryClient.clear(); // wipes private data from the cache
+      queryClient.setQueryData(authKeys.me, null); // "not logged in", no refetch needed
+      clearAuth(); // TODO: remove when the Zustand auth store is deleted
+      router.push("/");
     }
   };
-
-  return performLogout;
 }
