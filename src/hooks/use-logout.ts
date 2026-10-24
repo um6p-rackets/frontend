@@ -5,22 +5,22 @@ import { useRouter } from "next/navigation";
 import { AuthApi } from "@/lib/api/auth";
 import { authKeys } from "@/hooks/use-me";
 
+import { broadcastAuthChange } from "@/hooks/use-auth-sync";
+
 export function useLogout() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
   return async () => {
     try {
-      await AuthApi.logout(); // clears the HttpOnly cookies
-    } catch {
-      // best thing we can do is make him logout in front side
-    } finally {
-      // 1. Tell everyone listening to useMe: not logged in
+      await AuthApi.logout(); 
+    } catch { } // force front-end logout regardless
+    finally {
       queryClient.setQueryData(authKeys.me, null);
-      // 2. Wipe all other private data, but keep the auth key
-      queryClient.removeQueries({
-        predicate: (query) => query.queryKey[0] !== authKeys.me[0],
-      });
+      queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== authKeys.me[0] });
+      
+      broadcastAuthChange();
+      
       router.push("/");
     }
   };

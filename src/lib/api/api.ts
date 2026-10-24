@@ -1,5 +1,5 @@
 import { ErrorBody } from "@/types/error";
-import { getUrl } from "../utils";
+import { getUrl, hasSessionHint } from "../utils";
 
 const TIMEOUT_MS = 8000;
 
@@ -59,16 +59,24 @@ function send(path: string, init?: RequestInit) {
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     let res = await send(path, init);
-
-    // Expired access token: refresh once, retry once
+    
+    // Expired access token or missing session
     if (res.status === 401 && canRefresh(path)) {
-      try {
-        await refreshOnce();
-      } catch {
+      if (hasSessionHint()) {
+        // Tab thinks it's logged in. Try to refresh.
+        try {
+          await refreshOnce();
+        } catch {
+          window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+          throw new ApiError(401, "Session expired. Please log in again.");
+        }
+        res = await send(path, init); // Retry original request
+      } else {
+        // Tab 1 just discovered Tab 2 logged out. 
+        // Dispatch the event to wipe the React Query cache instantly.
         window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
-        throw new ApiError(401, "Session expired. Please log in again.");
+        throw new ApiError(401, "Session expired.");
       }
-      res = await send(path, init);
     }
 
     if (!res.ok) {
