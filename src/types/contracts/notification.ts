@@ -18,7 +18,7 @@ export interface NotificationRealtimePayload {
   type: NotificationType;
   club_id: string | null;
   club_name: string | null;
-  sent_at: string;
+  sent_at: string;  
   is_read: boolean;
 }
 

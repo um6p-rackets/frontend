@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { io, type Socket } from "socket.io-client";
 import type {
   InboxResponse,
@@ -15,9 +22,17 @@ interface NotificationContextType {
   connected: boolean;
 }
 
-const NotificationContext = createContext<NotificationContextType | null>(null);
+const NotificationContext = createContext<NotificationContextType | null>(
+  null,
+);
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:3010";
+const WS_URL =
+  process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:3010";
+
+const notificationKeys = {
+  inbox: (userId: string | number) =>
+    ["notifications", "inbox", userId] as const,
+};
 
 function mapInboxItem(item: InboxItem): NotificationRealtimePayload {
   return {
@@ -36,67 +51,30 @@ function mapInboxItem(item: InboxItem): NotificationRealtimePayload {
   };
 }
 
-export function NotificationProvider({ children }: { children: ReactNode }) {
-  // const user = useAuth((state) => state.user);
+export function NotificationProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const { data: user } = useMe();
   const userId = user?.id;
+  const queryClient = useQueryClient();
 
-  const [notifications, setNotifications] = useState<NotificationRealtimePayload[]>([]);
   const [connected, setConnected] = useState(false);
 
-  // Fetch the persisted inbox for the authenticated user.
+  const inboxQuery = useQuery({
+    queryKey: notificationKeys.inbox(userId ?? ""), // the key to the cached data for a specific user
+    queryFn: async (): Promise<InboxResponse> => getInbox(1, 10), // how to get the data
+    enabled: !!userId,
+  });
+
+  const notifications: NotificationRealtimePayload[] =
+    inboxQuery.data?.items.map(mapInboxItem) ?? [];
+
+  // inboxQuery we could also
+  // inboxQuery.isLoading, inboxQuery.isError, inboxQuery.error, inboxQuery.refetch
   useEffect(() => {
     if (!userId) {
-      setNotifications([]);
-      return;
-    }
-
-    let cancelled = false;
-
-    async function loadInbox() {
-      try {
-        const response: InboxResponse = await getInbox(1, 10);
-
-        if (cancelled) return;
-
-        const inbox = response.items.map(mapInboxItem);
-
-        setNotifications((previous) => {
-          const merged = new Map<string, NotificationRealtimePayload>();
-
-          inbox.forEach((item) => {
-            merged.set(item.notification_id, item);
-          });
-
-          // Preserve notifications received while the request
-          // was in progress.
-          previous.forEach((item) => {
-            if (!merged.has(item.notification_id)) {
-              merged.set(item.notification_id, item);
-            }
-          });
-
-          return Array.from(merged.values()).sort(
-            (a, b) => new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime(),
-          );
-        });
-      } catch (error) {
-        if (!cancelled) {
-          console.error("Failed to load notification inbox:", error);
-        }
-      }
-    }
-
-    loadInbox();
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
-
-  // Connect to Socket.IO and listen for new notifications.
-  useEffect(() => {
-    if (!userId) {
-      setNotifications([]);
       setConnected(false);
       return;
     }
@@ -108,22 +86,71 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     socket.on("connect", () => setConnected(true));
     socket.on("disconnect", () => setConnected(false));
 
-    socket.on("notification:new", (notification: NotificationRealtimePayload) => {
-      setNotifications((previous) => [
-        notification,
-        ...previous.filter((item) => item.notification_id !== notification.notification_id),
-      ]);
-    });
+    socket.on(
+      "notification:new",
+      (notification: NotificationRealtimePayload) => {
+        queryClient.setQueryData<InboxResponse>( // this for real time updating the query cache
+          notificationKeys.inbox(userId),
+          (previous) => {
+            if (!previous) {
+              // The inbox query has not loaded yet.
+              // Trigger a refetch rather than losing the event.
+              void queryClient.invalidateQueries({
+                queryKey: notificationKeys.inbox(userId),
+              });
+              return previous;
+            }
+
+            const newItem: InboxItem = {
+              id: notification.notification_id,
+              notification_id: notification.notification_id,
+              receiver_user_id: String(userId),
+              is_read: false,
+              read_at: null,
+              notification: {
+                id: notification.notification_id,
+                event_id: notification.event_id,
+                sender_type: notification.sender_type,
+                sender_id: notification.sender_id,
+                sender_name: notification.sender_name,
+                sender_avatar_url: notification.sender_avatar_url,
+                category: notification.category,
+                type: notification.type,
+                club_id: notification.club_id,
+                club_name: notification.club_name,
+                sent_at: notification.sent_at,
+              },
+            };
+
+            const items = [
+              newItem,
+              ...previous.items.filter(
+                (item) =>
+                  item.notification_id !== notification.notification_id,
+              ),
+            ].slice(0, 10);
+
+            return {
+              ...previous,
+              items,
+            };
+          },
+        );
+      },
+    );
 
     socket.on("connect_error", (error) => {
-      console.error("Notification socket connection failed:", error.message);
+      console.error(
+        "Notification socket connection failed:",
+        error.message,
+      );
     });
 
     return () => {
       socket.disconnect();
       setConnected(false);
     };
-  }, [userId]);
+  }, [userId, queryClient]);
 
   return (
     <NotificationContext.Provider value={{ notifications, connected }}>
@@ -136,7 +163,9 @@ export function useNotifications() {
   const context = useContext(NotificationContext);
 
   if (!context) {
-    throw new Error("useNotifications must be used inside NotificationProvider");
+    throw new Error(
+      "useNotifications must be used inside NotificationProvider",
+    );
   }
 
   return context;
