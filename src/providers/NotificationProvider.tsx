@@ -1,35 +1,26 @@
-'use client';
+"use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from 'react';
-import { io, type Socket } from 'socket.io-client';
-import { useAuth } from '@/store/auth';
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { io, type Socket } from "socket.io-client";
+import { useAuth } from "@/store/auth";
 import type {
   InboxResponse,
   InboxItem,
   NotificationRealtimePayload,
-} from '@/types/contracts/notification';
-import { getInbox } from '@/lib/api/notification';
-
+} from "@/types/contracts/notification";
+import { getInbox } from "@/lib/api/notification";
+import { useMe } from "@/hooks/use-me";
 
 interface NotificationContextType {
   notifications: NotificationRealtimePayload[];
   connected: boolean;
 }
 
-const NotificationContext =
-  createContext<NotificationContextType | null>(null);
+const NotificationContext = createContext<NotificationContextType | null>(null);
 
-const WS_URL = 'http://localhost:3010'; // Replace with your WebSocket server URL
+const WS_URL = "http://localhost:3010"; // Replace with your WebSocket server URL
 
-function mapInboxItem(
-  item: InboxItem,
-): NotificationRealtimePayload {
+function mapInboxItem(item: InboxItem): NotificationRealtimePayload {
   return {
     notification_id: item.notification_id,
     event_id: item.notification.event_id,
@@ -43,16 +34,12 @@ function mapInboxItem(
   };
 }
 
-export function NotificationProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  const user = useAuth((state) => state.user);
+export function NotificationProvider({ children }: { children: ReactNode }) {
+  // const user = useAuth((state) => state.user);
+    const { data: user } = useMe();
 
   const [hydrated, setHydrated] = useState(false);
-  const [notifications, setNotifications] =
-    useState<NotificationRealtimePayload[]>([]);
+  const [notifications, setNotifications] = useState<NotificationRealtimePayload[]>([]);
   const [connected, setConnected] = useState(false);
 
   // Wait for Zustand persistence to hydrate.
@@ -79,18 +66,14 @@ export function NotificationProvider({
 
     async function loadInbox() {
       try {
-        const response: InboxResponse =
-          await getInbox(1, 10);
+        const response: InboxResponse = await getInbox(1, 10);
 
         if (cancelled) return;
 
         const inbox = response.items.map(mapInboxItem);
 
         setNotifications((previous) => {
-          const merged = new Map<
-            string,
-            NotificationRealtimePayload
-          >();
+          const merged = new Map<string, NotificationRealtimePayload>();
 
           inbox.forEach((item) => {
             merged.set(item.notification_id, item);
@@ -105,20 +88,17 @@ export function NotificationProvider({
           });
 
           return Array.from(merged.values()).sort(
-            (a, b) =>
-              new Date(b.sent_at).getTime() -
-              new Date(a.sent_at).getTime(),
+            (a, b) => new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime(),
           );
         });
       } catch (error) {
         if (!cancelled) {
-          console.error('Failed to load notification inbox:', error);
+          console.error("Failed to load notification inbox:", error);
         }
       }
     }
 
     loadInbox();
-
     return () => {
       cancelled = true;
     };
@@ -135,27 +115,18 @@ export function NotificationProvider({
       withCredentials: true,
     });
 
-    socket.on('connect', () => setConnected(true));
-    socket.on('disconnect', () => setConnected(false));
+    socket.on("connect", () => setConnected(true));
+    socket.on("disconnect", () => setConnected(false));
 
-    socket.on(
-      'notification:new',
-      (notification: NotificationRealtimePayload) => {
-        setNotifications((previous) => [
-          notification,
-          ...previous.filter(
-            (item) =>
-              item.notification_id !== notification.notification_id,
-          ),
-        ]);
-      },
-    );
+    socket.on("notification:new", (notification: NotificationRealtimePayload) => {
+      setNotifications((previous) => [
+        notification,
+        ...previous.filter((item) => item.notification_id !== notification.notification_id),
+      ]);
+    });
 
-    socket.on('connect_error', (error) => {
-      console.error(
-        'Notification socket connection failed:',
-        error.message,
-      );
+    socket.on("connect_error", (error) => {
+      console.error("Notification socket connection failed:", error.message);
     });
 
     return () => {
@@ -165,9 +136,7 @@ export function NotificationProvider({
   }, [hydrated, user?.id]);
 
   return (
-    <NotificationContext.Provider
-      value={{ notifications, connected }}
-    >
+    <NotificationContext.Provider value={{ notifications, connected }}>
       {children}
     </NotificationContext.Provider>
   );
@@ -177,9 +146,7 @@ export function useNotifications() {
   const context = useContext(NotificationContext);
 
   if (!context) {
-    throw new Error(
-      'useNotifications must be used inside NotificationProvider',
-    );
+    throw new Error("useNotifications must be used inside NotificationProvider");
   }
 
   return context;
