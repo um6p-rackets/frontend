@@ -17,8 +17,11 @@ export function useLogout() {
     } catch {
       // if server fails we just sigout locally, we can do nothing for that
     } finally {
-      queryClient.clear(); // wipes private data from the cache
-      queryClient.setQueryData(authKeys.me, null); // "not logged in", no refetch needed
+      queryClient.setQueryData(authKeys.me, null); // listeners are told: not logged in
+      // Wipe all the private data (matches, members...) except the auth key
+      queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== authKeys.me[0] });
+      // queryClient.clear(); // wipes private data from the cache
+      //queryClient.setQueryData(authKeys.me, null); // "not logged in", no refetch needed
       clearAuth(); // TODO: remove when the Zustand auth store is deleted
       router.push("/");
     }

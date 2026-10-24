@@ -15,25 +15,10 @@ export default function HeroSection() {
         'relative overflow-hidden bg-secondary/50 font-(family-name:--font-poppins) dark:bg-[#121417] pt-27'
       )}
     >
-      {/* decorative bars (desktop only) */}
-      {/* <span
-        aria-hidden
-        className="absolute bottom-[75px] left-[460px] hidden h-2.5 w-[335px] bg-[#2B2F33] dark:bg-white lg:block"
-      /> */}
       <span
         aria-hidden
         className="absolute right-0 top-98 hidden h-2.5 w-[18%]   bg-[#2B2F33] dark:bg-white lg:block"
       />
-
-      {/* tennis ball */}
-      {/* <Image
-        src="/tenis_ball.png"
-        alt=""
-        width={135}
-        height={135}
-        priority
-        className="pointer-events-none absolute right-4 top-4 z-20 w-[48px] sm:w-[110px] lg:right-[100px] lg:top-[72px] lg:w-[135px]"
-      /> */}
 
       <div className="relative mx-auto grid max-w-360 items-start gap-10 px-5 pb-10 pt-20 sm:py-10 lg:grid-cols-[535px_1fr] lg:gap-17.5 lg:px-0 lg:py-0 lg:pl-5.5">
         {/* court + rackets image (hidden on phones) */}
