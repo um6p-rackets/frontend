@@ -44,7 +44,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   // Fetch the persisted inbox for the authenticated user.
   useEffect(() => {
     if (!userId) {
-      setNotifications([]);
       return;
     }
 
@@ -86,6 +85,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     loadInbox();
     return () => {
+      setNotifications([]);
+
       cancelled = true;
     };
   }, [userId]);
@@ -93,7 +94,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   // Connect to Socket.IO and listen for new notifications.
   useEffect(() => {
     if (!userId) {
-      setConnected(false);
       return;
     }
 
@@ -116,8 +116,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
-      socket.disconnect();
       setConnected(false);
+      socket.disconnect();
     };
   }, [userId]);
 

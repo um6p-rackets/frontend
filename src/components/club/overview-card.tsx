@@ -3,19 +3,17 @@ import { Card } from '../ui/card';
 import { ReactNode } from 'react';
 
 export default function OverviewCard({
-  clubName,
   desc,
   members,
   coach,
   actions,
   topAction,
 }: {
-  clubName?: string;
   desc: string;
   members: number;
   coach?: string | null;
   actions?: ReactNode;
-  topAction?: ReactNode; // <--- 1. Type it
+  topAction?: ReactNode;
 }) {
   const coachDisplay = coach && coach.trim() !== '' ? coach : 'Pending';
 

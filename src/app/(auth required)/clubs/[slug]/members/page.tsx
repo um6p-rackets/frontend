@@ -25,9 +25,7 @@ const ROLE_OPTIONS = [
 ];
 
 export default function ClubMembersPage() {
-  const params = useParams<{ name: string }>();
-  const slug = params?.name ?? ""; // TODO: becomes params.slug when the folder is renamed
-
+  const { slug } = useParams<{ slug: string }>();
   // The Select works with strings, so we keep the role as a string and convert it
   const [roleValue, setRoleValue] = useState(MemberRole.MEMBER);
   const [search, setSearch] = useState("");

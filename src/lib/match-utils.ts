@@ -1,6 +1,6 @@
 import type { MatchDetail, Player, TeamWithPlayers } from "@/types/contracts/club";
 
-const MATCH_TIME_ZONE = "Africa/Casablanca";
+import { APP_TIME_ZONE } from "@/lib/date-utils";
 
 // Seeded users can have no first or last name: fall back to the login
 export function playerName(player: Player | null | undefined) {
@@ -27,7 +27,7 @@ export function getMySide(match: MatchDetail, memberId: number): "team1" | "team
 
 // Dates and times always use the app time zone, not the browser one
 export const formatMatchDate = (iso: string) =>
-  new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeZone: MATCH_TIME_ZONE }).format(
+  new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeZone: APP_TIME_ZONE }).format(
     new Date(iso),
   );
 
@@ -35,5 +35,5 @@ export const formatMatchTime = (iso: string) =>
   new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: MATCH_TIME_ZONE,
+    timeZone: APP_TIME_ZONE,
   }).format(new Date(iso));

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { authInputClass, authLabelClass, FieldError } from "@/components/auth/form-parts";
+// eslint-disable-next-line no-restricted-imports -- oauthLogin is a page redirect, not a data call
 import { AuthApi } from "@/lib/api/auth";
 import { useLogin } from "@/hooks/use-auth-mutations";
 import { loginSchema, type LoginValues } from "@/lib/schemas/auth";
