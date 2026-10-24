@@ -1,6 +1,20 @@
 import { ErrorBody } from "@/types/error";
-import { useAuth } from "@/store/auth";
 import { getUrl } from "../utils";
+
+const TIMEOUT_MS = 8000;
+
+// Sent when the session cannot be renewed. AuthHydrator listens to it
+// and marks the user as logged out in the cache.
+export const SESSION_EXPIRED_EVENT = "auth:session-expired";
+
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
+    super(message);
+  }
+}
 
 // A 401 on login, register, etc. means "wrong credentials", not "expired token".
 // Only /auth/me can be a real expired token, so it is allowed to refresh.
@@ -15,6 +29,7 @@ async function refreshTokens() {
   if (!res.ok) throw new ApiError(res.status, "Session expired");
 }
 
+// Only one refresh at a time: every 401 request waits for the same promise
 let refreshPromise: Promise<void> | null = null;
 
 function refreshOnce() {
@@ -22,24 +37,6 @@ function refreshOnce() {
     refreshPromise = null;
   });
   return refreshPromise;
-}
-
-// Shortcut for JSON POST requests
-export const post = <T>(path: string, body?: unknown) =>
-  api<T>(path, {
-    method: "POST",
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-
-const TIMEOUT_MS = 8000;
-
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
 }
 
 // One network call: cookies, JSON header (only with a body), timeout
@@ -63,12 +60,12 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     let res = await send(path, init);
 
-    // Expired access token: refresh once, retry once (never for /auth/ routes)
+    // Expired access token: refresh once, retry once
     if (res.status === 401 && canRefresh(path)) {
       try {
         await refreshOnce();
       } catch {
-        useAuth.getState().logout();
+        window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
         throw new ApiError(401, "Session expired. Please log in again.");
       }
       res = await send(path, init);
@@ -92,3 +89,10 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
     throw err;
   }
 }
+
+// Shortcut for JSON POST requests
+export const post = <T>(path: string, body?: unknown) =>
+  api<T>(path, {
+    method: "POST",
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });

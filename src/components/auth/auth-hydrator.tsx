@@ -6,15 +6,18 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
 import { AuthApi } from "@/lib/api/auth";
+import { SESSION_EXPIRED_EVENT } from "@/lib/api/api";
 import { authKeys } from "@/hooks/use-me";
 
-// Handles the return from Google login (?oauth=success).
-// Who is logged in now comes only from useMe, so this file no longer stores the user.
+// App-wide auth plumbing. Who is logged in lives only in useMe; this file only:
+//   1. handles the return from Google login (?oauth=success)
+//   2. marks the user as logged out when the session can no longer be renewed
 export function AuthHydrator({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const isOauthSuccess = searchParams.get("oauth") === "success";
 
+  // 1. Return from Google login
   useEffect(() => {
     if (!isOauthSuccess) return;
 
@@ -29,6 +32,23 @@ export function AuthHydrator({ children }: { children: React.ReactNode }) {
         window.history.replaceState(null, "", url.pathname + url.search + url.hash);
       });
   }, [isOauthSuccess, queryClient]);
+
+  // 2. Session expired: api() could not refresh the token
+  useEffect(() => {
+    const onExpired = () => queryClient.setQueryData(authKeys.me, null);
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
+  }, [queryClient]);
+
+  // TEMPORARY: remove keys the old auth store left in people's browsers (delete after a few weeks)
+  useEffect(() => {
+    try {
+      localStorage.removeItem("auth-storage");
+      localStorage.removeItem("is_authenticated");
+    } catch {
+      // localStorage can be blocked: nothing to clean then
+    }
+  }, []);
 
   // Keep the spinner until the answer is in and the URL is clean
   if (isOauthSuccess) {
