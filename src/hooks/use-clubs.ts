@@ -10,8 +10,8 @@ import {
   joinClubSession,
   leaveClub,
   leaveClubSession,
+  updateClub,
 } from "@/lib/api/club";
-import { api } from "@/lib/api/api";
 import { useMe } from "./use-me";
 
 
@@ -73,15 +73,7 @@ export function useUpdateClub(slug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { name?: string; description?: string }) => {
-      return api<unknown>(`/clubs/${slug}`, {
-        method: "PATCH",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    },
+    mutationFn: (data: { name?: string; description?: string }) => updateClub(slug, data),
     onSuccess: () => {
       toast.success("Club updated successfully!");
       queryClient.invalidateQueries({ queryKey: clubKeys.detail(slug) });

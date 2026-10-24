@@ -75,3 +75,9 @@ export const leaveClub = (slug: string) =>
 
 export const cancelJoinRequest = (slug: string) =>
   api<{ success: boolean }>(`${CLUBS}/${slug}/join`, { method: "DELETE" });
+
+export const updateClub = (slug: string, data: { name?: string; description?: string }) =>
+  api<Club>(`${CLUBS}/${slug}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
