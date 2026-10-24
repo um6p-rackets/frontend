@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { io, type Socket } from "socket.io-client";
-import { useAuth } from "@/store/auth";
 import type {
   InboxResponse,
   InboxItem,
@@ -18,7 +17,7 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
-const WS_URL = "http://localhost:3010"; // Replace with your WebSocket server URL
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:3010";
 
 function mapInboxItem(item: InboxItem): NotificationRealtimePayload {
   return {
@@ -36,28 +35,15 @@ function mapInboxItem(item: InboxItem): NotificationRealtimePayload {
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   // const user = useAuth((state) => state.user);
-    const { data: user } = useMe();
+  const { data: user } = useMe();
+  const userId = user?.id;
 
-  const [hydrated, setHydrated] = useState(false);
   const [notifications, setNotifications] = useState<NotificationRealtimePayload[]>([]);
   const [connected, setConnected] = useState(false);
 
-  // Wait for Zustand persistence to hydrate.
-  useEffect(() => {
-    const unsubscribe = useAuth.persist.onFinishHydration(() => {
-      setHydrated(true);
-    });
-
-    if (useAuth.persist.hasHydrated()) {
-      setHydrated(true);
-    }
-
-    return unsubscribe;
-  }, []);
-
   // Fetch the persisted inbox for the authenticated user.
   useEffect(() => {
-    if (!hydrated || !user) {
+    if (!userId) {
       setNotifications([]);
       return;
     }
@@ -102,11 +88,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [hydrated, user?.id]);
+  }, [userId]);
 
   // Connect to Socket.IO and listen for new notifications.
   useEffect(() => {
-    if (!hydrated || !user) {
+    if (!userId) {
       setConnected(false);
       return;
     }
@@ -133,7 +119,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       socket.disconnect();
       setConnected(false);
     };
-  }, [hydrated, user?.id]);
+  }, [userId]);
 
   return (
     <NotificationContext.Provider value={{ notifications, connected }}>

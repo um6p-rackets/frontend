@@ -134,7 +134,6 @@ function VisitorNav() {
 
 function UserNav({ user }: { user: User }) {
   const [isOpen, setIsOpen] = useState(false);
-  // (delete the old `const user = useAuth(...)` line)
   
   const pathname = usePathname(); 
    // still testing 
