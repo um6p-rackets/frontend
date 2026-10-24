@@ -1,21 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import {
   Lock,
   Loader2,
   Plus,
   History,
-  CheckCircle2,
-  UserCheck,
-  ShieldCheck,
-  MoreVertical,
-  LogOut,
-  UserMinus,
-  UserX
-} from 'lucide-react';
+} from "lucide-react";
 
 import ClubTitle from '@/components/club/club-title';
 import OverviewCard from '@/components/club/overview-card';
@@ -24,26 +17,20 @@ import Leaderboard from '@/components/club/leaderboard';
 import AcceptMatchModal from '@/components/club/accept-match-modal';
 import AcceptJoinModal from '@/components/club/accept-join-modal';
 import ManageLeadersModal from '@/components/club/manage-leaders-modal';
+import EditClubModal from '@/components/club/edit-club-modal';
+import ClubDropdownMenu from '@/components/club/club-dropdown-menu';
 
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
+import { Button } from "@/components/ui/button";
 
 import {
   useClub,
   useClubStatus,
   useJoinClub,
   useCancelJoinClub,
-  useLeaveClub
-} from '@/hooks/use-clubs';
-import { ApiError } from '@/lib/api/api';
-import { mockClubData } from '@/lib/mock-data'; // TODO: remove when the leaderboard API is ready
+  useLeaveClub,
+} from "@/hooks/use-clubs";
+import { ApiError } from "@/lib/api/api";
+import { mockClubData } from "@/lib/mock-data";
 
 export default function ClubPage() {
   const { name: clubSlug } = useParams<{ name: string }>();
@@ -54,33 +41,27 @@ export default function ClubPage() {
   const [isRemoveLeaderModalOpen, setIsRemoveLeaderModalOpen] = useState(false);
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState(false);
 
-  const {
-    data: club,
-    isLoading: isClubLoading,
-    isError,
-    error,
-    refetch
-  } = useClub(clubSlug);
+  const { data: club, isLoading: isClubLoading, isError, error, refetch } = useClub(clubSlug);
 
   const {
     data: status,
     isLoading: isChecking,
     isError: isStatusError,
-    refetch: refetchStatus
+    refetch: refetchStatus,
   } = useClubStatus(clubSlug);
 
   const currentMemberId = status?.member_id ?? 0;
 
   const join = useJoinClub(clubSlug);
   const cancelJoin = useCancelJoinClub(clubSlug);
-  const leave = useLeaveClub(clubSlug, currentMemberId);
+  const leave = useLeaveClub(clubSlug);
 
   if (isError) {
     const notFound = error instanceof ApiError && error.status === 404;
     return (
       <div className="w-[92%] lg:w-[70%] mx-auto py-24 text-center">
         <h2 className="text-2xl font-black mb-2">
-          {notFound ? 'Club not found' : 'Could not load this club'}
+          {notFound ? "Club not found" : "Could not load this club"}
         </h2>
         {!notFound && (
           <Button variant="outline" onClick={() => refetch()}>
@@ -93,14 +74,14 @@ export default function ClubPage() {
 
   const clubName = club?.name ?? clubSlug;
   const membersCount = club?.members_count ?? 0;
-  const description =
-    club?.description ?? `Welcome to ${clubName} campus club.`;
-  const coachFullName = club?.coach_full_name ?? 'N/A';
+  const description = club?.description ?? `Welcome to ${clubName} campus club.`;
+  const coachFullName = club?.coach_full_name ?? "N/A";
 
   const isMember = !!status?.is_member;
   const isStaffOnly = isMember && (status?.role === 1 || status?.role === 2);
   const isCoachOnly = isMember && status?.role === 2;
 
+  // Bottom action buttons (Request Match, Match History, Dropdown)
   const actionButtons = isMember ? (
     <>
       <Link
@@ -117,81 +98,30 @@ export default function ClubPage() {
         <History className="w-3.5 h-3.5 text-muted-foreground" /> Match History
       </Link>
 
-      {/* Management and member actions */}
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <button
-              type="button"
-              className="flex items-center justify-center w-9 h-9 rounded-xl border border-border/70 hover:border-brand-orange bg-card text-foreground transition-colors shadow-xs cursor-pointer focus-visible:outline-none"
-            >
-              <MoreVertical className="w-4 h-4 text-muted-foreground" />
-            </button>
-          }
-        />
-        <DropdownMenuContent className="w-52" align="end">
-          <DropdownMenuGroup>
-            {isStaffOnly && (
-              <>
-                <DropdownMenuItem
-                  onClick={() => setIsAcceptModalOpen(true)}
-                  className="cursor-pointer font-medium text-xs gap-2"
-                >
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Accept
-                  Match
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setIsAcceptJoinModalOpen(true)}
-                  className="cursor-pointer font-medium text-xs gap-2"
-                >
-                  <UserCheck className="w-4 h-4 text-brand-orange" /> Accept
-                  Join Request
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setIsRemoveMemberModalOpen(true)}
-                  className="cursor-pointer font-medium text-xs gap-2"
-                >
-                  <UserX className="w-4 h-4 text-red-500" /> Remove Member
-                </DropdownMenuItem>
-              </>
-            )}
-
-            {isCoachOnly && (
-              <>
-                <DropdownMenuItem
-                  onClick={() => setIsSetLeaderModalOpen(true)}
-                  className="cursor-pointer font-medium text-xs gap-2"
-                >
-                  <ShieldCheck className="w-4 h-4 text-blue-500" /> Set Leader
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setIsRemoveLeaderModalOpen(true)}
-                  className="cursor-pointer font-medium text-xs gap-2"
-                >
-                  <UserMinus className="w-4 h-4 text-amber-500" /> Remove Leader
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuGroup>
-
-          <DropdownMenuSeparator />
-
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              onClick={() => leave.mutate()}
-              disabled={leave.isPending}
-              className="cursor-pointer font-semibold text-xs text-destructive hover:text-white hover:bg-destructive focus:text-white focus:bg-destructive gap-2 transition-colors"
-            >
-              <LogOut className="w-4 h-4" /> Leave Club
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ClubDropdownMenu
+        isStaffOnly={isStaffOnly}
+        isCoachOnly={isCoachOnly}
+        isLeavePending={leave.isPending}
+        onOpenAcceptModal={() => setIsAcceptModalOpen(true)}
+        onOpenAcceptJoinModal={() => setIsAcceptJoinModalOpen(true)}
+        onOpenRemoveMemberModal={() => setIsRemoveMemberModalOpen(true)}
+        onOpenSetLeaderModal={() => setIsSetLeaderModalOpen(true)}
+        onOpenRemoveLeaderModal={() => setIsRemoveLeaderModalOpen(true)}
+        onLeaveClub={() => leave.mutate()}
+      />
     </>
   ) : null;
 
+  const topActionSlot = isCoachOnly ? (
+    <EditClubModal
+      clubSlug={clubSlug}
+      currentName={clubName}
+      currentDescription={description}
+    />
+  ) : null;
+
   return (
-    <div className="w-[92%] lg:w-[70%] mx-auto pb-20">
+    <div className="w-[92%] xl:w-[80%] mx-auto pb-20">
       {isClubLoading ? (
         <div className="flex justify-center items-center py-24">
           <Loader2 className="size-10 animate-spin text-brand-orange" />
@@ -207,6 +137,7 @@ export default function ClubPage() {
               coach={coachFullName}
               members={membersCount}
               actions={actionButtons}
+              topAction={topActionSlot}
             />
           </section>
 
@@ -216,9 +147,7 @@ export default function ClubPage() {
             </div>
           ) : isStatusError ? (
             <div className="mt-10 text-center">
-              <p className="text-muted-foreground mb-4">
-                Could not check your membership.
-              </p>
+              <p className="text-muted-foreground mb-4">Could not check your membership.</p>
               <Button variant="outline" onClick={() => refetchStatus()}>
                 Retry
               </Button>
@@ -243,8 +172,8 @@ export default function ClubPage() {
                 Members Only
               </h2>
               <p className="text-muted-foreground font-medium max-w-md mb-8 text-sm sm:text-base">
-                You must be an active member to view sessions, leaderboards, and
-                book matches for {clubName}.
+                You must be an active member to view sessions, leaderboards, and book matches for{" "}
+                {clubName}.
               </p>
 
               {join.isPending || cancelJoin.isPending ? (

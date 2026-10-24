@@ -1,14 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useMemo } from 'react';
-import { useParams } from 'next/navigation';
-import { Loader2, Search } from 'lucide-react';
+import { useMemo, useState } from "react";
+import { useParams } from "next/navigation";
+import { Loader2, Search } from "lucide-react";
 
-import MembersHeader from '@/components/members/members-header';
-import MembersTable from '@/components/members/members-table';
-import { ClubMember } from '@/components/members/members-row';
-import { api, ApiError } from '@/lib/api/api';
-
+import MembersHeader from "@/components/members/members-header";
+import MembersTable from "@/components/members/members-table";
+import { Button } from "@/components/ui/button";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import {
   Select,
   SelectContent,
@@ -16,121 +15,111 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { useClubMembers } from "@/hooks/use-club-members";
+import { MemberRole } from "@/types/contracts/club";
+
+const ROLE_OPTIONS = [
+  { role: MemberRole.MEMBER, label: "Members" },
+  { role: MemberRole.LEADER, label: "Leaders" },
+  { role: MemberRole.COACH, label: "Coaches" },
+];
 
 export default function ClubMembersPage() {
   const params = useParams<{ name: string }>();
-  const clubSlug = params?.name ?? '';
+  const slug = params?.name ?? ""; // TODO: becomes params.slug when the folder is renamed
 
-  const [rawMembers, setRawMembers] = useState<ClubMember[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // The Select works with strings, so we keep the role as a string and convert it
+  const [roleValue, setRoleValue] = useState(MemberRole.MEMBER);
+  const [search, setSearch] = useState("");
 
-  // Use text values for the UI so the Select component correctly shows words, not numbers
-  const [role, setRole] = useState<string>("member");
-  const [searchInput, setSearchInput] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const { data, isPending, isError, error, refetch } = useClubMembers(slug, roleValue);
 
-  // Debounce the search input for smooth typing
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchInput);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
-  // 1. Fetch the full list of members for the selected role
-  useEffect(() => {
-    async function fetchMembers() {
-      if (!clubSlug) return;
-      setIsLoading(true);
-
-      try {
-        // Map the text back to the integer your backend expects
-        const roleMap: Record<string, number> = { member: 0, leader: 1, coach: 2 };
-        const roleNum = roleMap[role] ?? 0;
-
-        // We DO NOT pass login to the backend here, so we get the full list for local filtering
-        const url = `/clubs/${clubSlug}/members?limit=50&role=${roleNum}`;
-        const res = await api<{ data: ClubMember[] }>(url);
-
-        const sortedMembers = (res.data || []).sort((a, b) => b.role - a.role);
-        setRawMembers(sortedMembers);
-
-      } catch (error: unknown) {
-        if (error instanceof ApiError && error.status === 404) {
-          setRawMembers([]);
-        } else {
-          // console.error('Failed to fetch club members:', error);
-          setRawMembers([]);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchMembers();
-  }, [clubSlug, role]);
-
-  // 2. Filter the members locally by username, first name, or last name
+  // Local search on the loaded page of members (the backend login filter is an exact match)
   const filteredMembers = useMemo(() => {
-    if (!debouncedSearch.trim()) return rawMembers;
+    const members = data?.data ?? [];
+    const term = search.toLowerCase().trim();
+    if (!term) return members;
 
-    const lowerSearch = debouncedSearch.toLowerCase().trim();
-
-    return rawMembers.filter((m) => {
-      const loginMatch = m.user.login.toLowerCase().includes(lowerSearch);
-      const fullNameMatch = `${m.user.first_name} ${m.user.last_name}`.toLowerCase().includes(lowerSearch);
-      return loginMatch || fullNameMatch;
+    return members.filter((m) => {
+      // Seeded users can have no first or last name
+      const fullName = `${m.user.first_name ?? ""} ${m.user.last_name ?? ""}`;
+      return m.user.login.toLowerCase().includes(term) || fullName.toLowerCase().includes(term);
     });
-  }, [rawMembers, debouncedSearch]);
+  }, [data, search]);
 
   return (
     <main className="min-h-screen px-4 py-8 sm:p-8 md:p-15 flex flex-col items-center">
-      <MembersHeader clubName={clubSlug} />
+      <MembersHeader clubName={slug} />
 
-      {/* Filters and Search Section */}
       <div className="w-full max-w-6xl mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
-
-        {/* Local Search Input Group */}
         <InputGroup className="w-full sm:max-w-sm bg-card shadow-sm border-border">
           <InputGroupInput
             placeholder="Search by name or username..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent"
           />
           <InputGroupAddon>
             <Search className="w-4 h-4 text-muted-foreground" />
           </InputGroupAddon>
-          <InputGroupAddon align="inline-end" className="text-xs font-semibold text-muted-foreground">
+          <InputGroupAddon
+            align="inline-end"
+            className="text-xs font-semibold text-muted-foreground"
+          >
             {filteredMembers.length} results
           </InputGroupAddon>
         </InputGroup>
 
-        {/* Role Select Dropdown (Using text values) */}
-        <Select value={role} onValueChange={(val) => val && setRole(val)}>
+        <Select
+          value={ROLE_OPTIONS.find((o) => o.role === roleValue)?.label ?? "Select role"}
+          onValueChange={(value) =>
+            value &&
+            setRoleValue(ROLE_OPTIONS.find((o) => o.label === value)?.role ?? MemberRole.MEMBER)
+          }
+        >
           <SelectTrigger className="w-full sm:w-45 bg-card shadow-sm border-border font-semibold">
             <SelectValue placeholder="Select role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="member" className="font-semibold cursor-pointer">Members</SelectItem>
-            <SelectItem value="leader" className="font-semibold cursor-pointer">Leaders</SelectItem>
-            <SelectItem value="coach" className="font-semibold cursor-pointer">Coaches</SelectItem>
+            {ROLE_OPTIONS.map((option) => (
+              <SelectItem
+                key={option.role}
+                value={option.label}
+                className="font-semibold cursor-pointer"
+                // on select show label not role value
+                // and for that we need to use the SelectValue component in the trigger
+              >
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
-
       </div>
 
-      {isLoading ? (
+      {isPending && (
         <div className="flex justify-center items-center py-24">
           <Loader2 className="w-12 h-12 animate-spin text-brand-orange" />
         </div>
-      ) : (
-        <MembersTable members={filteredMembers} />
+      )}
+
+      {isError && (
+        <div className="flex flex-col items-center gap-3 py-24">
+          <p className="text-muted-foreground">{error.message}</p>
+          <Button variant="outline" onClick={() => refetch()}>
+            Try again
+          </Button>
+        </div>
+      )}
+
+      {data && (
+        <>
+          <MembersTable key={`${roleValue}-${search}`} members={filteredMembers} />
+          {data.total > data.data.length && (
+            <p className="mt-4 text-sm text-muted-foreground">
+              Showing the first {data.data.length} of {data.total} members.
+            </p>
+          )}
+        </>
       )}
     </main>
   );

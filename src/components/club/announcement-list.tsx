@@ -20,33 +20,55 @@ export interface AnnouncementWithAuthor {
   description: string;
   created_at: string;
   announcer: {
-    id: number;
+    id?: number;
+    member_id?: number;
     login: string;
     first_name: string;
     last_name: string;
   } | null;
 }
 
+interface ClubMember {
+  id?: number;
+  member_id: number;
+  login: string;
+  first_name: string;
+  last_name: string;
+}
+
 function Announcement({
   clubSlug,
   announcement,
   isAdmin,
+  membersMap,
   onDelete
 }: {
   clubSlug: string;
   announcement: AnnouncementWithAuthor;
   isAdmin: boolean;
+  membersMap: Map<number, ClubMember>;
   onDelete: (id: number) => void;
 }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const dateStr = new Date(announcement.created_at).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric'
-  });
+  const formattedDate = (() => {
+    if (!announcement.created_at) return '';
+    const isoString = announcement.created_at.includes(' ') && !announcement.created_at.includes('T')
+      ? announcement.created_at.replace(' ', 'T')
+      : announcement.created_at;
+    const date = new Date(isoString);
+    return !isNaN(date.getTime())
+      ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : announcement.created_at;
+  })();
 
-  const displayName = [announcement.announcer?.first_name, announcement.announcer?.last_name]
-    .filter(Boolean).join(' ') || announcement.announcer?.login || 'Club Admin';
+  // Dynamically resolve author from the database members map using announcer_id
+  const memberAuthor = membersMap.get(announcement.announcer_id);
+  const announcer = (announcement.announcer?.first_name ? announcement.announcer : null) || memberAuthor;
+
+  const displayName = [announcer?.first_name, announcer?.last_name]
+    .filter(Boolean).join(' ') || announcer?.login || 'Club Admin';
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -57,7 +79,6 @@ function Announcement({
         description: "The announcement has been permanently removed.",
       });
     } catch (error) {
-      // console.error('Failed to delete', error);
       toast.error("Failed to delete", {
         description: "An error occurred while deleting the announcement.",
       });
@@ -66,7 +87,6 @@ function Announcement({
     }
   };
 
-  // Simple heuristic: if description is long (> 160 chars or contains newlines), allow expanding
   const isLongText = announcement.description.length > 160 || announcement.description.includes('\n');
 
   return (
@@ -93,7 +113,7 @@ function Announcement({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white hover:bg-white hover:border-destructive hover:text-destructive">
                 {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete"}
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -123,7 +143,7 @@ function Announcement({
 
       <div className="flex justify-between w-full text-xs text-muted-foreground/80 pt-1 mt-3 border-t border-border/40">
         <span className="italic font-medium">By {displayName}</span>
-        <span className="font-semibold">{dateStr}</span>
+        <span className="font-semibold">{formattedDate}</span>
       </div>
     </Card>
   );
@@ -137,6 +157,7 @@ export default function AnnouncementList({
   isAdmin?: boolean;
 }) {
   const [announcements, setAnnouncements] = useState<AnnouncementWithAuthor[]>([]);
+  const [membersMap, setMembersMap] = useState<Map<number, ClubMember>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
 
@@ -147,18 +168,36 @@ export default function AnnouncementList({
   const INITIAL_VISIBLE_COUNT = 4;
 
   useEffect(() => {
-    async function fetchAnnouncements() {
+    async function fetchData() {
       if (!clubSlug) return setIsLoading(false);
       try {
-        const res = await api<{ data: AnnouncementWithAuthor[] }>(`/clubs/${clubSlug}/announcements?limit=20&page=1`);
-        setAnnouncements(res.data || []);
+        // Fetch announcements and club members concurrently from the database
+        const [annRes, membersRes] = await Promise.all([
+          api<{ data: AnnouncementWithAuthor[] }>(`/clubs/${clubSlug}/announcements?limit=20&page=1`),
+          api<{ data: ClubMember[] } | ClubMember[]>(`/clubs/${clubSlug}/members`).catch(() => ({ data: [] }))
+        ]);
+
+        const fetchedAnnouncements = annRes.data || [];
+        
+        // Build a dynamic lookup map from member/user IDs
+        const map = new Map<number, ClubMember>();
+        const memberList = Array.isArray(membersRes) ? membersRes : (membersRes?.data || []);
+        memberList.forEach((m: ClubMember) => {
+          const key = m.member_id || m.id;
+          if (key) map.set(key, m);
+        });
+        setMembersMap(map);
+
+        // Sort by newest first based on created_at timestamp
+        const sorted = fetchedAnnouncements.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setAnnouncements(sorted);
       } catch (error) {
-        // console.error('Failed to fetch', error);
+        // Handle error silently
       } finally {
         setIsLoading(false);
       }
     }
-    fetchAnnouncements();
+    fetchData();
   }, [clubSlug]);
 
   const handleCreateAnnouncement = async (e: React.FormEvent) => {
@@ -171,14 +210,14 @@ export default function AnnouncementList({
         method: 'POST',
         body: JSON.stringify({ description: newDesc }),
       });
-      setAnnouncements([res, ...announcements]);
+
+      setAnnouncements(prev => [res, ...prev].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
       setNewDesc('');
       setIsAddOpen(false);
       toast.success("Announcement posted", {
         description: "Your new announcement is now live.",
       });
     } catch (error) {
-      // console.error('Failed to create', error);
       toast.error("Failed to post", {
         description: "An error occurred while creating the announcement.",
       });
@@ -243,6 +282,7 @@ export default function AnnouncementList({
               clubSlug={clubSlug}
               announcement={announcement}
               isAdmin={isAdmin}
+              membersMap={membersMap}
               onDelete={removeAnnouncementFromState}
             />
           ))}

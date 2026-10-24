@@ -1,26 +1,27 @@
-'use client';
+"use client";
 
-import { useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
-import { AuthApi } from '@/lib/api/auth';
-import { useAuth } from '@/store/auth';
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { AuthApi } from "@/lib/api/auth";
+import { authKeys } from "@/hooks/use-me";
 
 export function useLogout() {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const clearAuth = useAuth((state) => state.logout);
 
-  const performLogout = async () => {
+  return async () => {
     try {
-      await AuthApi.logout(); // Clears HttpOnly cookies & localStorage flag
-    } catch (error) {
-      console.warn('Backend logout failed, clearing local state anyway.');
+      await AuthApi.logout(); // clears the HttpOnly cookies
+    } catch {
+      // best thing we can do is make him logout in front side
     } finally {
-      queryClient.clear(); // Wipes sensitive data from React Query memory
-      clearAuth(); // Clears Zustand user state
-      router.push('/'); // Redirects to home
+      // 1. Tell everyone listening to useMe: not logged in
+      queryClient.setQueryData(authKeys.me, null);
+      // 2. Wipe all other private data, but keep the auth key
+      queryClient.removeQueries({
+        predicate: (query) => query.queryKey[0] !== authKeys.me[0],
+      });
+      router.push("/");
     }
   };
-
-  return performLogout;
 }

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Search, Loader2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { api } from '@/lib/api/api';
-import type { MemberWithUser } from '@/types/contracts/club';
-import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
+// -> src/components/match/member-search-modal.tsx
+import { useState } from "react";
+import Image from "next/image";
+import { Search, Loader2 } from "lucide-react";
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useClubMembers } from "@/hooks/use-club-members";
 
 export default function MemberSearchModal({
   clubSlug,
@@ -20,25 +20,26 @@ export default function MemberSearchModal({
   clubSlug: string;
   isOpen: boolean;
   onClose: () => void;
-  onSelectMember: (memberId: number, memberName: string, department: string, avatarUrl: string | null) => void;
+  onSelectMember: (
+    memberId: number,
+    memberName: string,
+    department: string,
+    avatarUrl: string | null,
+  ) => void;
   excludeMemberIds?: number[];
   title?: string;
 }) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: members = [], isLoading } = useQuery({
-    queryKey: ['club-members', clubSlug],
-    queryFn: async () => {
-      const res = await api<MemberWithUser[] | { data: MemberWithUser[] }>(`/clubs/${clubSlug}/members`);
-      return Array.isArray(res) ? res : (res.data || []);
-    },
-    enabled: isOpen,
-  });
+  // role undefined = all members
+  const { data, isLoading } = useClubMembers(clubSlug, undefined, isOpen);
+  const members = data?.data ?? [];
 
+  const query = searchQuery.toLowerCase();
   const filteredMembers = members.filter((m) => {
     if (excludeMemberIds.includes(m.id)) return false;
-    const fullName = `${m.user.first_name} ${m.user.last_name} ${m.user.login}`.toLowerCase();
-    return fullName.includes(searchQuery.toLowerCase());
+    const text = `${m.user.first_name} ${m.user.last_name} ${m.user.login}`.toLowerCase();
+    return text.includes(query);
   });
 
   return (
@@ -47,7 +48,7 @@ export default function MemberSearchModal({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4 pt-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -68,8 +69,9 @@ export default function MemberSearchModal({
               <p className="text-center text-sm text-muted-foreground py-6">No members found.</p>
             ) : (
               filteredMembers.map((m) => {
-                const name = [m.user.first_name, m.user.last_name].filter(Boolean).join(' ') || m.user.login;
-                const dept = m.user.department || 'Sport Department';
+                const name =
+                  [m.user.first_name, m.user.last_name].filter(Boolean).join(" ") || m.user.login;
+                const dept = m.user.department || "Sport Department";
                 return (
                   <div
                     key={m.id}
@@ -91,7 +93,9 @@ export default function MemberSearchModal({
                       )}
                       <div>
                         <div className="font-bold text-sm text-foreground">{name}</div>
-                        <div className="text-xs text-muted-foreground">{dept} • @{m.user.login}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {dept} • @{m.user.login}
+                        </div>
                       </div>
                     </div>
                     <span className="text-xs font-semibold text-brand-orange">Select</span>
