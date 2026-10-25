@@ -16,7 +16,6 @@ export const passwordSchema = z
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, "Password is required."),
-  rememberMe: z.boolean(), // not sent to the backend yet
 });
 
 export const forgotPasswordSchema = z.object({

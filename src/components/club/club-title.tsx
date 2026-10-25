@@ -1,10 +1,7 @@
-import Image from 'next/image';
 import { Card } from '../ui/card';
 
 export default function ClubTitle({
   name,
-  slug,
-  avatar,
 }: {
   name: string;
   slug?: string;
@@ -15,8 +12,6 @@ export default function ClubTitle({
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
-
-  const avatarSrc = avatar || (slug ? `/clubs/${slug}.png` : undefined);
 
   return (
     <div className="pt-2 sm:pt-4">

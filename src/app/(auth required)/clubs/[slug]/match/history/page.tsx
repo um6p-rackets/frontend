@@ -5,8 +5,7 @@ import { MemberGate } from "@/components/club/member-gate";
 import MatchHistorySection from "@/components/club/match-history-section";
 
 export default function MatchHistoryPage() {
-  const params = useParams<{ name: string }>();
-  const clubSlug = params?.name ?? "";
+const { slug: clubSlug } = useParams<{ slug: string }>();
 
   return (
     <MemberGate slug={clubSlug}>

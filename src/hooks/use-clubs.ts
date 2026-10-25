@@ -4,24 +4,16 @@ import {
   cancelJoinRequest,
   getClub,
   getClubs,
-  getClubSessions,
   getClubStatus,
   joinClub,
-  joinClubSession,
   leaveClub,
-  leaveClubSession,
   updateClub,
 } from "@/lib/api/club";
 import { useMe } from "./use-me";
 
-
-import type { WeekView } from "@/types/contracts/club";
-
 export const clubKeys = {
   all: ["clubs"] as const,
   detail: (slug: string) => ["clubs", slug] as const,
-  sessions: (slug: string, week?: string) =>
-    ["clubs", slug, "sessions", week ?? "current"] as const,
   status: (slug: string, userId?: number) => ["clubs", slug, "status", userId] as const,
 };
 
@@ -81,125 +73,6 @@ export function useUpdateClub(slug: string) {
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to update club information.");
-    },
-  });
-}
-
-export function useClubSessions(slug: string, week?: string) {
-  return useQuery({
-    queryKey: clubKeys.sessions(slug, week),
-    queryFn: () => getClubSessions(slug, week),
-    enabled: Boolean(slug),
-    refetchInterval: 4000,
-    refetchOnWindowFocus: true,
-  });
-}
-
-export function useJoinClubSession(slug: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (sessionId: number) => joinClubSession(slug, sessionId),
-    onMutate: async (sessionId: number) => {
-      await queryClient.cancelQueries({
-        queryKey: ["clubs", slug, "sessions"],
-      });
-
-      const previousData = queryClient.getQueriesData<WeekView>({
-        queryKey: ["clubs", slug, "sessions"],
-      });
-
-      queryClient.setQueriesData<WeekView>({ queryKey: ["clubs", slug, "sessions"] }, (old) => {
-        if (!old) return old;
-        return {
-          ...old,
-          sessions: old.sessions.map((s) =>
-            s.id === sessionId
-              ? {
-                  ...s,
-                  is_joined: true,
-                  spots_left: Math.max(0, s.spots_left - 1),
-                  attends_count: s.attends_count + 1,
-                }
-              : s,
-          ),
-        };
-      });
-
-      return { previousData };
-    },
-    onSuccess: () => {
-      toast.success("You have successfully joined the session!");
-    },
-    onError: (err: unknown, _sessionId, context) => {
-      if (context?.previousData) {
-        context.previousData.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-      }
-
-      const errorMessage = err instanceof Error ? err.message : "";
-      if (
-        errorMessage.toLowerCase().includes("full") ||
-        errorMessage.toLowerCase().includes("capacity") ||
-        errorMessage.toLowerCase().includes("conflict")
-      ) {
-        toast.error("You couldn't join because the session is now full!");
-      } else {
-        toast.error(errorMessage || "Failed to join session");
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["clubs", slug, "sessions"] });
-    },
-  });
-}
-
-export function useLeaveClubSession(slug: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (sessionId: number) => leaveClubSession(slug, sessionId),
-    onMutate: async (sessionId: number) => {
-      await queryClient.cancelQueries({
-        queryKey: ["clubs", slug, "sessions"],
-      });
-
-      const previousData = queryClient.getQueriesData<WeekView>({
-        queryKey: ["clubs", slug, "sessions"],
-      });
-
-      queryClient.setQueriesData<WeekView>({ queryKey: ["clubs", slug, "sessions"] }, (old) => {
-        if (!old) return old;
-        return {
-          ...old,
-          sessions: old.sessions.map((s) =>
-            s.id === sessionId
-              ? {
-                  ...s,
-                  is_joined: false,
-                  spots_left: s.spots_left + 1,
-                  attends_count: Math.max(0, s.attends_count - 1),
-                }
-              : s,
-          ),
-        };
-      });
-
-      return { previousData };
-    },
-    onSuccess: () => {
-      toast.success("You have left the session.");
-    },
-    onError: (err: unknown, _sessionId, context) => {
-      if (context?.previousData) {
-        context.previousData.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-      }
-      const errorMessage = err instanceof Error ? err.message : "Failed to leave session";
-      toast.error(errorMessage);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["clubs", slug, "sessions"] });
     },
   });
 }

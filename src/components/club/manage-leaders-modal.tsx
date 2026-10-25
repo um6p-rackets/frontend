@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Search, ShieldCheck, ShieldAlert, UserX, AlertTriangle } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -174,7 +173,6 @@ export default function ManageLeadersModal({
                                     member.user?.login ||
                                     'User';
                                 const dept = member.user?.department || 'Sport Department';
-                                const isLeader = member.role === MemberRole.LEADER;
 
                                 return (
                                     <div

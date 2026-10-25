@@ -75,7 +75,6 @@ export function NotificationProvider({
   // inboxQuery.isLoading, inboxQuery.isError, inboxQuery.error, inboxQuery.refetch
   useEffect(() => {
     if (!userId) {
-      setConnected(false);
       return;
     }
 
@@ -147,8 +146,8 @@ export function NotificationProvider({
     });
 
     return () => {
-      socket.disconnect();
       setConnected(false);
+      socket.disconnect();
     };
   }, [userId, queryClient]);
 

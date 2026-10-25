@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { authInputClass, authLabelClass, FieldError } from "@/components/auth/form-parts";
+// eslint-disable-next-line no-restricted-imports -- oauthLogin is a page redirect, not a data call
 import { AuthApi } from "@/lib/api/auth";
 import { useLogin } from "@/hooks/use-auth-mutations";
 import { loginSchema, type LoginValues } from "@/lib/schemas/auth";
@@ -27,11 +28,10 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToForgot }: L
     formState: { errors },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "", rememberMe: false },
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit = ({ email, password }: LoginValues) => {
-    // backend doesn't remember me yet.
     login.mutate({ email, password }, { onSuccess: () => onSuccess?.() });
   };
 
@@ -95,21 +95,6 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onSwitchToForgot }: L
               />
               <FieldError message={errors.password?.message} />
             </Field>
-
-            <div className="flex items-center gap-2 pt-1 pb-2">
-              <input
-                type="checkbox"
-                id="rememberMe"
-                className="size-4 rounded border-border/80 bg-background/60 text-brand-orange focus:ring-brand-orange/40 cursor-pointer"
-                {...register("rememberMe")}
-              />
-              <label
-                htmlFor="rememberMe"
-                className="text-xs font-medium text-muted-foreground cursor-pointer select-none"
-              >
-                Remember me for 30 days
-              </label>
-            </div>
 
             {/* Error from the backend (wrong password, server down...) */}
             {login.isError && <FieldError message={login.error.message} />}
