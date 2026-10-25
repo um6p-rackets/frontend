@@ -1,12 +1,13 @@
 "use client";
 
+// -> src/components/achievement/club-achievements.tsx (replaces the previous version)
 import { useState } from "react";
 import { Loader2, Plus, Trash2, Trophy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { AchievementChip } from "@/components/achievement/achievement-list";
 import { getAchievementMeta } from "@/components/achievement/achievement-meta";
-import AwardAchievementSheet from "@/components/achievement/award-achievement-sheet";
+import GiveAchievementModal from "@/components/achievement/give-achievement-modal";
 import { useClubAchievements, useDeleteAchievement } from "@/hooks/use-achievements";
 
 const LIMIT = 10;
@@ -14,13 +15,15 @@ const LIMIT = 10;
 // canManage = leader or coach (role 1 or 2)
 export default function ClubAchievements({
   clubSlug,
+  currentMemberId,
   canManage,
 }: {
   clubSlug: string;
+  currentMemberId: number;
   canManage: boolean;
 }) {
   const [page, setPage] = useState(1);
-  const [isAwardOpen, setIsAwardOpen] = useState(false);
+  const [isGiveOpen, setIsGiveOpen] = useState(false);
 
   const { data, isLoading, isError, refetch, isPlaceholderData } = useClubAchievements(
     clubSlug,
@@ -39,7 +42,7 @@ export default function ClubAchievements({
         {canManage && (
           <Button
             size="sm"
-            onClick={() => setIsAwardOpen(true)}
+            onClick={() => setIsGiveOpen(true)}
             className="h-9 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-bold text-xs cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5 mr-1" /> Award
@@ -61,17 +64,21 @@ export default function ClubAchievements({
       ) : items.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-border/50 rounded-3xl flex flex-col items-center gap-2">
           <Trophy className="w-8 h-8 text-muted-foreground/50" />
-          <p className="text-sm text-muted-foreground font-medium">No achievements awarded yet.</p>
+          <p className="text-sm text-muted-foreground font-medium">
+            No achievements awarded yet.
+          </p>
         </div>
       ) : (
-        <div className={`space-y-2 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}>
+        <div
+          className={`space-y-2 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}
+        >
           {items.map((a) => {
             const { title } = getAchievementMeta(a.code);
             const name =
               [a.user?.first_name, a.user?.last_name].filter(Boolean).join(" ") ||
               a.user?.login ||
               "Member";
-            const isRemoving = remove.isPending && remove.variables?.achievementId === a.id;
+            const isRemoving = remove.isPending && remove.variables === a.id;
 
             return (
               <div
@@ -92,17 +99,12 @@ export default function ClubAchievements({
                     disabled={remove.isPending}
                     onClick={() => {
                       if (!window.confirm("Remove this achievement?")) return;
-                      remove.mutate(
-                        { achievementId: a.id, userId: a.user_id },
-                        {
-                          // last item of the last page: step back one page
-                          onSuccess: () => {
-                            if (items.length === 1 && page > 1) {
-                              setPage((p) => p - 1);
-                            }
-                          },
+                      remove.mutate(a.id, {
+                        // last item of the last page: step back one page
+                        onSuccess: () => {
+                          if (items.length === 1 && page > 1) setPage((p) => p - 1);
                         },
-                      );
+                      });
                     }}
                     aria-label="Remove achievement"
                     className="p-2 rounded-xl text-red-600 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50"
@@ -145,10 +147,11 @@ export default function ClubAchievements({
       )}
 
       {canManage && (
-        <AwardAchievementSheet
+        <GiveAchievementModal
           clubSlug={clubSlug}
-          isOpen={isAwardOpen}
-          onClose={() => setIsAwardOpen(false)}
+          currentMemberId={currentMemberId}
+          isOpen={isGiveOpen}
+          onClose={() => setIsGiveOpen(false)}
         />
       )}
     </div>

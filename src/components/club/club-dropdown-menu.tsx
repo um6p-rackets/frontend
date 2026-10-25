@@ -8,7 +8,6 @@ import {
   UserMinus,
   MoreVertical,
   LogOut,
-  Award,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -29,7 +28,6 @@ interface ClubDropdownMenuProps {
   onOpenSetLeaderModal: () => void;
   onOpenRemoveLeaderModal: () => void;
   onLeaveClub: () => void;
-  onOpenGiveAchievementModal: () => void;
 }
 
 export default function ClubDropdownMenu({
@@ -42,7 +40,6 @@ export default function ClubDropdownMenu({
   onOpenSetLeaderModal,
   onOpenRemoveLeaderModal,
   onLeaveClub,
-  onOpenGiveAchievementModal,
 }: ClubDropdownMenuProps) {
   return (
     <DropdownMenu>
@@ -78,12 +75,6 @@ export default function ClubDropdownMenu({
                 className="cursor-pointer font-medium text-xs gap-2"
               >
                 <UserX className="w-4 h-4 text-red-500" /> Remove Member
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={onOpenGiveAchievementModal}
-                className="cursor-pointer font-medium text-xs gap-2"
-              >
-                <Award className="w-4 h-4 text-amber-500" /> Give Achievement
               </DropdownMenuItem>
             </>
           )}

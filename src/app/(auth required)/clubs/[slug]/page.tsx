@@ -21,10 +21,10 @@ import { useClub, useClubStatus, useLeaveClub } from "@/hooks/use-clubs";
 import { ApiError } from "@/lib/api-error";
 import { mockClubData } from "@/lib/mock-data"; // TODO: the leaderboard still uses mock data
 import { MemberRole } from "@/types/contracts/club";
-import GiveAchievementModal from "@/components/club/give-achievement-modal";
+import ClubAchievements from "@/components/achievement/club-achievement";
 
 // Only one modal is open at a time
-type ClubModal = "accept-match" | "accept-join" | "set-leader" | "remove-leader" | "remove-member" | "give-achievement";
+type ClubModal = "accept-match" | "accept-join" | "set-leader" | "remove-leader" | "remove-member";
 
 export default function ClubPage() {
   const { slug: clubSlug } = useParams<{ slug: string }>();
@@ -90,7 +90,6 @@ export default function ClubPage() {
         onOpenRemoveMemberModal={() => setOpenModal("remove-member")}
         onOpenSetLeaderModal={() => setOpenModal("set-leader")}
         onOpenRemoveLeaderModal={() => setOpenModal("remove-leader")}
-        onOpenGiveAchievementModal={() => setOpenModal("give-achievement")}
         onLeaveClub={() => leave.mutate()}
       />
     </>
@@ -146,6 +145,16 @@ export default function ClubPage() {
                   <Leaderboard top_members={mockClubData.top_members} />
                 </section>
               </div>
+
+              <section className="self-start w-full min-w-0 space-y-8">
+                {memberId !== null && (
+                  <ClubAchievements
+                    clubSlug={clubSlug}
+                    currentMemberId={memberId}
+                    canManage={isStaffOnly}
+                  />
+                )}
+              </section>
             </div>
           ) : (
             <MembersOnlyPanel
@@ -191,12 +200,6 @@ export default function ClubPage() {
             isOpen={openModal === "remove-member"}
             onClose={closeModal}
             mode="remove-member"
-          />
-          <GiveAchievementModal
-            clubSlug={clubSlug}
-            currentMemberId={memberId}
-            isOpen={openModal === "give-achievement"}
-            onClose={closeModal}
           />
         </>
       )}
