@@ -1,56 +1,36 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
 import { ChevronDown, ChevronUp, Loader2, Plus, Trash2 } from 'lucide-react';
-import { api } from '@/lib/api/api';
-import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '../ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { cn } from '@/lib/utils';
-
-export interface AnnouncementWithAuthor {
-  id: number;
-  club_id: number;
-  announcer_id: number;
-  description: string;
-  created_at: string;
-  announcer: {
-    id?: number;
-    member_id?: number;
-    login: string;
-    first_name: string;
-    last_name: string;
-  } | null;
-}
-
-interface ClubMember {
-  id?: number;
-  member_id: number;
-  login: string;
-  first_name: string;
-  last_name: string;
-}
+import { 
+  useClubAnnouncements, 
+  useCreateAnnouncement, 
+  useDeleteAnnouncement 
+} from '@/hooks/use-announcement';
+import type { AnnouncementWithAuthor } from '@/types/contracts/club';
+import type { ClubMember } from '@/hooks/use-announcement';
 
 function Announcement({
   clubSlug,
   announcement,
   isAdmin,
   membersMap,
-  onDelete
 }: {
   clubSlug: string;
   announcement: AnnouncementWithAuthor;
   isAdmin: boolean;
   membersMap: Map<number, ClubMember>;
-  onDelete: (id: number) => void;
 }) {
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const deleteMutation = useDeleteAnnouncement(clubSlug);
 
   const formattedDate = (() => {
     if (!announcement.created_at) return '';
@@ -69,23 +49,6 @@ function Announcement({
 
   const displayName = [announcer?.first_name, announcer?.last_name]
     .filter(Boolean).join(' ') || announcer?.login || 'Club Admin';
-
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    try {
-      await api(`/clubs/${clubSlug}/announcements/${announcement.id}`, { method: 'DELETE' });
-      onDelete(announcement.id);
-      toast.success("Announcement deleted", {
-        description: "The announcement has been permanently removed.",
-      });
-    } catch (error) {
-      toast.error("Failed to delete", {
-        description: "An error occurred while deleting the announcement.",
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   const isLongText = announcement.description.length > 160 || announcement.description.includes('\n');
 
@@ -113,8 +76,11 @@ function Announcement({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-white hover:bg-white hover:border-destructive hover:text-destructive">
-                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete"}
+              <AlertDialogAction 
+                onClick={() => deleteMutation.mutate(announcement.id)} 
+                className="bg-destructive text-white hover:bg-white hover:border-destructive hover:text-destructive"
+              >
+                {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -156,78 +122,26 @@ export default function AnnouncementList({
   clubSlug: string;
   isAdmin?: boolean;
 }) {
-  const [announcements, setAnnouncements] = useState<AnnouncementWithAuthor[]>([]);
-  const [membersMap, setMembersMap] = useState<Map<number, ClubMember>>(new Map());
-  const [isLoading, setIsLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
-
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newDesc, setNewDesc] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const INITIAL_VISIBLE_COUNT = 4;
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!clubSlug) return setIsLoading(false);
-      try {
-        // Fetch announcements and club members concurrently from the database
-        const [annRes, membersRes] = await Promise.all([
-          api<{ data: AnnouncementWithAuthor[] }>(`/clubs/${clubSlug}/announcements?limit=20&page=1`),
-          api<{ data: ClubMember[] } | ClubMember[]>(`/clubs/${clubSlug}/members`).catch(() => ({ data: [] }))
-        ]);
+  const { data = { announcements: [], membersMap: new Map() }, isLoading } = useClubAnnouncements(clubSlug);
+  const { announcements, membersMap } = data;
 
-        const fetchedAnnouncements = annRes.data || [];
-        
-        // Build a dynamic lookup map from member/user IDs
-        const map = new Map<number, ClubMember>();
-        const memberList = Array.isArray(membersRes) ? membersRes : (membersRes?.data || []);
-        memberList.forEach((m: ClubMember) => {
-          const key = m.member_id || m.id;
-          if (key) map.set(key, m);
-        });
-        setMembersMap(map);
-
-        // Sort by newest first based on created_at timestamp
-        const sorted = fetchedAnnouncements.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        setAnnouncements(sorted);
-      } catch (error) {
-        // Handle error silently
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchData();
-  }, [clubSlug]);
-
-  const handleCreateAnnouncement = async (e: React.FormEvent) => {
+  const createMutation = useCreateAnnouncement(clubSlug);
+  
+  const handleCreateAnnouncement = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDesc.trim()) return;
-
-    setIsSubmitting(true);
-    try {
-      const res = await api<AnnouncementWithAuthor>(`/clubs/${clubSlug}/announcements`, {
-        method: 'POST',
-        body: JSON.stringify({ description: newDesc }),
-      });
-
-      setAnnouncements(prev => [res, ...prev].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
-      setNewDesc('');
-      setIsAddOpen(false);
-      toast.success("Announcement posted", {
-        description: "Your new announcement is now live.",
-      });
-    } catch (error) {
-      toast.error("Failed to post", {
-        description: "An error occurred while creating the announcement.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const removeAnnouncementFromState = (id: number) => {
-    setAnnouncements(prev => prev.filter(a => a.id !== id));
+    createMutation.mutate(newDesc, {
+      onSuccess: () => {
+        setNewDesc('');
+        setIsAddOpen(false);
+      }
+    });
   };
 
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-brand-orange" /></div>;
@@ -260,8 +174,8 @@ export default function AnnouncementList({
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={isSubmitting} className="bg-brand-orange hover:bg-brand-orange/90 text-white">
-                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Post"}
+                  <Button type="submit" disabled={createMutation.isPending} className="bg-brand-orange hover:bg-brand-orange/90 text-white">
+                    {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Post"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -283,7 +197,6 @@ export default function AnnouncementList({
               announcement={announcement}
               isAdmin={isAdmin}
               membersMap={membersMap}
-              onDelete={removeAnnouncementFromState}
             />
           ))}
         </div>
