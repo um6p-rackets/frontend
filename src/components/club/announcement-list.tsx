@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
 import { ChevronDown, ChevronUp, Loader2, Plus, Trash2 } from 'lucide-react';
@@ -15,19 +17,17 @@ import {
   useCreateAnnouncement, 
   useDeleteAnnouncement 
 } from '@/hooks/use-announcement';
+import { createAnnouncementSchema, type CreateAnnouncementValues } from '@/lib/schemas/announcement';
 import type { AnnouncementWithAuthor } from '@/types/contracts/club';
-import type { ClubMember } from '@/hooks/use-announcement';
 
 function Announcement({
   clubSlug,
   announcement,
   isAdmin,
-  membersMap,
 }: {
   clubSlug: string;
   announcement: AnnouncementWithAuthor;
   isAdmin: boolean;
-  membersMap: Map<number, ClubMember>;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const deleteMutation = useDeleteAnnouncement(clubSlug);
@@ -43,10 +43,8 @@ function Announcement({
       : announcement.created_at;
   })();
 
-  // Dynamically resolve author from the database members map using announcer_id
-  const memberAuthor = membersMap.get(announcement.announcer_id);
-  const announcer = (announcement.announcer?.first_name ? announcement.announcer : null) || memberAuthor;
-
+  // Directly extract the author details from the announcement contract object
+  const announcer = announcement.announcer;
   const displayName = [announcer?.first_name, announcer?.last_name]
     .filter(Boolean).join(' ') || announcer?.login || 'Club Admin';
 
@@ -124,23 +122,30 @@ export default function AnnouncementList({
 }) {
   const [showAll, setShowAll] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [newDesc, setNewDesc] = useState('');
 
   const INITIAL_VISIBLE_COUNT = 4;
 
-  const { data = { announcements: [], membersMap: new Map() }, isLoading } = useClubAnnouncements(clubSlug);
-  const { announcements, membersMap } = data;
-
+  const { data: announcements = [], isLoading } = useClubAnnouncements(clubSlug);
   const createMutation = useCreateAnnouncement(clubSlug);
-  
-  const handleCreateAnnouncement = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newDesc.trim()) return;
-    createMutation.mutate(newDesc, {
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateAnnouncementValues>({
+    resolver: zodResolver(createAnnouncementSchema),
+    defaultValues: {
+      description: '',
+    },
+  });
+
+  const onSubmit = (values: CreateAnnouncementValues) => {
+    createMutation.mutate(values.description, {
       onSuccess: () => {
-        setNewDesc('');
+        reset();
         setIsAddOpen(false);
-      }
+      },
     });
   };
 
@@ -153,7 +158,7 @@ export default function AnnouncementList({
     <div className="flex-1 flex flex-col">
       {isAdmin && (
         <div className="flex justify-end mb-8">
-          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <Dialog open={isAddOpen} onOpenChange={(open) => { setIsAddOpen(open); if (!open) reset(); }}>
             <DialogTrigger render={<Button size="lg" className="bg-brand-orange hover:bg-brand-orange/90 text-white" />}>
               <Plus className="w-4 h-4 mr-2" /> New Announcement
             </DialogTrigger>
@@ -161,19 +166,20 @@ export default function AnnouncementList({
               <DialogHeader>
                 <DialogTitle>Create Announcement</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleCreateAnnouncement} className="space-y-4 pt-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label>Message Content</Label>
                   <Textarea
                     placeholder="Type the announcement here..."
-                    value={newDesc}
-                    onChange={(e) => setNewDesc(e.target.value)}
                     className="min-h-25"
-                    required
+                    {...register('description')}
                   />
+                  {errors.description && (
+                    <p className="text-xs text-destructive font-medium">{errors.description.message}</p>
+                  )}
                 </div>
                 <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+                  <Button type="button" variant="outline" onClick={() => { reset(); setIsAddOpen(false); }}>Cancel</Button>
                   <Button type="submit" disabled={createMutation.isPending} className="bg-brand-orange hover:bg-brand-orange/90 text-white">
                     {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Post"}
                   </Button>
@@ -196,14 +202,13 @@ export default function AnnouncementList({
               clubSlug={clubSlug}
               announcement={announcement}
               isAdmin={isAdmin}
-              membersMap={membersMap}
             />
           ))}
         </div>
       )}
 
       {hasMore && (
-        <div className="pt-6 pb-1 flex justify-center">
+        <div className="pt-2 pb-1 flex justify-center mt-2">
           <Button
             variant="ghost"
             size="sm"

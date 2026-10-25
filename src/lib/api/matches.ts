@@ -34,3 +34,9 @@ export const getClubMatches = (
 
 export const cancelMatch = (slug: string, matchId: number) =>
   post<void>(`${CLUBS}/${slug}/matches/${matchId}/cancel`);
+
+export const submitMatchResult = (
+  slug: string,
+  matchId: number,
+  body: { team1_score: number; team2_score: number }
+) => post<MatchDetail>(`${CLUBS}/${slug}/matches/${matchId}/result`, body);

@@ -9,6 +9,7 @@ import {
   getClubMatches,
   getPendingMatches,
   requestMatch,
+  submitMatchResult
 } from "@/lib/api/matches";
 import type { MatchRequestBody } from "@/types/contracts/club";
 
@@ -83,5 +84,21 @@ export function useRequestMatch(slug: string) {
       return queryClient.invalidateQueries({ queryKey: matchKeys.all(slug) });
     },
     onError: (err: Error) => toast.error(err.message || "Failed to send match request"),
+  });
+}
+
+export function useSubmitMatchResult(slug: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ matchId, team1_score, team2_score }: { matchId: number; team1_score: number; team2_score: number }) =>
+      submitMatchResult(slug, matchId, { team1_score, team2_score }),
+    onSuccess: () => {
+      toast.success("Match result saved successfully!");
+      return queryClient.invalidateQueries({ queryKey: matchKeys.all(slug) });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to submit match result.");
+    },
   });
 }
