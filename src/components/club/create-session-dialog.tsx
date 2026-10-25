@@ -82,8 +82,8 @@ export default function CreateSessionDialog({ clubSlug }: { clubSlug: string }) 
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-brand-orange hover:bg-brand-orange/90 text-white shadow-sm h-8 px-3 gap-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer">
-        <Plus className="w-4 h-4" /> New Session
+      <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-lg text-xs sm:text-sm font-semibold transition-colors bg-brand-orange hover:bg-brand-orange/90 text-white shadow-xs h-9 sm:h-10 px-3 sm:px-4 gap-1.5 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer not-italic">
+        <Plus className="w-4 h-4 stroke-[2.5]" /> New Session
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

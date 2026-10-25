@@ -97,7 +97,7 @@ export default function SessionsList({
 
   if (isError) {
     return (
-      <div className="p-8 text-center flex flex-col items-center justify-center gap-3 border border-destructive/20 rounded-xl bg-destructive/5">
+      <div className="p-8 text-center flex flex-col items-center justify-center gap-3 border bg border-destructive/20 rounded-xl bg-destructive/5">
         <AlertCircle className="w-8 h-8 text-destructive" />
         <div className="text-sm font-semibold text-destructive">Failed to load sessions</div>
         <p className="text-xs text-muted-foreground max-w-sm">{error.message}</p>

@@ -36,16 +36,16 @@ export default function ClubAchievements({
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / LIMIT));
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-black italic text-foreground">Achievements</h2>
+      <div className="space-y-4 mt-6 w-182.5 lg:h-full flex flex-col p-6 bg-card rounded-3xl border border-border/70 shadow-2xs">
+      <div className="flex items-center justify-between gap- sm:gap-4 border-b border-gray-200">
+        <h2 className="text-xl sm:text-2xl px-4 py-3 font-bold flex items-center justify-start gap-3">Achievements</h2>
         {canManage && (
           <Button
             size="sm"
             onClick={() => setIsGiveOpen(true)}
-            className="h-9 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-bold text-xs cursor-pointer"
+            className="h-9 sm:h-10 w-30 rounded-lg bg-brand-orange hover:bg-brand-orange/90 text-white font-semibold text-xs sm:text-sm cursor-pointer not-italic"
           >
-            <Plus className="w-3.5 h-3.5 mr-1" /> Award
+            Award <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
           </Button>
         )}
       </div>

@@ -169,7 +169,10 @@ const onSubmit = (values: CreateDocumentValues) => {
           <Dialog open={isAddOpen} onOpenChange={(open) => { setIsAddOpen(open); if (!open) reset(); }}>
             <DialogTrigger
               render={
-                <Button size="sm" className="bg-brand-orange hover:bg-brand-orange/90 text-white gap-2" />
+                <Button
+                  size="sm"
+                  className="h-9 sm:h-10 w-50 rounded-lg bg-brand-orange hover:bg-brand-orange/90 text-white font-semibold text-xs sm:text-sm cursor-pointer not-italic"
+                />
               }
             >
               <Plus className="w-4 h-4" /> Add Document
