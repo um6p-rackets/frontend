@@ -35,7 +35,7 @@ function DocumentCard({
   );
 
   return (
-    <div className="p-4 gap-2 flex flex-col justify-between items-start m-0 border border-border/70 bg-card rounded-xl shadow-2xs group relative hover:shadow-md transition-shadow duration-300">
+    <div className="p-4 gap-2 flex flex-col justify-between items-start m-0 border border-border/70 bg-card rounded-xl shadow-2xs group relative hover:shadow-md transition-shadow duration-300 w-full overflow-hidden">
 
       {isAdmin && (
         <AlertDialog>
@@ -70,8 +70,8 @@ function DocumentCard({
         </AlertDialog>
       )}
 
-      <div className="w-full pr-8">
-        <h3 className="font-bold text-base sm:text-lg text-foreground">{document.title}</h3>
+      <div className="w-full pr-10">
+        <h3 className="font-bold text-base sm:text-lg text-foreground break-all">{document.title}</h3>
         {document.description && (
           <div className="mt-1">
             <p className={cn(
@@ -94,19 +94,20 @@ function DocumentCard({
         )}
       </div>
 
-      <div className="flex items-center justify-between w-full pt-3 mt-2 border-t border-border/40">
+      <div className="w-full flex items-center justify-between pt-3 mt-2 border-t border-border/40">
         <Link
           href={document.path || "#"}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-brand-orange font-semibold hover:underline text-sm"
+          className="flex items-center gap-2 text-brand-orange font-semibold hover:underline text-sm truncate"
         >
-          <BookOpenText className="w-4 h-4" /> <span> Open Document </span>
+          <BookOpenText className="w-4 h-4 shrink-0" /> <span className="truncate">Open Document</span>
         </Link>
       </div>
     </div>
   );
 }
+
 
 export default function DocumentList({
   clubSlug,
