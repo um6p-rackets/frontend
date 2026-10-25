@@ -65,12 +65,13 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
           throw new ApiError(401, "Session expired. Please log in again.");
         }
         res = await send(path, init); // Retry original request
-      } else {
-        // Tab 1 just discovered Tab 2 logged out. 
-        // Dispatch the event to wipe the React Query cache instantly.
-        window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
-        throw new ApiError(401, "Session expired.");
       }
+      // else {
+      //   // Tab 1 just discovered Tab 2 logged out. 
+      //   // Dispatch the event to wipe the React Query cache instantly.
+      //   window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+      //   throw new ApiError(401, "Session expired.");
+      // }
     }
 
     if (!res.ok) {
