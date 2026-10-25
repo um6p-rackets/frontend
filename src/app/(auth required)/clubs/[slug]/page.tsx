@@ -3,57 +3,40 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import {
-  Lock,
-  Loader2,
-  Plus,
-  History,
-} from "lucide-react";
+import { Loader2, Plus, History } from "lucide-react";
 
-import ClubTitle from '@/components/club/club-title';
-import OverviewCard from '@/components/club/overview-card';
-import ClubTaps from '@/components/club/taps';
-import Leaderboard from '@/components/club/leaderboard';
-import AcceptMatchModal from '@/components/club/accept-match-modal';
-import AcceptJoinModal from '@/components/club/accept-join-modal';
-import ManageLeadersModal from '@/components/club/manage-leaders-modal';
-import EditClubModal from '@/components/club/edit-club-modal';
-import ClubDropdownMenu from '@/components/club/club-dropdown-menu';
+import ClubTitle from "@/components/club/club-title";
+import OverviewCard from "@/components/club/overview-card";
+import ClubTaps from "@/components/club/taps";
+import Leaderboard from "@/components/club/leaderboard";
+import AcceptMatchModal from "@/components/club/accept-match-modal";
+import AcceptJoinModal from "@/components/club/accept-join-modal";
+import ManageLeadersModal from "@/components/club/manage-leaders-modal";
+import EditClubModal from "@/components/club/edit-club-modal";
+import ClubDropdownMenu from "@/components/club/club-dropdown-menu";
+import MembersOnlyPanel from "@/components/club/members-only-panel";
 
 import { Button } from "@/components/ui/button";
+import { useClub, useClubStatus, useLeaveClub } from "@/hooks/use-clubs";
+import { ApiError } from "@/lib/api-error";
+import { mockClubData } from "@/lib/mock-data"; // TODO: the leaderboard still uses mock data
+import { MemberRole } from "@/types/contracts/club";
 
-import {
-  useClub,
-  useClubStatus,
-  useJoinClub,
-  useCancelJoinClub,
-  useLeaveClub,
-} from "@/hooks/use-clubs";
-import { ApiError } from "@/lib/api/api";
-import { mockClubData } from "@/lib/mock-data";
+// Only one modal is open at a time
+type ClubModal = "accept-match" | "accept-join" | "set-leader" | "remove-leader" | "remove-member";
 
 export default function ClubPage() {
   const { slug: clubSlug } = useParams<{ slug: string }>();
-
-  const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
-  const [isAcceptJoinModalOpen, setIsAcceptJoinModalOpen] = useState(false);
-  const [isSetLeaderModalOpen, setIsSetLeaderModalOpen] = useState(false);
-  const [isRemoveLeaderModalOpen, setIsRemoveLeaderModalOpen] = useState(false);
-  const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState(false);
+  const [openModal, setOpenModal] = useState<ClubModal | null>(null);
+  const closeModal = () => setOpenModal(null);
 
   const { data: club, isLoading: isClubLoading, isError, error, refetch } = useClub(clubSlug);
-
   const {
     data: status,
     isLoading: isChecking,
     isError: isStatusError,
     refetch: refetchStatus,
   } = useClubStatus(clubSlug);
-
-  const currentMemberId = status?.member_id ?? 0;
-
-  const join = useJoinClub(clubSlug);
-  const cancelJoin = useCancelJoinClub(clubSlug);
   const leave = useLeaveClub(clubSlug);
 
   if (isError) {
@@ -73,13 +56,12 @@ export default function ClubPage() {
   }
 
   const clubName = club?.name ?? clubSlug;
-  const membersCount = club?.members_count ?? 0;
   const description = club?.description ?? `Welcome to ${clubName} campus club.`;
-  const coachFullName = club?.coach_full_name ?? "N/A";
 
   const isMember = !!status?.is_member;
-  const isStaffOnly = isMember && (status?.role === 1 || status?.role === 2);
-  const isCoachOnly = isMember && status?.role === 2;
+  const memberId = status?.member_id ?? null;
+  const isStaffOnly = isMember && (status?.role ?? MemberRole.MEMBER) >= MemberRole.LEADER;
+  const isCoachOnly = isMember && status?.role === MemberRole.COACH;
 
   // Bottom action buttons (Request Match, Match History, Dropdown)
   const actionButtons = isMember ? (
@@ -102,21 +84,22 @@ export default function ClubPage() {
         isStaffOnly={isStaffOnly}
         isCoachOnly={isCoachOnly}
         isLeavePending={leave.isPending}
-        onOpenAcceptModal={() => setIsAcceptModalOpen(true)}
-        onOpenAcceptJoinModal={() => setIsAcceptJoinModalOpen(true)}
-        onOpenRemoveMemberModal={() => setIsRemoveMemberModalOpen(true)}
-        onOpenSetLeaderModal={() => setIsSetLeaderModalOpen(true)}
-        onOpenRemoveLeaderModal={() => setIsRemoveLeaderModalOpen(true)}
+        onOpenAcceptModal={() => setOpenModal("accept-match")}
+        onOpenAcceptJoinModal={() => setOpenModal("accept-join")}
+        onOpenRemoveMemberModal={() => setOpenModal("remove-member")}
+        onOpenSetLeaderModal={() => setOpenModal("set-leader")}
+        onOpenRemoveLeaderModal={() => setOpenModal("remove-leader")}
         onLeaveClub={() => leave.mutate()}
       />
     </>
   ) : null;
 
+  // The edit form must start from the real description, not from the "Welcome to..." placeholder
   const topActionSlot = isCoachOnly ? (
     <EditClubModal
       clubSlug={clubSlug}
       currentName={clubName}
-      currentDescription={description}
+      currentDescription={club?.description ?? ""}
     />
   ) : null;
 
@@ -133,8 +116,8 @@ export default function ClubPage() {
           <section className="relative mt-4">
             <OverviewCard
               desc={description}
-              coach={coachFullName}
-              members={membersCount}
+              coach={club?.coach_full_name ?? "N/A"}
+              members={club?.members_count ?? 0}
               actions={actionButtons}
               topAction={topActionSlot}
             />
@@ -163,79 +146,52 @@ export default function ClubPage() {
               </div>
             </div>
           ) : (
-            <div className="mt-10 sm:mt-12 flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-border/60 rounded-3xl bg-muted/10 animate-in fade-in zoom-in-95 duration-500">
-              <div className="w-20 h-20 bg-orange-50 dark:bg-orange-950/40 text-brand-orange rounded-full flex items-center justify-center mb-6 shadow-sm border border-orange-200/60 dark:border-orange-900/40">
-                <Lock className="w-10 h-10" />
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-black italic text-brand-ink dark:text-white mb-3">
-                Members Only
-              </h2>
-              <p className="text-muted-foreground font-medium max-w-md mb-8 text-sm sm:text-base">
-                You must be an active member to view sessions, leaderboards, and book matches for{" "}
-                {clubName}.
-              </p>
-
-              {join.isPending || cancelJoin.isPending ? (
-                <div className="inline-flex items-center gap-2 px-6 py-4 bg-orange-50 text-brand-orange border border-orange-200 rounded-xl font-bold text-base shadow-sm">
-                  <Loader2 className="size-5 animate-spin" /> Processing...
-                </div>
-              ) : status?.has_pending_request ? (
-                <Button
-                  onClick={() => cancelJoin.mutate()}
-                  className="h-12 px-8 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 font-bold text-base transition-all shadow-sm cursor-pointer"
-                >
-                  Cancel Request
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => join.mutate()}
-                  className="h-12 px-10 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-black italic text-base tracking-wide shadow-md shadow-brand-orange/20 cursor-pointer"
-                >
-                  Join Club Now
-                </Button>
-              )}
-            </div>
+            <MembersOnlyPanel
+              clubSlug={clubSlug}
+              clubName={clubName}
+              hasPendingRequest={!!status?.has_pending_request}
+            />
           )}
         </>
       )}
 
-      {/* Modals */}
-      <AcceptMatchModal
-        clubSlug={clubSlug}
-        currentMemberId={currentMemberId}
-        isOpen={isAcceptModalOpen}
-        onClose={() => setIsAcceptModalOpen(false)}
-      />
-
-      <AcceptJoinModal
-        clubSlug={clubSlug}
-        isOpen={isAcceptJoinModalOpen}
-        onClose={() => setIsAcceptJoinModalOpen(false)}
-      />
-
-      <ManageLeadersModal
-        clubSlug={clubSlug}
-        currentMemberId={currentMemberId}
-        isOpen={isSetLeaderModalOpen}
-        onClose={() => setIsSetLeaderModalOpen(false)}
-        mode="set"
-      />
-
-      <ManageLeadersModal
-        clubSlug={clubSlug}
-        currentMemberId={currentMemberId}
-        isOpen={isRemoveLeaderModalOpen}
-        onClose={() => setIsRemoveLeaderModalOpen(false)}
-        mode="remove"
-      />
-
-      <ManageLeadersModal
-        clubSlug={clubSlug}
-        currentMemberId={currentMemberId}
-        isOpen={isRemoveMemberModalOpen}
-        onClose={() => setIsRemoveMemberModalOpen(false)}
-        mode="remove-member"
-      />
+      {/* Modals: only for members, who always have a member id */}
+      {memberId !== null && (
+        <>
+          <AcceptMatchModal
+            clubSlug={clubSlug}
+            currentMemberId={memberId}
+            isOpen={openModal === "accept-match"}
+            onClose={closeModal}
+          />
+          <AcceptJoinModal
+            clubSlug={clubSlug}
+            isOpen={openModal === "accept-join"}
+            onClose={closeModal}
+          />
+          <ManageLeadersModal
+            clubSlug={clubSlug}
+            currentMemberId={memberId}
+            isOpen={openModal === "set-leader"}
+            onClose={closeModal}
+            mode="set"
+          />
+          <ManageLeadersModal
+            clubSlug={clubSlug}
+            currentMemberId={memberId}
+            isOpen={openModal === "remove-leader"}
+            onClose={closeModal}
+            mode="remove"
+          />
+          <ManageLeadersModal
+            clubSlug={clubSlug}
+            currentMemberId={memberId}
+            isOpen={openModal === "remove-member"}
+            onClose={closeModal}
+            mode="remove-member"
+          />
+        </>
+      )}
     </div>
   );
 }

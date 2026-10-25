@@ -1,5 +1,7 @@
 import { ErrorBody } from "@/types/error";
 import { getUrl, hasSessionHint } from "../utils";
+import { ApiError } from "@/lib/api-error";
+export { ApiError }; // keeps old imports working
 
 const TIMEOUT_MS = 8000;
 
@@ -7,14 +9,6 @@ const TIMEOUT_MS = 8000;
 // and marks the user as logged out in the cache.
 export const SESSION_EXPIRED_EVENT = "auth:session-expired";
 
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
-}
 
 // A 401 on login, register, etc. means "wrong credentials", not "expired token".
 // Only /auth/me can be a real expired token, so it is allowed to refresh.

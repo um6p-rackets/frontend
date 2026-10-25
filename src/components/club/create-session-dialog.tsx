@@ -1,82 +1,87 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import { format } from "date-fns";
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '../ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Calendar } from '../ui/calendar';
-import { Plus, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { api } from '@/lib/api/api';
-import { cn } from '@/lib/utils';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { Plus, Calendar as CalendarIcon, Loader2 } from "lucide-react";
 
-interface CreateSessionDialogProps {
-  clubSlug: string;
-  onSuccess: () => void;
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Calendar } from "../ui/calendar";
+import { FieldError } from "@/components/auth/form-parts";
+import { useCreateSession } from "@/hooks/use-sessions";
+import { cn } from "@/lib/utils";
+import { createSessionSchema, type CreateSessionValues } from "@/lib/schemas/session";
+
+const DEFAULT_VALUES: Partial<CreateSessionValues> = {
+  title: "",
+  location: "",
+  capacity: 20,
+  date: undefined,
+  startTime: "",
+  endTime: "",
+  repeatWeekly: true,
+};
+
+// The backend counts weekdays from Monday (0) to Sunday (6), and wants the Monday of the week
+function toBackendDay(date: Date) {
+  const weekday = (date.getDay() + 6) % 7;
+  const monday = new Date(date);
+  monday.setDate(monday.getDate() - weekday);
+  return { weekday, weekStart: format(monday, "yyyy-MM-dd") };
 }
 
-export default function CreateSessionDialog({ clubSlug, onSuccess }: CreateSessionDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [title, setTitle] = useState('');
-  const [location, setLocation] = useState('');
-  const [capacity, setCapacity] = useState('20');
-  const [sessionDate, setSessionDate] = useState<Date>();
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [repeatWeekly, setRepeatWeekly] = useState(true);
+export default function CreateSessionDialog({ clubSlug }: { clubSlug: string }) {
+  const [open, setOpen] = useState(false);
+  const createSession = useCreateSession(clubSlug);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!sessionDate || !startTime || !endTime) {
-      toast.error("Please fill in the date and times");
-      return;
-    }
-    if (startTime >= endTime) return;
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateSessionValues>({
+    resolver: zodResolver(createSessionSchema),
+    defaultValues: DEFAULT_VALUES,
+  });
 
-    setIsSubmitting(true);
-    try {
-      const jsDay = sessionDate.getDay();
-      const backendWeekday = jsDay === 0 ? 6 : jsDay - 1;
-      const mondayDate = new Date(sessionDate);
-      mondayDate.setDate(mondayDate.getDate() - backendWeekday);
+  const onSubmit = (values: CreateSessionValues) => {
+    const { weekday, weekStart } = toBackendDay(values.date);
 
-      await api(`/clubs/${clubSlug}/sessions`, {
-        method: 'POST',
-        body: JSON.stringify({
-          title,
-          location,
-          capacity: parseInt(capacity),
-          weekday: backendWeekday,
-          start_time: startTime,
-          end_time: endTime,
-          week_start: format(mondayDate, 'yyyy-MM-dd'),
-          repeat_weekly: repeatWeekly 
-        }),
-      });
-
-      toast.success("Session created successfully");
-      setIsOpen(false);
-      setTitle('');
-      setLocation('');
-      setSessionDate(undefined);
-      setStartTime('');
-      setEndTime('');
-      setCapacity('20');
-      onSuccess();
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to create session";
-      toast.error(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
+    createSession.mutate(
+      {
+        title: values.title,
+        location: values.location,
+        capacity: values.capacity,
+        weekday,
+        start_time: values.startTime,
+        end_time: values.endTime,
+        week_start: weekStart,
+        repeat_weekly: values.repeatWeekly,
+      },
+      {
+        onSuccess: () => {
+          setOpen(false);
+          reset(DEFAULT_VALUES);
+        },
+      },
+    );
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-brand-orange hover:bg-brand-orange/90 text-white shadow-sm h-8 px-3 gap-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer">
         <Plus className="w-4 h-4" /> New Session
       </DialogTrigger>
@@ -84,47 +89,71 @@ export default function CreateSessionDialog({ clubSlug, onSuccess }: CreateSessi
         <DialogHeader>
           <DialogTitle>Create New Session</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleCreate} className="space-y-4 pt-4">
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4" noValidate>
           <div className="space-y-2">
-            <Label>Title</Label>
-            <Input placeholder="e.g., Beginners Training" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <Label htmlFor="session-title">Title</Label>
+            <Input
+              id="session-title"
+              placeholder="e.g., Beginners Training"
+              {...register("title")}
+            />
+            <FieldError message={errors.title?.message} />
           </div>
 
           <div className="space-y-2 flex flex-col">
             <Label>Date</Label>
-            <Popover>
-              <PopoverTrigger className={cn(
-                "inline-flex items-center justify-between whitespace-nowrap rounded-md text-sm font-normal border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 w-full text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer",
-                !sessionDate && "text-muted-foreground"
-              )}>
-                {sessionDate ? format(sessionDate, "PPP") : <span>Pick a date</span>}
-                <CalendarIcon className="w-4 h-4 opacity-50" />
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={sessionDate} onSelect={setSessionDate} />
-              </PopoverContent>
-            </Popover>
+            <Controller
+              name="date"
+              control={control}
+              render={({ field }) => (
+                <Popover>
+                  <PopoverTrigger
+                    className={cn(
+                      "inline-flex items-center justify-between whitespace-nowrap rounded-md text-sm font-normal border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 w-full text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer",
+                      !field.value && "text-muted-foreground",
+                    )}
+                  >
+                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                    <CalendarIcon className="w-4 h-4 opacity-50" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} />
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
+            <FieldError message={errors.date?.message} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Start Time</Label>
-              <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
+              <Label htmlFor="session-start">Start Time</Label>
+              <Input id="session-start" type="time" {...register("startTime")} />
+              <FieldError message={errors.startTime?.message} />
             </div>
             <div className="space-y-2">
-              <Label>End Time</Label>
-              <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required />
+              <Label htmlFor="session-end">End Time</Label>
+              <Input id="session-end" type="time" {...register("endTime")} />
+              <FieldError message={errors.endTime?.message} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Location</Label>
-              <Input placeholder="Court 1" value={location} onChange={(e) => setLocation(e.target.value)} required />
+              <Label htmlFor="session-location">Location</Label>
+              <Input id="session-location" placeholder="Court 1" {...register("location")} />
+              <FieldError message={errors.location?.message} />
             </div>
             <div className="space-y-2">
-              <Label>Capacity</Label>
-              <Input type="number" min="1" value={capacity} onChange={(e) => setCapacity(e.target.value)} required />
+              <Label htmlFor="session-capacity">Capacity</Label>
+              <Input
+                id="session-capacity"
+                type="number"
+                min="1"
+                {...register("capacity", { valueAsNumber: true })}
+              />
+              <FieldError message={errors.capacity?.message} />
             </div>
           </div>
 
@@ -132,9 +161,8 @@ export default function CreateSessionDialog({ clubSlug, onSuccess }: CreateSessi
             <input
               type="checkbox"
               id="repeatWeekly"
-              checked={repeatWeekly}
-              onChange={(e) => setRepeatWeekly(e.target.checked)}
-              className="w-4 h-4 text-brand-orange rounded cursor-pointer accent-brand-orange"
+              className="w-4 h-4 rounded cursor-pointer accent-brand-orange"
+              {...register("repeatWeekly")}
             />
             <Label htmlFor="repeatWeekly" className="font-normal text-sm cursor-pointer">
               Schedule as a recurring weekly session
@@ -142,9 +170,19 @@ export default function CreateSessionDialog({ clubSlug, onSuccess }: CreateSessi
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button type="submit" disabled={isSubmitting} className="bg-brand-orange text-white">
-              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Create Session"}
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={createSession.isPending}
+              className="bg-brand-orange text-white"
+            >
+              {createSession.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Create Session"
+              )}
             </Button>
           </DialogFooter>
         </form>
