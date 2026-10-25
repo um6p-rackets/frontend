@@ -1,8 +1,8 @@
 // Club service types, shared by the backend and the frontend.
 // Timestamps are ISO strings. Ids from other services are plain numbers.
 
-import { AchievementCode } from './achievement-code.js';
-import { User } from './auth.js';
+import { AchievementCode } from "./achievement-code.js";
+import { User } from "./auth.js";
 
 // ==========================================
 // 1. Enums
@@ -101,6 +101,9 @@ export type Achievement = {
   taken_at: string;
 };
 
+// GET /:slug/achievements returns the owner with each row.
+export type AchievementWithUser = Achievement & { user: UserSummary };
+
 export type ClubDocument = {
   id: number;
   club_id: number;
@@ -193,7 +196,7 @@ export type Paginated<T> = {
 // Small user card used inside other responses (data from the auth service).
 export type UserSummary = Pick<
   User,
-  'id' | 'login' | 'first_name' | 'last_name' | 'avatar' | 'department'
+  "id" | "login" | "first_name" | "last_name" | "avatar" | "department"
 >;
 
 // A club member seen as a person.
@@ -203,7 +206,10 @@ export type Player = UserSummary & { member_id: number };
 // 4. Club views
 // ==========================================
 
-export type ClubWithMembersCountAndCoachFullName = Club & { members_count: number, coach_full_name: string };
+export type ClubWithMembersCountAndCoachFullName = Club & {
+  members_count: number;
+  coach_full_name: string;
+};
 
 // GET /:slug/status: who the current user is in this club.
 export type ClubMemberStatus = {
@@ -217,7 +223,7 @@ export type ClubMemberStatus = {
 export type JoinRequestWithUser = JoinRequest & { user: UserSummary };
 
 // POST /:slug/join
-export type JoinClubResponse = { status: 'pending' };
+export type JoinClubResponse = { status: "pending" };
 
 export type MemberWithUser = Member & { user: UserSummary };
 
@@ -228,7 +234,7 @@ export type AnnouncementWithAuthor = Announcement & { announcer: Player };
 // ==========================================
 
 // First match wins: cancelled, past (ended), ongoing (started), full, open.
-export type SessionState = 'cancelled' | 'past' | 'ongoing' | 'full' | 'open';
+export type SessionState = "cancelled" | "past" | "ongoing" | "full" | "open";
 
 export type SessionView = Session & {
   attends_count: number;
@@ -257,7 +263,7 @@ export type TeamWithPlayers = Team & {
 };
 
 export type MatchDetail = Match & {
-  club: Pick<Club, 'id' | 'name' | 'slug'>;
+  club: Pick<Club, "id" | "name" | "slug">;
   team1: TeamWithPlayers;
   team2: TeamWithPlayers;
   referee: Player | null;
@@ -284,7 +290,7 @@ export type UserHistoryMatch = {
   mode: MatchMode;
   partner: Player | null; // doubles only
   opponents: Player[]; // 1 in singles, 2 in doubles
-  result: 'W' | 'L';
+  result: "W" | "L";
   my_score: number;
   opponent_score: number;
   points_change: number;
