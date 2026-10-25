@@ -40,6 +40,8 @@ import { useLogout } from '@/hooks/use-logout';
 import { useNotifications } from '@/providers/NotificationProvider';
 import { User } from '@/types/contracts/auth';
 import { useMe } from '@/hooks/use-me';
+import { NotificationCenter } from "@/components/notifications/notification-center";
+import { connected } from 'process';
 
 export default function Navbar() {
   const { data: user, isPending } = useMe();
@@ -200,7 +202,7 @@ function UserNav({ user }: { user: User }) {
           )}
 
           {/* Notifications Sheet */}
-          <Sheet>
+          {/* <Sheet>
             <SheetTrigger title="Notifications" className="flex items-center justify-center text-foreground hover:text-brand-orange transition-colors outline-none bg-transparent p-0 border-none cursor-pointer">
               <Bell className="w-5 h-5" />
             </SheetTrigger>
@@ -238,8 +240,13 @@ function UserNav({ user }: { user: User }) {
                 )}
               </div>
             </SheetContent>
-          </Sheet>
-
+          </Sheet> */}
+          <NotificationCenter
+              notifications={notifications}
+              connected={connected}
+              // onMarkAllAsRead={handleMarkAllAsRead}
+              // markingAllAsRead={markingAllAsRead}
+            />
           {/* Leaderboard Icon */}
           {isAppView && currentClubSlug && (
             <Link 
