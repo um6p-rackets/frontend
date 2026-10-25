@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { BookOpenText, Loader2, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 
@@ -16,6 +18,7 @@ import {
   useCreateDocument, 
   useDeleteDocument 
 } from '@/hooks/use-documents';
+import { createDocumentSchema, type CreateDocumentValues } from '@/lib/schemas/documents';
 import type { ClubDocument } from '@/types/contracts/club';
 
 function DocumentCard({
@@ -108,7 +111,6 @@ function DocumentCard({
   );
 }
 
-
 export default function DocumentList({
   clubSlug,
   isAdmin = false
@@ -117,28 +119,37 @@ export default function DocumentList({
   isAdmin?: boolean;
 }) {
   const [showAll, setShowAll] = useState(false);
-
-  // Form States
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [path, setPath] = useState('');
 
   const INITIAL_VISIBLE_COUNT = 3;
 
   const { data: documents = [], isLoading } = useClubDocuments(clubSlug);
   const createMutation = useCreateDocument(clubSlug);
 
-  const handleCreateDocument = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !path.trim()) return;
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateDocumentValues>({
+    resolver: zodResolver(createDocumentSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      path: '',
+    },
+  });
+
+const onSubmit = (values: CreateDocumentValues) => {
     createMutation.mutate(
-      { title, description, path },
+      {
+        title: values.title,
+        description: values.description || "",
+        path: values.path,
+      },
       {
         onSuccess: () => {
-          setTitle('');
-          setDescription('');
-          setPath('');
+          reset();
           setIsAddOpen(false);
         },
       }
@@ -155,7 +166,7 @@ export default function DocumentList({
 
       {isAdmin && (
         <div className="flex justify-end mb-4">
-          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <Dialog open={isAddOpen} onOpenChange={(open) => { setIsAddOpen(open); if (!open) reset(); }}>
             <DialogTrigger
               render={
                 <Button size="sm" className="bg-brand-orange hover:bg-brand-orange/90 text-white gap-2" />
@@ -167,38 +178,42 @@ export default function DocumentList({
               <DialogHeader>
                 <DialogTitle>Add New Document</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleCreateDocument} className="space-y-4 pt-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label>Document Title</Label>
                   <Input
                     placeholder="e.g., Club Rules 2026"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
+                    {...register('title')}
                   />
+                  {errors.title && (
+                    <p className="text-xs text-destructive font-medium">{errors.title.message}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>Description (Optional)</Label>
                   <Textarea
                     placeholder="Briefly describe this document..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
                     className="min-h-[80px]"
+                    {...register('description')}
                   />
+                  {errors.description && (
+                    <p className="text-xs text-destructive font-medium">{errors.description.message}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>File Link</Label>
                   <Input
                     type="url"
                     placeholder="https://example.com/document.pdf"
-                    value={path}
-                    onChange={(e) => setPath(e.target.value)}
-                    required
+                    {...register('path')}
                   />
+                  {errors.path && (
+                    <p className="text-xs text-destructive font-medium">{errors.path.message}</p>
+                  )}
                 </div>
                 <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={createMutation.isPending || !path.trim()} className="bg-brand-orange hover:bg-brand-orange/90 text-white">
+                  <Button type="button" variant="outline" onClick={() => { reset(); setIsAddOpen(false); }}>Cancel</Button>
+                  <Button type="submit" disabled={createMutation.isPending} className="bg-brand-orange hover:bg-brand-orange/90 text-white">
                     {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Add"}
                   </Button>
                 </DialogFooter>
