@@ -3,8 +3,7 @@
 import { Camera, Trash2 } from "lucide-react";
 import {
     FileUpload,
-    FileUploadTrigger,
-    } from "@/components/diceui/file-upload";
+    FileUploadTrigger } from "@/components/ui/file-upload";
     import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
     interface ProfileAvatarUploadProps {
