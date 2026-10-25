@@ -76,9 +76,11 @@ export default function SessionsList({
   const oldestWeek = addDays(thisMonday, -52 * 7);
   const newestWeek = addDays(thisMonday, 7);
 
+  // Monday to Sunday, earliest first
   const sessions = [...(data?.sessions ?? [])].sort(
-    (a, b) => new Date(b.start_at).getTime() - new Date(a.start_at).getTime(),
+    (a, b) => new Date(a.start_at).getTime() - new Date(b.start_at).getTime(),
   );
+
   const visibleSessions = showAll ? sessions : sessions.slice(0, INITIAL_VISIBLE_COUNT);
   const hasMore = sessions.length > INITIAL_VISIBLE_COUNT;
 
@@ -114,8 +116,7 @@ export default function SessionsList({
     <div className="flex-1 flex flex-col">
       {isAdmin && (
         <div className="flex justify-end mb-4">
-          {/* TODO: remove onSuccess when CreateSessionDialog uses useCreateSession */}
-          <CreateSessionDialog clubSlug={clubSlug} onSuccess={() => refetch()} />
+          <CreateSessionDialog clubSlug={clubSlug} />
         </div>
       )}
 

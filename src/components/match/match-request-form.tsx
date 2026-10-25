@@ -23,7 +23,6 @@ export default function MatchRequestForm({
   clubSlug,
   currentMemberId,
   currentUserName,
-  currentUserDepartment,
   currentUserAvatar
 }: {
   clubSlug: string;
@@ -122,10 +121,7 @@ export default function MatchRequestForm({
     opponents[1]?.id
   ].filter((id): id is number => id !== undefined);
 
-  const formattedUserDept =
-    currentUserDepartment && currentUserDepartment.trim() !== ''
-      ? currentUserDepartment
-      : 'Sport Department';
+
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
@@ -198,7 +194,6 @@ export default function MatchRequestForm({
 
               <MatchPlayerCard
                 name={currentUserName}
-                subtitle={formattedUserDept}
                 badgeText="1200 PTS" // TODO: hardcoded, use the real rating
                 avatarUrl={currentUserAvatar}
               />
@@ -207,7 +202,6 @@ export default function MatchRequestForm({
                 <MatchPlayerCard
                   type="empty"
                   name={partner ? partner.name : 'Choose Teammate'}
-                  subtitle={partner ? partner.dept : '+ Add Teammate'}
                   avatarUrl={partner?.avatar}
                   onClick={() => setActiveTarget('partner')}
                 />
@@ -232,7 +226,6 @@ export default function MatchRequestForm({
               <MatchPlayerCard
                 type="empty"
                 name={opponents[0] ? opponents[0].name : 'Choose Opponent'}
-                subtitle={opponents[0] ? opponents[0].dept : 'click and search'}
                 avatarUrl={opponents[0]?.avatar}
                 onClick={() => setActiveTarget('opponent_1')}
               />
@@ -241,7 +234,6 @@ export default function MatchRequestForm({
                 <MatchPlayerCard
                   type="empty"
                   name={opponents[1] ? opponents[1].name : 'Choose Opponent 2'}
-                  subtitle={opponents[1] ? opponents[1].dept : 'click and search'}
                   avatarUrl={opponents[1]?.avatar}
                   onClick={() => setActiveTarget('opponent_2')}
                 />
