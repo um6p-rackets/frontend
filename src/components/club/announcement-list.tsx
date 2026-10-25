@@ -159,8 +159,8 @@ export default function AnnouncementList({
       {isAdmin && (
         <div className="flex justify-end mb-8">
           <Dialog open={isAddOpen} onOpenChange={(open) => { setIsAddOpen(open); if (!open) reset(); }}>
-            <DialogTrigger render={<Button size="lg" className="bg-brand-orange hover:bg-brand-orange/90 text-white" />}>
-              <Plus className="w-4 h-4 mr-2" /> New Announcement
+            <DialogTrigger render={<Button size="sm" className="h-9 sm:h-10 rounded-lg bg-brand-orange hover:bg-brand-orange/90 text-white font-semibold text-xs sm:text-sm cursor-pointer not-italic" />}>
+              <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" /> New Announcement
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
