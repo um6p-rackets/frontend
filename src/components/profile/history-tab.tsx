@@ -1,40 +1,41 @@
 'use client';
 
 import { useState } from 'react';
-import { UserHistoryMatch } from '@/types/contracts/club';
+import { UserHistoryMatch, Paginated } from '@/types/contracts/club';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ChevronDown } from 'lucide-react';
+import LeaderboardPagination from '../members/pagination';
 
 interface HistoryTabProps {
-  history: UserHistoryMatch[];
+  history: Paginated<UserHistoryMatch>;
 }
 
-const BATCH_SIZE = 5;
+const ITEMS_PER_PAGE = 5;
 
 export default function HistoryTab({ history }: HistoryTabProps) {
-  const [visibleCount, setVisibleCount] = useState<number>(BATCH_SIZE);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
-  if (history.length === 0) {
+  // Since backend fetches all matches in `data`, we paginate it locally
+  const allMatches = history.data || [];
+  
+  if (allMatches.length === 0) {
     return (
-      <div className="bg-card rounded-2xl border border-border/80 p-8 text-center text-muted-foreground italic">
+      <div className="bg-card rounded-2xl border border-border/80 p-8 text-center text-muted-foreground italic font-semibold">
         No match history recorded yet.
       </div>
     );
   }
 
-  const visibleMatches = history.slice(0, visibleCount);
-  const hasMore = visibleCount < history.length;
-
-  const handleShowMore = () => {
-    setVisibleCount((prev) => prev + BATCH_SIZE);
-  };
+  // Calculate Pagination
+  const totalPages = Math.ceil(allMatches.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const visibleMatches = allMatches.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
     <div className="flex flex-col gap-3.5 w-full">
       {visibleMatches.map((match) => {
         const opponentNames =
           match.opponents.length > 0
-            ? match.opponents.map((o) => `${o.first_name} ${o.last_name}`).join(' & ')
+            ? match.opponents.map((o) => `${o.login}`).join(' & ')
             : 'Unknown Opponent';
         const primaryOpponent = match.opponents[0];
         const dateFormatted = new Date(match.date).toLocaleDateString('en-US', {
@@ -42,56 +43,83 @@ export default function HistoryTab({ history }: HistoryTabProps) {
           day: '2-digit',
           year: 'numeric',
         });
+        
+        const isWin = match.result === 'W';
 
         return (
           <div
             key={match.match_id}
-            className="bg-[#F8F7F4] dark:bg-card border border-border/70 hover:border-border rounded-xl p-4 sm:p-5 flex items-center justify-between gap-4 transition-all shadow-2xs"
+            className="bg-card hover:bg-muted/30 border border-border/60 hover:border-border rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4 transition-all shadow-xs hover:shadow-sm"
           >
-            {/* Left: Result Badge + Opponent */}
-            <div className="flex items-center gap-3.5 min-w-0">
+            {/* Left: Result Badge + Avatar + Text */}
+            <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+              {/* W/L Badge */}
               <span
-                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-black italic text-xs sm:text-sm shrink-0 ${
-                  match.result === 'W'
-                    ? 'bg-emerald-500 text-white shadow-2xs'
-                    : 'bg-destructive text-white shadow-2xs'
+                className={`w-9 h-9 rounded-xl flex items-center justify-center font-black italic text-sm shrink-0 shadow-2xs ${
+                  isWin
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-destructive text-white'
                 }`}
               >
                 {match.result}
               </span>
 
-              <Avatar className="w-9 h-9 sm:w-10 sm:h-10 border border-background shrink-0">
+              {/* Avatar */}
+              {/* <Avatar className="w-10 h-10 border-2 border-background shrink-0 shadow-2xs">
                 <AvatarImage
                   src={primaryOpponent?.avatar || undefined}
                   alt={opponentNames}
                 />
-                <AvatarFallback className="bg-brand-cream text-brand-ink font-bold text-xs">
+                <AvatarFallback className="bg-muted text-foreground font-bold text-xs uppercase">
                   {primaryOpponent?.first_name?.charAt(0) || 'O'}
                 </AvatarFallback>
-              </Avatar>
+              </Avatar> */}
 
-              <div className="min-w-0">
-                <h4 className="font-bold italic text-sm sm:text-base text-brand-ink dark:text-white truncate">
-                  vs {opponentNames}
-                  {match.partner ? ` (with ${match.partner.first_name} ${match.partner.last_name})` : ''}
+              {/* Text Info */}
+              <div className="min-w-0 flex flex-col justify-center">
+                
+              </div>
+                
+              <div className="min-w-0 flex flex-col justify-center">
+                <h4 className="font-black italic text-sm sm:text-base text-brand-ink dark:text-white line-clamp-2 leading-tight">
+                  
+                  {match.partner && (
+                    <span className="text-muted-foreground/80 font-bold ml-1.5 text-xs sm:text-sm">
+                      (with {match.partner.login})
+                    </span>
+                  )}
+                  {" "}vs {opponentNames}
                 </h4>
-                <p className="text-xs font-semibold italic text-muted-foreground truncate">
-                  {match.club_name} • {match.my_score} - {match.opponent_score}
-                  {primaryOpponent?.department ? ` • Dept ${primaryOpponent.department}` : ''}
-                </p>
+                
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold italic text-muted-foreground mt-1">
+                  <span className="text-brand-ink dark:text-gray-300 font-bold">{match.club_name}</span>
+                  <span className="opacity-40">•</span>
+                  {/* Fixed score string formatting */}
+                  <span className="bg-secondary/60 dark:bg-secondary px-1.5 py-0.5 rounded text-[11px] uppercase tracking-wider text-foreground">
+                    Score: {match.my_score} - {match.opponent_score}
+                  </span>
+                  {primaryOpponent?.department && (
+                    <>
+                      <span className="opacity-40">•</span>
+                      <span>Dept {primaryOpponent.department}</span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Right: Date & Points Change */}
+            {/* Right: Date & Points Badge */}
             <div className="flex flex-col items-end shrink-0 pl-2">
-              <span
-                className={`font-black italic text-sm sm:text-base ${
-                  match.points_change >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'
+              <div
+                className={`inline-flex items-center justify-center px-2.5 py-1 rounded-lg font-black italic text-sm border shadow-2xs ${
+                  match.points_change >= 0 
+                    ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' 
+                    : 'bg-red-50 dark:bg-destructive/10 text-destructive border-red-200 dark:border-destructive/20'
                 }`}
               >
                 {match.points_change >= 0 ? `+${match.points_change}` : match.points_change} PTS
-              </span>
-              <span className="text-[11px] font-bold italic text-muted-foreground mt-0.5">
+              </div>
+              <span className="text-[10px] font-bold italic text-muted-foreground mt-1.5 uppercase tracking-wider">
                 {dateFormatted}
               </span>
             </div>
@@ -99,25 +127,17 @@ export default function HistoryTab({ history }: HistoryTabProps) {
         );
       })}
 
-      {/* Show More Button (reveals 5 more per click) */}
-      {hasMore && (
-        <div className="pt-2 flex justify-center w-full">
-          <button
-            type="button"
-            onClick={handleShowMore}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-card border border-border/80 hover:border-brand-orange hover:text-brand-orange text-brand-ink dark:text-gray-200 text-xs sm:text-sm font-bold italic transition-all cursor-pointer shadow-2xs hover:shadow-xs active:scale-98"
-          >
-            <span>Show More</span>
-            <ChevronDown className="w-4 h-4 shrink-0" />
-          </button>
+      {/* Reusable Pagination Component */}
+      {totalPages > 1 && (
+        <div className="mt-2 flex justify-center w-full bg-card border border-border/60 rounded-xl p-2 shadow-2xs">
+          <LeaderboardPagination
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={(page) => {
+              setCurrentPage(page);
+            }} 
+          />
         </div>
-      )}
-
-      {/* All Loaded Message */}
-      {!hasMore && history.length > BATCH_SIZE && (
-        <p className="text-center text-xs text-muted-foreground font-semibold italic py-2">
-          Showing all {history.length} matches
-        </p>
       )}
     </div>
   );

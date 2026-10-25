@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserProfileData } from '@/types/contracts/club';
 import { GraduationCap, Settings } from 'lucide-react';
 import Rank1Badge from '@/components/badge/rank1';
 import Rank2Badge from '@/components/badge/rank2';
@@ -16,28 +15,29 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { SettingsProfile1 } from '@/components/setting/setting';
+import { UserProfile } from '@/types';
 
-export default function ProfileHeader({ data }: { data: UserProfileData }) {
+export default function ProfileHeader({ data }: { data: UserProfile }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(data.user);
-  const { stats, joined_clubs, club_ranks } = data;
+  const { global_stats, joined_clubs, club_ranks } = data.memberProfile;
   const fullName = `${currentUser.first_name} ${currentUser.last_name}`;
 
   // Find user's best rank across clubs or campus leaderboard
   const lbMember = mockClubData.top_members.find((m) => m.user_id === currentUser.id);
-  const bestRankNumber = stats.best_rank?.rank ?? (lbMember ? mockClubData.top_members.indexOf(lbMember) + 1 : null);
+  const bestRankNumber = global_stats.best_rank?.rank ?? (lbMember ? mockClubData.top_members.indexOf(lbMember) + 1 : null);
 
   const hasRank1 = bestRankNumber === 1;
   const hasRank2 = bestRankNumber === 2;
   const hasRank3 = bestRankNumber === 3;
-  const isUndefeated = (stats.wins > 0 && stats.losses === 0) || lbMember?.badges?.includes('undefeated');
-  const isHotStreak = stats.current_win_streak >= 3 || lbMember?.badges?.includes('hot-streak');
+  const isUndefeated = (global_stats.wins > 0 && global_stats.losses === 0) || lbMember?.badges?.includes('undefeated');
+  const isHotStreak = global_stats.current_win_streak >= 3 || lbMember?.badges?.includes('hot-streak');
 
   // Top ranked sport for this user (highest points, then best rank)
   const topClubRank =
     club_ranks && club_ranks.length > 0
       ? [...club_ranks].sort((a, b) => (b.points !== a.points ? b.points - a.points : a.rank - b.rank))[0]
-      : stats.best_rank;
+      : global_stats.best_rank;
   const topClubId = topClubRank?.club_id;
 
   // Sort joined clubs so the sport with the top-ranked sport is always first
