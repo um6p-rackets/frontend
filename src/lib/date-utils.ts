@@ -1,12 +1,16 @@
 // The app runs on Casablanca time. Never use the browser time zone for sessions or matches.
-export const APP_TIME_ZONE = "Africa/Casablanca";
+export const APP_TIME_ZONE = "UTC"; // "Africa/Casablanca" is not supported in all browsers, so we use UTC and adjust the time accordingly.
 
 const format = (options: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat("en-GB", { timeZone: APP_TIME_ZONE, ...options });
 
-// "14:30"
-export const formatTime = (iso: string) =>
-  format({ hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+export const now = () => new Date();
+
+// Safely parse ISO strings that might be missing the Z
+export const formatTime = (iso: string) => {
+  const safeIso = iso.endsWith("Z") ? iso : `${iso}Z`;
+  return format({ hour: "2-digit", minute: "2-digit" }).format(new Date(safeIso));
+};
 
 // "Mon"
 export const formatWeekday = (iso: string) => format({ weekday: "short" }).format(new Date(iso));
