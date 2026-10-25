@@ -43,6 +43,12 @@ export enum JoinRequestStatus {
   CANCELLED = 3, // the user took the request back
 }
 
+export enum MatchMineFilter {
+  PLAYER = 1, // matches I play in
+  REFEREE = 2, // matches I referee
+  ANY = 3, // either
+}
+
 // ==========================================
 // 2. Database entities (club service)
 // ==========================================

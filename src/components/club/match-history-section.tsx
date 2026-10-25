@@ -15,7 +15,7 @@ import {
   playerName,
   teamNames,
 } from "@/lib/match-utils";
-import { MatchStatus, MemberRole, type MatchDetail } from "@/types/contracts/club";
+import { MatchMineFilter, MatchStatus, MemberRole, type MatchDetail } from "@/types/contracts/club";
 
 type Tab = "mine" | "referee" | "club";
 
@@ -208,11 +208,14 @@ export default function MatchHistorySection({
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
 
-  // "mine" and "referee" both ask for my matches: the server returns the matches
   // where I play or referee. Only the club tab asks for everyone's.
   const { data, isLoading, error } = useClubMatches(
     clubSlug,
-    tab === "club" ? "false" : "true",
+    tab === "mine"
+      ? String(MatchMineFilter.PLAYER)
+      : tab === "referee"
+        ? String(MatchMineFilter.REFEREE)
+        : tab == "club" ? null : String(MatchMineFilter.ANY),
     statusFilter,
     page,
     PAGE_SIZE,

@@ -20,14 +20,15 @@ export const requestMatch = (slug: string, body: MatchRequestBody) =>
 
 export const getClubMatches = (
   slug: string,
-  mine: string,
+  mine: string | null,
   statusFilter: string,
   page: number,
   limit: number
 ) => {
   const statusParam = statusFilter !== 'all' ? `&status=${statusFilter}` : '';
+  const mineParam = mine ? `&mine=${mine}` : '';
   return api<Paginated<MatchDetail>>(
-    `${CLUBS}/${slug}/matches?mine=${mine}&page=${page}&limit=${limit}${statusParam}`
+    `${CLUBS}/${slug}/matches?${mineParam}&page=${page}&limit=${limit}${statusParam}`
   );
 };
 

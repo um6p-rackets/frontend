@@ -30,7 +30,7 @@ export function usePendingMatches(slug: string, enabled = true) {
 
 export function useClubMatches(
   slug: string,
-  mine: string,
+  mine: string | null,
   statusFilter: string,
   page: number,
   limit: number,
