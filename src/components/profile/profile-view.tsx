@@ -1,22 +1,24 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import ProfileHeader from '@/components/profile/profile-header';
-import ProfileTabs, { ProfileTabType } from '@/components/profile/profile-tabs';
-import StatisticsTab from '@/components/profile/statistics-tab';
-import HistoryTab from '@/components/profile/history-tab';
-import SportRankCard from '@/components/profile/sport-rank-card';
-import { Footer } from '@/components/footer';
-import { UserProfileData } from '@/types/contracts/club';
+import { useState } from "react";
+import ProfileHeader from "@/components/profile/profile-header";
+import ProfileTabs, { ProfileTabType } from "@/components/profile/profile-tabs";
+import StatisticsTab from "@/components/profile/statistics-tab";
+import HistoryTab from "@/components/profile/history-tab";
+import SportRankCard from "@/components/profile/sport-rank-card";
+import { Footer } from "@/components/footer";
+import { UserProfile } from "@/types";
 
 interface ProfileViewProps {
-  data: UserProfileData;
+  data: UserProfile;
 }
 
 export default function ProfileView({ data }: ProfileViewProps) {
-  const [activeTab, setActiveTab] = useState<ProfileTabType>('statistics');
+  const [activeTab, setActiveTab] = useState<ProfileTabType>("statistics");
   const fullName = `${data.user.first_name} ${data.user.last_name}`;
-  const { stats } = data;
+  const user = data.user;
+  const memberProfile = data.memberProfile;
+  const { global_stats } = memberProfile;
 
   return (
     // Outer container set to min-h-screen and flex-col so footer stays at the bottom
@@ -33,10 +35,10 @@ export default function ProfileView({ data }: ProfileViewProps) {
             </span>
             <div className="mt-3">
               <div className="text-3xl font-black italic text-brand-ink dark:text-white">
-                {(stats.win_rate * 100).toFixed(1)}%
+                {global_stats.win_rate}%
               </div>
               <p className="text-xs font-semibold italic text-muted-foreground mt-0.5">
-                {stats.wins} Wins – {stats.losses} Losses
+                {global_stats.wins} Wins – {global_stats.losses} Losses
               </p>
             </div>
           </div>
@@ -47,11 +49,13 @@ export default function ProfileView({ data }: ProfileViewProps) {
             </span>
             <div className="mt-3">
               <div className="text-3xl font-black italic text-brand-ink dark:text-white flex items-baseline gap-2">
-                <span>{stats.total_matches}</span>
-                <span className="text-xs font-bold text-muted-foreground uppercase not-italic">Total</span>
+                <span>{global_stats.total_matches}</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase not-italic">
+                  Total
+                </span>
               </div>
               <p className="text-xs font-semibold italic text-muted-foreground mt-0.5">
-                Across all {data.club_ranks.length} sports
+                Across all {memberProfile.club_ranks.length} sports
               </p>
             </div>
           </div>
@@ -62,8 +66,10 @@ export default function ProfileView({ data }: ProfileViewProps) {
             </span>
             <div className="mt-3">
               <div className="text-3xl font-black italic text-brand-orange flex items-baseline gap-2">
-                <span>{stats.current_win_streak}W</span>
-                <span className="text-xs font-bold text-brand-orange/80 uppercase not-italic">Unbroken</span>
+                <span>{global_stats.current_win_streak}W</span>
+                <span className="text-xs font-bold text-brand-orange/80 uppercase not-italic">
+                  Unbroken
+                </span>
               </div>
               <p className="text-xs font-semibold italic text-muted-foreground mt-0.5">
                 Active winning streak
@@ -74,31 +80,26 @@ export default function ProfileView({ data }: ProfileViewProps) {
 
         {/* Main Content Grid: Campus Standing (Left) & Toggleable Section (Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-7 items-start w-full">
-          {/* Left Column: Campus Standing / Sport Rank Card */}
-          <aside className="lg:col-span-4 w-full flex flex-col gap-3">
+          {/* Changed from lg:col-span-4 to lg:col-span-3 */}
+          <aside className="lg:col-span-5 w-full flex flex-col gap-3">
             <SportRankCard
-              clubRanks={data.club_ranks}
+              clubRanks={memberProfile.club_ranks}
               userName={fullName}
-              department={data.user.department}
+              department={user.department}
             />
           </aside>
 
-          {/* Right Column: Interactive Performance by Sport / Match History */}
-          <section className="lg:col-span-8 w-full flex flex-col gap-3">
-            {/* Tab Navigation Switcher */}
-            <ProfileTabs
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-            />
+          {/* Changed from lg:col-span-8 to lg:col-span-9 */}
+          <section className="lg:col-span-7 w-full flex flex-col gap-3">
+            <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
             {/* Active Tab View Body */}
+            {/* TODO: Use Pagnation for history tab to avoid loading all matches at once */}
             <div className="w-full">
-              {activeTab === 'statistics' && (
-                <StatisticsTab data={data} />
-              )}
-              {activeTab === 'history' && (
-                <HistoryTab history={data.history} />
-              )}
+              {/* {activeTab === 'statistics' && (
+                <StatisticsTab data={memberProfile} />
+              )} */}
+              {activeTab === "history" && <HistoryTab history={memberProfile.history} />}
             </div>
           </section>
         </div>

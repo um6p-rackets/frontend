@@ -15,14 +15,16 @@ export default function ProfileTabs({
   ];
 
   return (
-    <div className="flex items-center gap-2 bg-card p-1.5 rounded-xl border border-border/80 shadow-2xs w-fit">
+    // Changed `w-fit` to `w-full`
+    <div className="flex items-center gap-2 bg-card p-1.5 rounded-xl border border-border/80 shadow-2xs w-full">
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`px-5 py-2 rounded-lg text-xs sm:text-sm font-bold italic transition-all cursor-pointer ${
+            // Added `flex-1` so both tabs stretch equally to fill the container
+            className={`flex-1 px-5 py-2 rounded-lg text-xs sm:text-sm font-bold italic transition-all cursor-pointer ${
               isActive
                 ? 'bg-brand-orange text-white shadow-xs'
                 : 'text-muted-foreground hover:text-brand-ink dark:hover:text-white hover:bg-muted/50'
