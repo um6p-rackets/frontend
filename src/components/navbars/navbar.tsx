@@ -139,7 +139,6 @@ function UserNav({ user }: { user: User }) {
   
   const pathname = usePathname(); 
    // still testing 
-  const { notifications } = useNotifications();
   // 1. Extract the club slug from the URL (e.g., "/clubs/badminton" -> "badminton")
   const pathParts = pathname?.split('/').filter(Boolean) || [];
   const clubsIndex = pathParts.indexOf('clubs');
@@ -153,6 +152,7 @@ function UserNav({ user }: { user: User }) {
   
   const fallbackInitial = user?.first_name?.charAt(0)?.toUpperCase() || user?.login?.charAt(0)?.toUpperCase() || 'U';
  
+  const { notifications , connected } = useNotifications();
 
   return (
     <header className="absolute top-0 left-0 w-full z-50 bg-transparent pt-6 px-6 md:px-12 lg:px-16">
@@ -244,8 +244,6 @@ function UserNav({ user }: { user: User }) {
           <NotificationCenter
               notifications={notifications}
               connected={connected}
-              // onMarkAllAsRead={handleMarkAllAsRead}
-              // markingAllAsRead={markingAllAsRead}
             />
           {/* Leaderboard Icon */}
           {isAppView && currentClubSlug && (

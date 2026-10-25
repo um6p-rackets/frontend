@@ -129,7 +129,7 @@ export function NotificationCenter({
     (notification) => !notification.is_read,
   ).length;
 
-  return (
+  return (k
     <Sheet>
       <SheetTrigger
         title="Notifications"

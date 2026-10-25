@@ -52,8 +52,7 @@ export function NotificationProvider({
   const inboxQuery = useNotificationInbox(userId);
   const { connected } = useNotificationSocket(userId);
 
-  const notifications =
-    inboxQuery.data?.items.map(mapInboxItem) ?? [];
+  const notifications = inboxQuery.data?.items.map(mapInboxItem) ?? [];
 
   return (
     <NotificationContext.Provider
