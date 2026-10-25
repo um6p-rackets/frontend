@@ -12,10 +12,13 @@ export interface NotificationRealtimePayload {
   event_id: string;
   sender_type: SenderType;
   sender_id: string | null;
+  sender_name: string | null;
+  sender_avatar_url: string | null;
   category: NotificationCategory;
   type: NotificationType;
   club_id: string | null;
-  sent_at: string;
+  club_name: string | null;
+  sent_at: string;  
   is_read: boolean;
 }
 
@@ -30,6 +33,9 @@ export interface InboxItem {
     event_id: string;
     sender_type: SenderType;
     sender_id: string | null;
+    sender_name: string | null;
+    sender_avatar_url: string | null;
+    club_name: string | null;
     category: NotificationCategory;
     type: NotificationType;
     club_id: string | null;
