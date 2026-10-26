@@ -13,7 +13,7 @@ export default function ClubList() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-40 gap-y-14 md:gap-y-20 place-items-center">
         {clubs.map((club) => (
-          <ClubCard key={club.slug} name={club.name} imageUrl={`/clubs/${club.slug}.png`} link={`/clubs/${club.slug}`} />
+          <ClubCard key={club.slug} name={club.name} slug={club.slug} link={`/clubs/${club.slug}`} />
         ))}
         
         <div className="max-w-[320px] text-xs sm:text-sm text-muted-foreground italic lg:justify-self-start self-center py-4 pl-4 border-l-2 border-brand-teal/20">
