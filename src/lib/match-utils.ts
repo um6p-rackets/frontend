@@ -5,7 +5,7 @@ import { APP_TIME_ZONE } from "@/lib/date-utils";
 // Seeded users can have no first or last name: fall back to the login
 export function playerName(player: Player | null | undefined) {
   if (!player) return "";
-  const fullName = `${player.first_name ?? ""} ${player.last_name ?? ""}`.trim();
+  const fullName = `${player.login ?? ""}`.trim();
   return fullName || player.login;
 }
 
