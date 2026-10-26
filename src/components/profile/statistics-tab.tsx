@@ -8,7 +8,7 @@ export default function StatisticsTab({ data }: StatisticsTabProps) {
   const { club_ranks, history } = data;
 
   const sportBreakdown = club_ranks.map((cr, idx) => {
-    const clubMatches = history.filter((m) => m.club_id === cr.club_id);
+    const clubMatches = history.data.filter((m) => m.club_id === cr.club_id);
     const wins = clubMatches.filter((m) => m.result === 'W').length;
     const losses = clubMatches.filter((m) => m.result === 'L').length;
     const total = wins + losses;
