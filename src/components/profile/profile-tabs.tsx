@@ -10,7 +10,7 @@ export default function ProfileTabs({
   onTabChange,
 }: ProfileTabsProps) {
   const tabs: { id: ProfileTabType; label: string }[] = [
-    { id: 'statistics', label: 'Performance by Sport' },
+    // { id: 'statistics', label: 'Performance by Sport' },
     { id: 'history', label: 'Match History' },
   ];
 
