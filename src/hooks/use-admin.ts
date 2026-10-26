@@ -43,6 +43,7 @@ export function useAdminStats(weeks?: number) {
   return useQuery({
     queryKey: adminKeys.statsByWeeks(weeks),
     queryFn: () => getAdminStats({ weeks }),
+    placeholderData: keepPreviousData,
   });
 }
 
