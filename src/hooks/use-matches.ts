@@ -8,6 +8,7 @@ import {
   cancelMatch,
   getClubMatches,
   getPendingMatches,
+  getUserMatches,
   requestMatch,
   submitMatchResult
 } from "@/lib/api/matches";
@@ -19,6 +20,8 @@ export const matchKeys = {
   lists: (slug: string) => [...matchKeys.all(slug), "list"] as const,
   list: (slug: string, filters: Record<string, unknown>) =>
     [...matchKeys.lists(slug), filters] as const,
+  userMatches: (userId: number, page: number, limit: number) =>
+    ["users", userId, "matches", { page, limit }] as const,
 };
 
 export function usePendingMatches(slug: string, enabled = true) {
@@ -100,5 +103,19 @@ export function useSubmitMatchResult(slug: string) {
     onError: (err: Error) => {
       toast.error(err.message || "Failed to submit match result.");
     },
+  });
+}
+
+export function useUserMatches(
+  userId: number,
+  page: number = 1,
+  limit: number = 10,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: matchKeys.userMatches(userId, page, limit),
+    queryFn: () => getUserMatches(userId, page, limit),
+    enabled: enabled && Boolean(userId),
+    placeholderData: keepPreviousData, // Keeps previous page active while loading new page
   });
 }
