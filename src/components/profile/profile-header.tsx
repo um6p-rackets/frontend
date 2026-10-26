@@ -129,7 +129,7 @@ export default function ProfileHeader({ data }: { data: UserProfile }) {
                   name: fullName,
                   email: currentUser.email,
                   username: currentUser.login,
-                  avatar: currentUser.avatar ?? undefined,
+                  // avatar: currentUser.avatar ?? undefined,
                   department: currentUser.department ?? '',
                 }}
                 onSave={(updated) => {
@@ -139,7 +139,7 @@ export default function ProfileHeader({ data }: { data: UserProfile }) {
                     last_name: updated.last_name ?? prev.last_name,
                     email: updated.email ?? prev.email,
                     login: updated.username ?? prev.login,
-                    avatar: updated.avatar !== undefined ? updated.avatar : null,
+                    // avatar: updated.avatar !== undefined ? updated.avatar : null,
                     department: updated.department ?? prev.department,
                   }));
                   setIsSettingsOpen(false);

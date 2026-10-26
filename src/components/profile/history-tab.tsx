@@ -1,9 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { UserHistoryMatch, Paginated } from '@/types/contracts/club';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import LeaderboardPagination from '../members/pagination';
+import { useState } from "react";
+import { UserHistoryMatch, Paginated } from "@/types/contracts/club";
+import Pagination from "../members/pagination";
 
 interface HistoryTabProps {
   history: Paginated<UserHistoryMatch>;
@@ -14,128 +13,108 @@ const ITEMS_PER_PAGE = 5;
 export default function HistoryTab({ history }: HistoryTabProps) {
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // Since backend fetches all matches in `data`, we paginate it locally
   const allMatches = history.data || [];
-  
+
   if (allMatches.length === 0) {
     return (
-      <div className="bg-card rounded-2xl border border-border/80 p-8 text-center text-muted-foreground italic font-semibold">
+      <div className="bg-card rounded-2xl border border-border/80 p-8 text-center text-muted-foreground text-sm font-medium">
         No match history recorded yet.
       </div>
     );
   }
 
-  // Calculate Pagination
   const totalPages = Math.ceil(allMatches.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const visibleMatches = allMatches.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
-    <div className="flex flex-col gap-3.5 w-full">
+    <div className="flex flex-col gap-2.5 w-full">
       {visibleMatches.map((match) => {
-        const opponentNames =
-          match.opponents.length > 0
-            ? match.opponents.map((o) => `${o.login}`).join(' & ')
-            : 'Unknown Opponent';
-        const primaryOpponent = match.opponents[0];
-        const dateFormatted = new Date(match.date).toLocaleDateString('en-US', {
-          month: 'short',
-          day: '2-digit',
-          year: 'numeric',
+        const dateFormatted = new Date(match.date).toLocaleDateString("en-US", {
+          month: "short",
+          day: "2-digit",
+          year: "numeric",
         });
         
-        const isWin = match.result === 'W';
+        const isWin = match.result === "W";
+
+        const resultText = isWin ? "VICTORY" : "DEFEAT";
+        const resultTextColor = isWin
+          ? "text-emerald-600 dark:text-emerald-400"
+          : "text-red-600 dark:text-red-400";
+
+        const bgColor = isWin
+          ? "bg-emerald-50/50 dark:bg-emerald-500/10"
+          : "bg-red-50/50 dark:bg-red-500/10";
+
+        const borderColor = isWin
+          ? "border-emerald-500/30 dark:border-emerald-400/30"
+          : "border-red-500/30 dark:border-red-400/30";
+
+        const pointsFormatted =
+          match.points_change >= 0 ? `+${match.points_change}` : match.points_change;
+
+        const matchMode = match.mode == 1 ? "1 V 1" : match.mode == 2 ? "2 V 2" : "UNKNOWN";
 
         return (
           <div
             key={match.match_id}
-            className="bg-card hover:bg-muted/30 border border-border/60 hover:border-border rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4 transition-all shadow-xs hover:shadow-sm"
+            className="flex items-center px-4 py-3.5 rounded-xl border border-border/80 transition-all duration-200 shadow-2xs bg-card hover:border-orange-500/60 dark:hover:border-orange-400/60"
           >
-            {/* Left: Result Badge + Avatar + Text */}
-            <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
-              {/* W/L Badge */}
-              <span
-                className={`w-9 h-9 rounded-xl flex items-center justify-center font-black italic text-sm shrink-0 shadow-2xs ${
-                  isWin
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-destructive text-white'
-                }`}
-              >
-                {match.result}
-              </span>
-
-              {/* Avatar */}
-              {/* <Avatar className="w-10 h-10 border-2 border-background shrink-0 shadow-2xs">
-                <AvatarImage
-                  src={primaryOpponent?.avatar || undefined}
-                  alt={opponentNames}
-                />
-                <AvatarFallback className="bg-muted text-foreground font-bold text-xs uppercase">
-                  {primaryOpponent?.first_name?.charAt(0) || 'O'}
-                </AvatarFallback>
-              </Avatar> */}
-
-              {/* Text Info */}
-              <div className="min-w-0 flex flex-col justify-center">
-                
-              </div>
-                
-              <div className="min-w-0 flex flex-col justify-center">
-                <h4 className="font-black italic text-sm sm:text-base text-brand-ink dark:text-white line-clamp-2 leading-tight">
-                  
-                  {match.partner && (
-                    <span className="text-muted-foreground/80 font-bold ml-1.5 text-xs sm:text-sm">
-                      (with {match.partner.login})
-                    </span>
-                  )}
-                  {" "}vs {opponentNames}
+            <div className="flex items-center justify-between w-full">
+              {/* Left Column: Club & Time */}
+              <div className="flex flex-col flex-1 min-w-0 pr-4">
+                <h4 className="font-bold italic text-sm sm:text-base text-brand-ink dark:text-white truncate uppercase leading-tight">
+                  {match.club_name}
                 </h4>
-                
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold italic text-muted-foreground mt-1">
-                  <span className="text-brand-ink dark:text-gray-300 font-bold">{match.club_name}</span>
-                  <span className="opacity-40">•</span>
-                  {/* Fixed score string formatting */}
-                  <span className="bg-secondary/60 dark:bg-secondary px-1.5 py-0.5 rounded text-[11px] uppercase tracking-wider text-foreground">
-                    Score: {match.my_score} - {match.opponent_score}
+                <span className="text-[11px] font-medium text-muted-foreground/80 truncate mt-0.5">
+                  {dateFormatted}
+                </span>
+              </div>
+
+              {/* Center Column: Mode + Victory/Defeat & Score */}
+              <div className="flex items-center justify-center gap-8 sm:gap-20 shrink-0">
+                {/* Mode Pill */}
+                <span className="px-2.5 py-0.5 rounded-full border border-border/60 bg-muted/30 text-[10px] font-bold text-muted-foreground tracking-wider shrink-0">
+                  {matchMode}
+                </span>
+
+                {/* Victory/Defeat & Score */}
+                <div className="flex flex-col items-center justify-center w-20 shrink-0">
+                  <span
+                    className={`font-bold italic tracking-wider text-[11px] sm:text-xs uppercase ${resultTextColor}`}
+                  >
+                    {resultText}
                   </span>
-                  {primaryOpponent?.department && (
-                    <>
-                      <span className="opacity-40">•</span>
-                      <span>Dept {primaryOpponent.department}</span>
-                    </>
-                  )}
+                  <span className="font-bold text-xs sm:text-sm text-foreground mt-0.5 tabular-nums">
+                    {match.my_score}{" "}
+                    <span className="text-muted-foreground font-normal mx-0.5">-</span>{" "}
+                    {match.opponent_score}
+                  </span>
                 </div>
               </div>
-            </div>
 
-            {/* Right: Date & Points Badge */}
-            <div className="flex flex-col items-end shrink-0 pl-2">
-              <div
-                className={`inline-flex items-center justify-center px-2.5 py-1 rounded-lg font-black italic text-sm border shadow-2xs ${
-                  match.points_change >= 0 
-                    ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' 
-                    : 'bg-red-50 dark:bg-destructive/10 text-destructive border-red-200 dark:border-destructive/20'
-                }`}
-              >
-                {match.points_change >= 0 ? `+${match.points_change}` : match.points_change} PTS
+              {/* Right Column: Points Box */}
+              <div className="flex items-center justify-end flex-1 min-w-0 pl-4">
+                <span
+                  className={`border rounded-md px-2.5 py-1 ${borderColor} ${bgColor} text-xs font-bold italic tracking-wide ${resultTextColor} shrink-0`}
+                >
+                  {pointsFormatted}
+                </span>
               </div>
-              <span className="text-[10px] font-bold italic text-muted-foreground mt-1.5 uppercase tracking-wider">
-                {dateFormatted}
-              </span>
             </div>
           </div>
         );
       })}
 
-      {/* Reusable Pagination Component */}
       {totalPages > 1 && (
-        <div className="mt-2 flex justify-center w-full bg-card border border-border/60 rounded-xl p-2 shadow-2xs">
-          <LeaderboardPagination
-            currentPage={currentPage} 
-            totalPages={totalPages} 
+        <div className="mt-4 flex justify-center w-full bg-card border border-border/60 rounded-xl p-2 shadow-2xs">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
             onPageChange={(page) => {
               setCurrentPage(page);
-            }} 
+            }}
           />
         </div>
       )}

@@ -324,7 +324,7 @@ export type UserGlobalStat = {
   win_rate: number | string; // 0..1
   ladder_points: number;
   current_win_streak: number;
-  best_rank: UserClubRank | null;
+  best_rank: UserClubRank;
 };
 
 export type UserProfileData = {
