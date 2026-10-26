@@ -1,26 +1,31 @@
-import { MoveUpRight } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
+"use client";
+
+import { MoveUpRight } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { CLUB_IMAGES } from "@/lib/club-images-list";
 
 type ClubCardProps = {
   name: string;
-  imageUrl: string;
+  slug: string;
   link: string;
 };
 
 // Helper function to format title: Capitalize first letter only, lowercase the rest, and limit to 12 chars
 const formatClubName = (text: string) => {
-  if (!text) return '';
-  
+  if (!text) return "";
+
   // Truncate to 12 characters max
-  const trimmed = text.length > 12 ? text.substring(0, 12) + '...' : text;
+  const trimmed = text.length > 12 ? text.substring(0, 12) + "..." : text;
 
   // Format case: Make first letter uppercase, rest lowercase
   const lower = trimmed.toLowerCase();
   return lower.charAt(0).toUpperCase() + lower.slice(1);
 };
 
-export default function ClubCard({ name, imageUrl, link }: ClubCardProps) {
+export default function ClubCard({ name, slug, link }: ClubCardProps) {
+  const [imageFailed, setImageFailed] = useState(!CLUB_IMAGES.has(slug));
   const formattedName = formatClubName(name);
 
   return (
@@ -47,14 +52,16 @@ export default function ClubCard({ name, imageUrl, link }: ClubCardProps) {
       </div>
 
       <div className="absolute top-1/2 text-black/0 -translate-y-1/2 -right-6 sm:-right-8 md:-right-12 w-37.5 h-37.5 sm:w-45 sm:h-45 md:w-55 md:h-55 z-10 drop-shadow-xl pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110">
-        <Image
-          src={imageUrl}
-          alt={name}
-          fill
-          className="object-contain"
-          sizes="(max-width: 768px) 150px, 220px"
-          priority
-        />
+        {!imageFailed && (
+          <Image
+            src={`/clubs/${slug}.png`}
+            alt={name}
+            fill
+            className="object-contain"
+            sizes="(max-width: 768px) 150px, 220px"
+            onError={() => setImageFailed(true)}
+          />
+        )}
       </div>
     </Link>
   );
