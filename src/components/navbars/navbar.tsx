@@ -26,14 +26,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import Logo from "../logo";
-import { AuthButton } from "../auth/auth-button";
-import { useLogout } from "@/hooks/use-logout";
-import { useNotifications } from "@/providers/NotificationProvider";
-import { User } from "@/types/contracts/auth";
-import { useMe } from "@/hooks/use-me";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+
+import Logo from '../logo';
+import { AuthButton } from '../auth/auth-button';
+import { useLogout } from '@/hooks/use-logout';
+import { useNotifications } from '@/providers/NotificationProvider';
+import { User } from '@/types/contracts/auth';
+import { useMe } from '@/hooks/use-me';
 import { NotificationComponent } from "@/components/notifications/notification-component";
-import { connected } from "process";
+import { connected } from 'process';
 
 export default function Navbar() {
   const { data: user, isPending } = useMe();
@@ -136,9 +145,14 @@ function VisitorNav() {
 
 function UserNav({ user }: { user: User }) {
   const [isOpen, setIsOpen] = useState(false);
-
-  const pathname = usePathname();
-  const { notifications } = useNotifications();
+  
+  const pathname = usePathname(); 
+   // still testing 
+  const { notifications , connected , markAllAsRead , markingAllAsRead } = useNotifications();
+  // 1. Extract the club slug from the URL (e.g., "/clubs/badminton" -> "badminton")
+  const pathParts = pathname?.split('/').filter(Boolean) || [];
+  const clubsIndex = pathParts.indexOf('clubs');
+  const currentClubSlug = clubsIndex !== -1 && pathParts.length > clubsIndex + 1 ? pathParts[clubsIndex + 1] : '';
   
   const pathParts = pathname?.split("/").filter(Boolean) || [];
   const clubsIndex = pathParts.indexOf("clubs");
@@ -232,14 +246,17 @@ function UserNav({ user }: { user: User }) {
                     </DropdownMenuItem>
                   ))
                 )}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
+              </div>
+            </SheetContent>
+          </Sheet> */}
           <NotificationComponent
-            notifications={notifications}
-          />
-
+              notifications={notifications}
+              connected={connected}
+              onMarkAllAsRead={markAllAsRead}
+              markingAllAsRead={markingAllAsRead}
+              // onMarkAllAsRead={handleMarkAllAsRead}
+              // markingAllAsRead={markingAllAsRead}
+            />
           {/* Leaderboard Icon */}
           {isAppView && currentClubSlug && (
             <Link
@@ -298,21 +315,22 @@ function UserNav({ user }: { user: User }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
-        {/* Mobile Menu Toggle */}
-        <div className="md:hidden shrink-0">
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="p-2 text-foreground rounded-lg hover:bg-black/5 transition-colors"
-            aria-label="Toggle Menu"
-          >
-            {isOpen ? (
-              <X className="w-7 h-7" />
-            ) : (
-              <Menu className="w-7 h-7" />
-            )}
-          </button>
-        </div>
+      </div>
+      {/* Mobile Actions: Notifications + Menu */}
+      {/* Mobile Menu Toggle */}
+      <div className="md:hidden">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2 text-foreground rounded-lg hover:bg-black/5 transition-colors"
+          aria-label="Toggle Menu"
+        >
+          {isOpen ? (
+            <X className="w-7 h-7" />
+          ) : (
+            <Menu className="w-7 h-7" />
+          )}
+        </button>
+      </div>
 
         {/* Mobile Dropdown Menu */}
         {isOpen && (
@@ -411,16 +429,75 @@ function UserNav({ user }: { user: User }) {
               </Avatar>
               <span>Profile</span>
             </Link>
+          )}
 
-            <div className="px-2 pt-2">
-              <Button
-                onClick={performLogout}
-                variant="destructive"
-                className="w-full h-11 text-base font-semibold"
-              >
-                Log out
-              </Button>
-            </div>
+          <NotificationComponent 
+            notifications={notifications}
+            connected={connected}
+            onMarkAllAsRead={markAllAsRead}
+            markingAllAsRead={markingAllAsRead}
+            showLabel
+            // onMarkAllAsRead={handleMarkAllAsRead}
+            // markingAllAsRead={markingAllAsRead}
+          />
+          {/* <Sheet>
+            <SheetTrigger className="px-4 py-2 flex items-center gap-3 text-base font-semibold rounded-lg hover:bg-muted text-foreground transition-colors w-full text-left">
+              <Bell className="w-5 h-5" /> Notifications
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Notifications</SheetTitle>
+              </SheetHeader>
+              <div className="py-6 flex flex-col gap-4">
+                {notifications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center">
+                    No new notifications
+                  </p>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.notification_id}
+                      className="rounded-lg border p-3"
+                    >
+                      <p className="text-sm font-medium">
+                        {notification.type.replaceAll('_', ' ')}
+                      </p>
+
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(notification.sent_at).toLocaleString()}
+                      </p>
+
+                      {!notification.is_read && (
+                        <span className="text-xs text-primary">Unread</span>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </SheetContent>
+          </Sheet> */}
+
+          {/* Leaderboard Link - Mobile */}
+          {isAppView && currentClubSlug && (
+            <Link href={`/leaderboard`} onClick={() => setIsOpen(false)} className={`px-4 py-2 flex items-center gap-3 text-base font-semibold rounded-lg transition-colors ${pathname?.includes('/leaderboard') ? 'bg-orange-50 text-brand-orange dark:bg-orange-950/40' : 'hover:bg-muted text-foreground'}`}>
+              <BarChart2 className="w-5 h-5" /> Leaderboard
+            </Link>
+          )}
+
+          <Link href="/profile" onClick={() => setIsOpen(false)} className={`px-4 py-2 flex items-center gap-3 text-base font-semibold rounded-lg transition-colors mt-2 border-t border-border pt-4 ${pathname?.startsWith('/profile') ? 'text-brand-orange' : 'hover:bg-muted text-foreground'}`}>
+            <Avatar className={`w-8 h-8 border shadow-sm shrink-0 ${pathname?.startsWith('/profile') ? 'border-brand-orange' : 'border-background'}`}>
+              <AvatarImage src={user?.avatar || undefined} alt={user?.first_name || 'User'}  referrerPolicy="no-referrer" />
+              <AvatarFallback className="bg-accent text-accent-foreground font-bold text-xs">
+                {fallbackInitial}
+              </AvatarFallback>
+            </Avatar>
+            <span>Profile</span>
+          </Link>
+
+          <div className="px-2 pt-2">
+            <Button onClick={performLogout} variant="destructive" className="w-full h-11 text-base font-semibold">
+              Log out
+            </Button>
           </div>
         )}
       </div>
