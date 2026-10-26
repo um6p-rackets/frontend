@@ -31,11 +31,12 @@ import type {
   NotificationRealtimePayload,
 } from "@/types/contracts/notification";
 
-interface NotificationCenterProps {
+interface NotificationComponentProps {
   notifications: NotificationRealtimePayload[];
   connected: boolean;
   onMarkAllAsRead?: () => void;
   markingAllAsRead?: boolean;
+  showLabel?: boolean;
 }
 
 const ORANGE = "#D7492A";
@@ -119,30 +120,22 @@ function formatNotificationDate(date: string) {
   });
 }
 
-export function NotificationCenter({
+export function NotificationComponent({
   notifications,
   connected,
   onMarkAllAsRead,
   markingAllAsRead = false,
-}: NotificationCenterProps) {
+  showLabel = false,
+}: NotificationComponentProps) {
   const unreadCount = notifications.filter(
     (notification) => !notification.is_read,
   ).length;
 
   return (k
     <Sheet>
-      <SheetTrigger
-        title="Notifications"
-        aria-label={`Notifications, ${unreadCount} unread`}
-        className="relative inline-flex size-10 items-center justify-center rounded-xl border border-transparent text-[#3B3B3B] transition-colors hover:border-[#D7492A]/20 hover:bg-[#D7492A]/10 hover:text-[#D7492A] dark:text-white"
-      >
-        <Bell className="size-5" />
-
-        {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-[#D7492A] px-1 text-[10px] font-bold text-white dark:border-[#202020]">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
+      <SheetTrigger className="flex items-center gap-3 rounded-lg px-4 py-2 text-base font-semibold hover:bg-muted">
+        <Bell className="h-5 w-5" />
+        {showLabel && <span>Notifications</span>}
       </SheetTrigger>
 
       <SheetContent
@@ -181,6 +174,7 @@ export function NotificationCenter({
 
               {connected ? "Live updates enabled" : "Reconnecting..."}
             </div>
+                        
             <Button
               type="button"
               size="sm"
@@ -191,21 +185,12 @@ export function NotificationCenter({
                 !onMarkAllAsRead
               }
               onClick={onMarkAllAsRead}
-            >
-              <CheckCheck className="size-3.5" />
-              {markingAllAsRead ? "Marking..." : "Mark all as read"}
-            </Button>
-            {/* <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={unreadCount === 0 || markingAllAsRead}
-              onClick={onMarkAllAsRead}
               className="h-8 gap-1.5 px-2 text-xs text-white hover:bg-white/10 hover:text-[#ED6E47] disabled:text-white/35"
             >
               <CheckCheck className="size-3.5" />
               {markingAllAsRead ? "Marking..." : "Mark all as read"}
-            </Button> */}
+            </Button>
+
           </div>
         </SheetHeader>
 

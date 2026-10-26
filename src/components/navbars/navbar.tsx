@@ -40,7 +40,7 @@ import { useLogout } from '@/hooks/use-logout';
 import { useNotifications } from '@/providers/NotificationProvider';
 import { User } from '@/types/contracts/auth';
 import { useMe } from '@/hooks/use-me';
-import { NotificationCenter } from "@/components/notifications/notification-center";
+import { NotificationComponent } from "@/components/notifications/notification-component";
 import { connected } from 'process';
 
 export default function Navbar() {
@@ -139,6 +139,7 @@ function UserNav({ user }: { user: User }) {
   
   const pathname = usePathname(); 
    // still testing 
+  const { notifications , connected , markAllAsRead , markingAllAsRead } = useNotifications();
   // 1. Extract the club slug from the URL (e.g., "/clubs/badminton" -> "badminton")
   const pathParts = pathname?.split('/').filter(Boolean) || [];
   const clubsIndex = pathParts.indexOf('clubs');
@@ -152,7 +153,6 @@ function UserNav({ user }: { user: User }) {
   
   const fallbackInitial = user?.first_name?.charAt(0)?.toUpperCase() || user?.login?.charAt(0)?.toUpperCase() || 'U';
  
-  const { notifications , connected } = useNotifications();
 
   return (
     <header className="absolute top-0 left-0 w-full z-50 bg-transparent pt-6 px-6 md:px-12 lg:px-16">
@@ -241,9 +241,13 @@ function UserNav({ user }: { user: User }) {
               </div>
             </SheetContent>
           </Sheet> */}
-          <NotificationCenter
+          <NotificationComponent
               notifications={notifications}
               connected={connected}
+              onMarkAllAsRead={markAllAsRead}
+              markingAllAsRead={markingAllAsRead}
+              // onMarkAllAsRead={handleMarkAllAsRead}
+              // markingAllAsRead={markingAllAsRead}
             />
           {/* Leaderboard Icon */}
           {isAppView && currentClubSlug && (
@@ -285,17 +289,21 @@ function UserNav({ user }: { user: User }) {
           </DropdownMenu>
 
         </div>
-
-        {/* Mobile Menu Toggle */}
-        <div className="md:hidden">
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="p-2 text-foreground rounded-lg hover:bg-black/5 transition-colors"
-            aria-label="Toggle Menu"
-          >
-            {isOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
-          </button>
-        </div>
+      </div>
+      {/* Mobile Actions: Notifications + Menu */}
+      {/* Mobile Menu Toggle */}
+      <div className="md:hidden">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2 text-foreground rounded-lg hover:bg-black/5 transition-colors"
+          aria-label="Toggle Menu"
+        >
+          {isOpen ? (
+            <X className="w-7 h-7" />
+          ) : (
+            <Menu className="w-7 h-7" />
+          )}
+        </button>
       </div>
 
       {/* Mobile Dropdown Menu */}
@@ -322,8 +330,17 @@ function UserNav({ user }: { user: User }) {
               <Users className="w-5 h-5" /> Members
             </Link>
           )}
-          
-          <Sheet>
+
+          <NotificationComponent 
+            notifications={notifications}
+            connected={connected}
+            onMarkAllAsRead={markAllAsRead}
+            markingAllAsRead={markingAllAsRead}
+            showLabel
+            // onMarkAllAsRead={handleMarkAllAsRead}
+            // markingAllAsRead={markingAllAsRead}
+          />
+          {/* <Sheet>
             <SheetTrigger className="px-4 py-2 flex items-center gap-3 text-base font-semibold rounded-lg hover:bg-muted text-foreground transition-colors w-full text-left">
               <Bell className="w-5 h-5" /> Notifications
             </SheetTrigger>
@@ -358,7 +375,7 @@ function UserNav({ user }: { user: User }) {
                 )}
               </div>
             </SheetContent>
-          </Sheet>
+          </Sheet> */}
 
           {/* Leaderboard Link - Mobile */}
           {isAppView && currentClubSlug && (

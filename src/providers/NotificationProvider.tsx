@@ -13,10 +13,14 @@ import type {
 import { useMe } from "@/hooks/use-me";
 import { useNotificationInbox } from "@/hooks/use-notification-inbox";
 import { useNotificationSocket } from "@/hooks/use-notification-socket";
+import { useMarkAllNotificationsAsRead } from "@/hooks/use-notification-mark-all-as-read";
 
 interface NotificationContextType {
   notifications: NotificationRealtimePayload[];
   connected: boolean;
+  // markAsRead: (notificationId: string) => void;
+  markAllAsRead: () => void;
+  markingAllAsRead: boolean;
 }
 
 const NotificationContext =
@@ -52,14 +56,24 @@ export function NotificationProvider({
   const inboxQuery = useNotificationInbox(userId);
   const { connected } = useNotificationSocket(userId);
 
-  const notifications = inboxQuery.data?.items.map(mapInboxItem) ?? [];
+  // const markOne = useMarkNotificationAsRead(userId);
+  const markAll = useMarkAllNotificationsAsRead(userId);
+
+  const notifications =
+    inboxQuery.data?.items.map(mapInboxItem) ?? [];
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, connected }}
-    >
-      {children}
-    </NotificationContext.Provider>
+  value={{
+    notifications,
+    connected,
+    // markAsRead: (id) => markOne.mutate(id),
+    markAllAsRead: () => markAll.mutate(),
+    markingAllAsRead: markAll.isPending,
+  }}
+>
+  {children}
+</NotificationContext.Provider>
   );
 }
 
