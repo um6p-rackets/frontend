@@ -7,6 +7,7 @@ import Rank2Badge from "@/components/badge/rank2";
 import Rank3Badge from "@/components/badge/rank3";
 import UndefeatedBadge from "@/components/badge/undefeated";
 import HotStreakBadge from "@/components/badge/hot-streak";
+import { useGetUserAchievements } from "@/hooks/use-achievements";
 
 // Optimized mathematically since we now have true database integers
 export function calculateWinRate(wins: number, total: number) {
@@ -15,6 +16,7 @@ export function calculateWinRate(wins: number, total: number) {
 }
 
 export default function LeaderboardRow({ member }: { member: Leaderboard }) {
+
   let rankBg = "bg-brand-ink text-background";
   let rowBg = "bg-brand-cream/20 hover:bg-muted";
   let cardBg = "bg-brand-cream/20 border-border hover:border-brand-orange/60";
@@ -125,18 +127,8 @@ export default function LeaderboardRow({ member }: { member: Leaderboard }) {
       {/* Desktop Row View (>= md) - Links to user profile */}
       <Link
         href={`/profile/${member.player.id}`}
-        className={`hidden md:flex relative flex-col justify-center px-4 sm:px-6 py-2.5 sm:py-4 rounded-xl transition-all cursor-pointer hover:shadow-xs ${rowBg}`}
+        className={`hidden md:flex relative px-4 sm:px-6 py-2.5 sm:py-4 rounded-xl transition-all cursor-pointer hover:shadow-xs ${rowBg}`}
       >
-        {hasBadges && (
-          <div className="absolute top-1 left-4 sm:left-6 flex flex-wrap items-center gap-1 scale-[0.8] sm:scale-100 origin-top-left">
-            {member.rank === 1 && <Rank1Badge />}
-            {member.rank === 2 && <Rank2Badge />}
-            {member.rank === 3 && <Rank3Badge />}
-            {isUndefeated && <UndefeatedBadge />}
-            {isHotStreak && <HotStreakBadge />}
-          </div>
-        )}
-
         <div
           className={`grid grid-cols-[60px_2.2fr_1fr_1fr_1fr_80px] items-center gap-4 w-full ${hasBadges ? "mt-4 sm:mt-4" : ""}`}
         >

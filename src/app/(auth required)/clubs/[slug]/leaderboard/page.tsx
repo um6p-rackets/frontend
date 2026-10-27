@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, use } from 'react';
-import LeaderboardHeader from '@/components/leaderboard/leaderboard-header';
-import LeaderboardTable from '@/components/leaderboard/leaderboard-table';
-import { useClubLeaderboard } from '@/hooks/use-leaderboard';
-import { useMe } from '@/hooks/use-me';
+import { useState, use } from "react";
+import LeaderboardHeader from "@/components/leaderboard/leaderboard-header";
+import LeaderboardTable from "@/components/leaderboard/leaderboard-table";
+import { useClubLeaderboard } from "@/hooks/use-leaderboard";
+import { useMe } from "@/hooks/use-me";
 
 export default function LeaderboardPage({
   params,
@@ -17,8 +17,8 @@ export default function LeaderboardPage({
   const unwrappedSearchParams = use(searchParams);
 
   const { data: userData } = useMe();
-  const targetUserId = unwrappedSearchParams.target_user_id 
-    ? parseInt(unwrappedSearchParams.target_user_id, 10) 
+  const targetUserId = unwrappedSearchParams.target_user_id
+    ? parseInt(unwrappedSearchParams.target_user_id, 10)
     : userData?.id;
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,7 +28,7 @@ export default function LeaderboardPage({
     slug,
     currentPage,
     itemsPerPage,
-    targetUserId
+    targetUserId,
   );
 
   if (isError) {
@@ -38,7 +38,8 @@ export default function LeaderboardPage({
           Club Not Found
         </h1>
         <p className="text-muted-foreground italic mt-2">
-          The club <span className="font-bold text-brand-orange">"{slug}"</span> does not exist or you do not have permission to view its leaderboard.
+          The club <span className="font-bold text-brand-orange">"{slug}"</span> does not exist or
+          you do not have permission to view its leaderboard.
         </p>
       </main>
     );
@@ -47,8 +48,8 @@ export default function LeaderboardPage({
   return (
     <main className="min-h-screen px-4 py-8 sm:p-8 md:p-15 flex flex-col items-center">
       <LeaderboardHeader slug={slug} />
-            
-      <LeaderboardTable 
+
+      <LeaderboardTable
         leaderboardData={data?.leaderboard.data || []}
         targetUserRow={data?.target_user_row || null}
         currentPage={currentPage}

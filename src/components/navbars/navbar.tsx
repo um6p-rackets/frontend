@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// Added Shield icon for "My Clubs"
 import { Menu, X, Users, BarChart2, Shield } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,7 @@ import { useNotifications } from "@/providers/NotificationProvider";
 import { User } from "@/types/contracts/auth";
 import { useMe } from "@/hooks/use-me";
 import { NotificationComponent } from "@/components/notifications/notification-component";
+import { useUserJoinedClubs } from "@/hooks/use-profile"; 
 
 export default function Navbar() {
   const { data: user, isPending } = useMe();
@@ -156,10 +156,8 @@ function UserNav({ user }: { user: User }) {
   const fallbackInitial =
     user?.first_name?.charAt(0)?.toUpperCase() || user?.login?.charAt(0)?.toUpperCase() || "U";
 
-  const myJoinedClubs = [
-    { club: { name: "Badminton Club", slug: "badminton" } },
-    { club: { name: "Tennis Club", slug: "tennis" } },
-  ];
+  // Dynamically fetch the user's joined clubs
+  const { data: myJoinedClubs = [] } = useUserJoinedClubs(user.id);
 
   return (
     <header className="absolute top-0 left-0 w-full max-w-[100vw] z-50 bg-transparent pt-6 px-4 md:px-12 lg:px-16 box-border">
@@ -248,7 +246,7 @@ function UserNav({ user }: { user: User }) {
           {isAppView && currentClubSlug && (
             <Link
               title="Leaderboard"
-              href={`/leaderboard`}
+              href={`/clubs/${currentClubSlug}/leaderboard?target_user_id=${user.id}`}
               className={`flex items-center justify-center transition-colors hover:text-brand-orange ${pathname?.includes("/leaderboard") ? "text-brand-orange" : "text-foreground"}`}
             >
               <BarChart2 className="w-5 h-5" />
@@ -390,7 +388,7 @@ function UserNav({ user }: { user: User }) {
             {/* Leaderboard Link - Mobile */}
             {isAppView && currentClubSlug && (
               <Link
-                href={`/leaderboard`}
+                href={`/clubs/${currentClubSlug}/leaderboard?target_user_id=${user.id}`}
                 onClick={() => setIsOpen(false)}
                 className={`px-4 py-2 flex items-center gap-3 text-base font-semibold rounded-lg transition-colors ${pathname?.includes("/leaderboard") ? "bg-orange-50 text-brand-orange dark:bg-orange-950/40" : "hover:bg-muted text-foreground"}`}
               >
