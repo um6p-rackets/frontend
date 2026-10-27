@@ -101,7 +101,7 @@ export default function HistoryTab({ userId, user }: HistoryTabProps) {
                     </div>
                   </div>
 
-                  <div className="flex lg:hidden items-center justify-center min-w-[4.5rem] px-3.5 py-2 rounded-xl bg-background/50 border border-border/70 shadow-2xs shrink-0">
+                  <div className="flex lg:hidden items-center justify-center min-w-18 px-3.5 py-2 rounded-xl bg-background/50 border border-border/70 shadow-2xs shrink-0">
                     <span className={cn("font-black italic text-sm", pointsTextColor)}>
                       {pointsFormatted}
                     </span>
@@ -112,7 +112,7 @@ export default function HistoryTab({ userId, user }: HistoryTabProps) {
                   <div className="flex-1 flex flex-col gap-2 w-full min-w-0 justify-center">
                     {myTeamNames.map((name, index) => (
                       <div key={index} className="w-full p-2.5 sm:p-3 rounded-2xl border border-border/70 bg-background/50 flex items-center justify-center text-center overflow-hidden">
-                        <div className="font-bold text-sm leading-snug text-foreground break-words w-full px-2" title={name}>
+                        <div className="font-bold text-sm leading-snug text-foreground wrap-break-word w-full px-2" title={name}>
                           {name}
                         </div>
                       </div>
@@ -128,7 +128,7 @@ export default function HistoryTab({ userId, user }: HistoryTabProps) {
                   <div className="flex-1 flex flex-col gap-2 w-full min-w-0 justify-center">
                     {opponentTeamNames.map((name, index) => (
                       <div key={index} className="w-full p-2.5 sm:p-3 rounded-2xl border border-border/70 bg-background/50 flex items-center justify-center text-center overflow-hidden">
-                        <div className="font-bold text-sm leading-snug text-foreground break-words w-full px-2" title={name}>
+                        <div className="font-bold text-sm leading-snug text-foreground wrap-break-word w-full px-2" title={name}>
                           {name}
                         </div>
                       </div>
@@ -137,7 +137,7 @@ export default function HistoryTab({ userId, user }: HistoryTabProps) {
                 </div>
 
                 <div className="hidden lg:flex items-center gap-2 shrink-0 self-center">
-                  <div className="flex items-center justify-center min-w-[4.5rem] px-3.5 py-2 rounded-xl bg-background/50 border border-border/70 shadow-2xs">
+                  <div className="flex items-center justify-center min-w-18 px-3.5 py-2 rounded-xl bg-background/50 border border-border/70 shadow-2xs">
                     <span className={cn("font-black italic text-sm", pointsTextColor)}>
                       {pointsFormatted}
                     </span>
