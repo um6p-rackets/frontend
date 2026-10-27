@@ -40,7 +40,7 @@ import { useLogout } from "@/hooks/use-logout";
 import { useNotifications } from "@/providers/NotificationProvider";
 import { User } from "@/types/contracts/auth";
 import { useMe } from "@/hooks/use-me";
-import { NotificationCenter } from "@/components/notifications/notification-center";
+import { NotificationComponent } from "@/components/notifications/notification-component";
 import { connected } from "process";
 
 export default function Navbar() {
@@ -249,7 +249,7 @@ function UserNav({ user }: { user: User }) {
               </div>
             </SheetContent>
           </Sheet> */}
-          <NotificationCenter
+          <NotificationComponent
             notifications={notifications}
             connected={connected}
             // onMarkAllAsRead={handleMarkAllAsRead}
@@ -400,7 +400,7 @@ function UserNav({ user }: { user: User }) {
                 )}
               </div>
             </SheetContent>
-          </Sheet> */}
+          </Sheet> 
 
           {/* Leaderboard Link - Mobile */}
           {isAppView && currentClubSlug && (
