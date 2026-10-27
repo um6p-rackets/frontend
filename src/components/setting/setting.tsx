@@ -1,101 +1,93 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "cn";
-import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  UM6P_DEPARTMENTS,
-  SettingsProfile1Props,
-  FormErrors,
-} from "./constants";
+import { UM6P_DEPARTMENTS, FormErrors } from "./constants";
 import { ProfileFormFields } from "./profile-form-fields";
+import { editProfileSchema, type EditProfileInput } from "@/lib/schemas/users";
+
+export type UpdateProfileBody = EditProfileInput;
+
+export type SettingsProfile1Props = {
+  defaultValues?: UpdateProfileBody;
+  onSave?: (data: UpdateProfileBody) => void;
+  onCancel?: () => void;
+  className?: string;
+  isPending?: boolean;
+};
 
 const SettingsProfile1 = ({
-  defaultValues = {
-    name: "Alex Morgan",
-    first_name: "Alex",
-    last_name: "Morgan",
-    email: "alex.morgan@um6p.ma",
-    username: "alexmorgan",
-    department: "1337",
-    customDepartment: "",
-    avatar: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/avatar/avatar8.jpg",
-  },
+  defaultValues = {},
   onSave,
   onCancel,
   className,
+  isPending = false,
 }: SettingsProfile1Props) => {
-  const initialFirstName =
-    defaultValues.first_name ??
-    (defaultValues.name ? defaultValues.name.split(" ")[0] : "Alex");
-  const initialLastName =
-    defaultValues.last_name ??
-    (defaultValues.name ? defaultValues.name.split(" ").slice(1).join(" ") : "Morgan");
-
   const isPresetDepartment = (dept?: string) =>
-    dept ? UM6P_DEPARTMENTS.some((d) => d.code === dept) : true;
+    dept ? UM6P_DEPARTMENTS.some((d) => d.code === dept) : false;
 
-  const [firstName, setFirstName] = useState(initialFirstName);
-  const [lastName, setLastName] = useState(initialLastName);
-  const [email, setEmail] = useState(defaultValues.email ?? "");
-  const [username, setUsername] = useState(defaultValues.username ?? "");
+  const initialDeptValue = defaultValues.department || "";
 
-  const initialDeptValue = defaultValues.department || "1337";
+  const [firstName, setFirstName] = useState(defaultValues.first_name || "");
+  const [lastName, setLastName] = useState(defaultValues.last_name || "");
+  const [phoneNumber, setPhoneNumber] = useState(defaultValues.phone_number || "");
+  const [gender, setGender] = useState<boolean | undefined>(defaultValues.gender);
+
   const [department, setDepartment] = useState(
-    isPresetDepartment(initialDeptValue) ? initialDeptValue : "OTHER"
+    isPresetDepartment(initialDeptValue) || !initialDeptValue ? initialDeptValue : "OTHER"
   );
   const [customDepartment, setCustomDepartment] = useState(
-    isPresetDepartment(initialDeptValue) ? (defaultValues.customDepartment || "") : initialDeptValue
+    isPresetDepartment(initialDeptValue) ? "" : initialDeptValue
   );
 
   const [errors, setErrors] = useState<FormErrors>({});
 
+  const validate = (): EditProfileInput | null => {
+    const finalDepartment = department === "OTHER" ? customDepartment.trim() : department;
 
+    const payloadToValidate = {
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
+      department: finalDepartment,
+      phone_number: phoneNumber.trim() || undefined,
+      gender,
+    };
 
-  const validate = (): boolean => {
-    const newErrors: FormErrors = {};
+    const result = editProfileSchema.safeParse(payloadToValidate);
 
-    if (!firstName.trim()) newErrors.firstName = "First name is required.";
-    if (!lastName.trim()) newErrors.lastName = "Last name is required.";
-    if (!username.trim()) {
-      newErrors.username = "Username is required.";
-    } else if (username.trim().length < 3) {
-      newErrors.username = "Username must be at least 3 characters.";
+    if (!result.success) {
+      const formattedErrors: FormErrors = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as string;
+        if (field === "first_name") formattedErrors.firstName = issue.message;
+        if (field === "last_name") formattedErrors.lastName = issue.message;
+        if (field === "department") {
+          if (department === "OTHER") {
+            formattedErrors.customDepartment = issue.message;
+          } else {
+            formattedErrors.department = issue.message;
+          }
+        }
+        if (field === "phone_number") {
+          (formattedErrors as any).phoneNumber = issue.message;
+        }
+      });
+
+      setErrors(formattedErrors);
+      return null;
     }
 
-    if (!email.trim()) {
-      newErrors.email = "Email address is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      newErrors.email = "Please enter a valid email address.";
-    }
-
-    if (!department) {
-      newErrors.department = "Please select your UM6P department.";
-    } else if (department === "OTHER" && (!customDepartment || customDepartment.trim().length < 2)) {
-      newErrors.customDepartment = "Please specify your department (min 2 characters).";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors({});
+    return result.data;
   };
 
   const handleSave = () => {
-    if (!validate()) return;
+    const validatedData = validate();
+    if (!validatedData) return;
 
-    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-    const finalDepartment = department === "OTHER" ? customDepartment.trim() : department;
-
-    onSave?.({
-      first_name: firstName.trim(),
-      last_name: lastName.trim(),
-      name: fullName || username,
-      username: username.trim(),
-      email: email.trim(),
-      department: finalDepartment,
-      customDepartment: department === "OTHER" ? customDepartment.trim() : undefined,
-      // avatar: avatarFiles.length > 0 ? avatarPreview : (currentAvatar || null),
-    });
+    onSave?.(validatedData);
   };
 
   return (
@@ -115,7 +107,8 @@ const SettingsProfile1 = ({
           <button
             type="button"
             onClick={onCancel}
-            className="size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-brand-ink dark:hover:text-white hover:bg-muted/80 transition-colors cursor-pointer border border-border/60 shrink-0"
+            disabled={isPending}
+            className="size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-brand-ink dark:hover:text-white hover:bg-muted/80 transition-colors cursor-pointer border border-border/60 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Close"
           >
             <X className="size-4" />
@@ -127,26 +120,15 @@ const SettingsProfile1 = ({
 
       {/* Body */}
       <div className="p-6 sm:p-7 space-y-5">
-        {/* <ProfileAvatarUpload
-          avatarFiles={avatarFiles}
-          setAvatarFiles={setAvatarFiles}
-          avatarPreview={avatarPreview}
-          firstName={firstName}
-          username={username}
-          initials={initials}
-          hasAvatar={avatarFiles.length > 0 || !!currentAvatar}
-          onRemoveAvatar={handleRemoveAvatar}
-        /> */}
-
         <ProfileFormFields
           firstName={firstName}
           setFirstName={setFirstName}
           lastName={lastName}
           setLastName={setLastName}
-          username={username}
-          setUsername={setUsername}
-          email={email}
-          setEmail={setEmail}
+          phoneNumber={phoneNumber}
+          setPhoneNumber={setPhoneNumber}
+          gender={gender}
+          setGender={setGender}
           department={department}
           setDepartment={setDepartment}
           customDepartment={customDepartment}
@@ -163,16 +145,19 @@ const SettingsProfile1 = ({
             variant="outline"
             type="button"
             onClick={onCancel}
-            className="h-10 px-4 rounded-xl font-bold italic text-xs border-border/80 hover:bg-muted text-brand-ink dark:text-gray-200 cursor-pointer"
+            disabled={isPending}
+            className="h-10 px-4 rounded-xl font-bold italic text-xs border-border/80 hover:bg-muted text-brand-ink dark:text-gray-200 cursor-pointer disabled:opacity-50"
           >
             Cancel
           </Button>
           <Button
             type="button"
             onClick={handleSave}
-            className="h-10 px-5 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-black italic text-xs tracking-wide shadow-md shadow-brand-orange/20 cursor-pointer"
+            disabled={isPending}
+            className="h-10 px-5 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-black italic text-xs tracking-wide shadow-md shadow-brand-orange/20 cursor-pointer disabled:opacity-70 flex items-center gap-2"
           >
-            Save Changes
+            {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            {isPending ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </div>
