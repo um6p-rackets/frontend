@@ -1,6 +1,4 @@
 "use client";
-
-import { useState } from "react";
 import { Bell, CheckCheck, Circle, Clock3, Inbox } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -34,11 +32,11 @@ const ORANGE = "#D7492A";
 const LIGHT_ORANGE = "#ED6E47";
 
 function getInitials(name?: string | null) {
-  if (!name) return "SY";
+  const parts = name?.trim().split(/\s+/).filter(Boolean) ?? [];
 
-  return name
-    .trim()
-    .split(/\s+/)
+  if (parts.length === 0) return "SY";
+
+  return parts
     .slice(0, 2)
     .map((part) => part[0])
     .join("")
