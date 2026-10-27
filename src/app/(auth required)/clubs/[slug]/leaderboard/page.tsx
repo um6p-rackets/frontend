@@ -46,7 +46,7 @@ export default function LeaderboardPage({
 
   return (
     <main className="min-h-screen px-4 py-8 sm:p-8 md:p-15 flex flex-col items-center">
-      <LeaderboardHeader />
+      <LeaderboardHeader slug={slug} />
             
       <LeaderboardTable 
         leaderboardData={data?.leaderboard.data || []}
