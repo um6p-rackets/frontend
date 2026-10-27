@@ -7,7 +7,6 @@ import Rank2Badge from "@/components/badge/rank2";
 import Rank3Badge from "@/components/badge/rank3";
 import UndefeatedBadge from "@/components/badge/undefeated";
 import HotStreakBadge from "@/components/badge/hot-streak";
-import { useGetUserAchievements } from "@/hooks/use-achievements";
 
 // Optimized mathematically since we now have true database integers
 export function calculateWinRate(wins: number, total: number) {

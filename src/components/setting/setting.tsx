@@ -9,7 +9,6 @@ import {
   SettingsProfile1Props,
   FormErrors,
 } from "./constants";
-import { ProfileAvatarUpload } from "./profile-avatar-upload";
 import { ProfileFormFields } from "./profile-form-fields";
 
 const SettingsProfile1 = ({
@@ -37,10 +36,6 @@ const SettingsProfile1 = ({
   const isPresetDepartment = (dept?: string) =>
     dept ? UM6P_DEPARTMENTS.some((d) => d.code === dept) : true;
 
-  const [avatarFiles, setAvatarFiles] = useState<File[]>([]);
-  const [currentAvatar, setCurrentAvatar] = useState<string | null | undefined>(
-    defaultValues.avatar
-  );
   const [firstName, setFirstName] = useState(initialFirstName);
   const [lastName, setLastName] = useState(initialLastName);
   const [email, setEmail] = useState(defaultValues.email ?? "");
@@ -56,19 +51,7 @@ const SettingsProfile1 = ({
 
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const initials = (
-    (firstName.charAt(0) || "") + (lastName.charAt(0) || "")
-  ).toUpperCase() || (username.slice(0, 2).toUpperCase() || "UM");
 
-  const avatarPreview =
-    avatarFiles.length > 0
-      ? URL.createObjectURL(avatarFiles[0])
-      : (currentAvatar || undefined);
-
-  const handleRemoveAvatar = () => {
-    setAvatarFiles([]);
-    setCurrentAvatar(null);
-  };
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};

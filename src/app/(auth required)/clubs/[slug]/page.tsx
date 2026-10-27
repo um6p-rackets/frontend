@@ -32,7 +32,7 @@ export default function ClubPage() {
   const [openModal, setOpenModal] = useState<ClubModal | null>(null);
   const closeModal = () => setOpenModal(null);
 
-  const { data: club, isLoading: isClubLoading, isError, error, refetch } = useClub(clubSlug);
+  const { data: club, isLoading: isClubLoading, isError, error } = useClub(clubSlug);
   const {
     data: status,
     isLoading: isChecking,
