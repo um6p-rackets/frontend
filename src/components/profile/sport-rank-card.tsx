@@ -29,6 +29,17 @@ function normalizeSportKey(sport: string): string {
   return s;
 }
 
+function formatSportTabName(name: string): string {
+  const cleanName = name.replace(/-/g, ' ').trim();
+  const words = cleanName.split(/\s+/);
+  
+  if (words.length > 1) {
+    return words.map(w => w.charAt(0)).join('').toUpperCase();
+  }
+  
+  return cleanName.substring(0, 3).toUpperCase();
+}
+
 export default function SportRankCard({ clubRanks, userName, department }: SportRankCardProps) {
   const availableSports = (clubRanks || []).map((rank) => {
     const key = normalizeSportKey(rank.club_name);
@@ -38,6 +49,7 @@ export default function SportRankCard({ clubRanks, userName, department }: Sport
       id: key,
       sport: rank.club_name,
       name: catalogItem.name,
+      tabName: formatSportTabName(catalogItem.name),
       rankInfo: rank,
     };
   });
@@ -71,38 +83,26 @@ export default function SportRankCard({ clubRanks, userName, department }: Sport
 
   return (
     <div className="flex flex-col gap-3 w-full min-w-0 h-full">
-      
-      {/* 
-        Matches ProfileTabs Design Exactly
-        onWheel translates vertical mouse scroll to horizontal scroll automatically 
-      */}
-      <div 
-        className="flex items-center gap-2 bg-card p-1.5 rounded-xl border border-border/80 shadow-2xs w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar:none]"
-        onWheel={(e) => {
-          if (e.deltaY !== 0) {
-            e.currentTarget.scrollLeft += e.deltaY;
-          }
-        }}
-      >
+      <div className="flex items-center gap-1 sm:gap-1.5 bg-card p-1 sm:p-1.5 rounded-xl border border-border/80 shadow-2xs w-full">
         {availableSports.map((sport) => {
           const isSelected = currentSport.id === sport.id;
           return (
             <button
               key={sport.id}
               onClick={() => setSelectedSport(sport.id)}
-              className={`shrink-0 px-5 py-2 rounded-lg text-xs sm:text-sm font-bold italic transition-all cursor-pointer select-none ${
+              title={sport.name} 
+              className={`flex-1 min-w-0 px-1 sm:px-2 py-2 rounded-lg text-xs md:text-sm font-black italic tracking-widest transition-all cursor-pointer select-none truncate text-center ${
                 isSelected
                   ? 'bg-brand-orange text-white shadow-xs'
                   : 'text-muted-foreground hover:text-brand-ink dark:hover:text-white hover:bg-muted/50'
               }`}
             >
-              {sport.name}
+              {sport.tabName}
             </button>
           );
         })}
       </div>
 
-      {/* Card Body */}
       <div className="w-full flex flex-col rounded-2xl shadow-xs border border-border/80 bg-card p-5 sm:p-6 gap-4">
         <div>
           <h2 className="text-2xl font-black italic text-brand-ink dark:text-white leading-none">
@@ -113,7 +113,6 @@ export default function SportRankCard({ clubRanks, userName, department }: Sport
           </p>
         </div>
 
-        {/* User Rank Box */}
         <div className="bg-secondary/50 dark:bg-[#121417] rounded-xl p-3.5 sm:p-4 flex items-center justify-between border border-border/60 dark:border-border/40">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-8 h-8 rounded-full bg-brand-orange text-white font-black italic flex items-center justify-center text-sm shrink-0 shadow-2xs">
@@ -130,7 +129,6 @@ export default function SportRankCard({ clubRanks, userName, department }: Sport
             </div>
           </div>
 
-          {/* Points */}
           <div className="flex flex-col items-end shrink-0 pl-2">
             <span className="font-black italic text-brand-orange text-base sm:text-lg leading-tight">
               {currentRankInfo.points.toLocaleString()}
@@ -141,7 +139,6 @@ export default function SportRankCard({ clubRanks, userName, department }: Sport
           </div>
         </div>
 
-        {/* View Leaderboard Link */}
         <Link
           href={`/clubs/${currentRankInfo.club_slug}/leaderboard`}
           className="flex items-center justify-center gap-1.5 pt-2 pb-1 text-xs sm:text-sm font-bold italic text-brand-ink dark:text-gray-200 hover:text-brand-orange dark:hover:text-brand-orange transition-colors cursor-pointer"
