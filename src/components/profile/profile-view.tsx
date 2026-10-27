@@ -111,7 +111,7 @@ export default function ProfileView({ data }: ProfileViewProps) {
             {/* Added flex-1 and min-h-0 to allow internal scrolling */}
             <div className="w-full flex-1 min-h-0">
               {/* {activeTab === "statistics" && <StatisticsTab data={memberProfile} />} */}
-              {activeTab === "history" && <HistoryTab userId={user.id} />}
+              {activeTab === "history" && <HistoryTab userId={user.id} user={user} />}
             </div>
           </section>
         </div>
