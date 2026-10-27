@@ -33,6 +33,8 @@ import { User } from "@/types/contracts/auth";
 import { useMe } from "@/hooks/use-me";
 import { NotificationComponent } from "@/components/notifications/notification-component";
 import { useUserJoinedClubs } from "@/hooks/use-profile"; 
+import { useClubStatus } from "@/hooks/use-clubs";
+import { MemberRole } from "@/types/contracts/club";
 
 export default function Navbar() {
   const { data: user, isPending } = useMe();
@@ -159,6 +161,14 @@ function UserNav({ user }: { user: User }) {
   // Dynamically fetch the user's joined clubs
   const { data: myJoinedClubs = [] } = useUserJoinedClubs(user.id);
 
+  // Fetch current club status to verify member roles (0, 1, 2)
+  const { data: clubStatus } = useClubStatus(currentClubSlug);
+  const isClubMemberOrStaff =
+    clubStatus?.role !== undefined &&
+    (clubStatus.role === MemberRole.MEMBER ||
+     clubStatus.role === MemberRole.LEADER ||
+     clubStatus.role === MemberRole.COACH);
+
   return (
     <header className="absolute top-0 left-0 w-full max-w-[100vw] z-50 bg-transparent pt-6 px-4 md:px-12 lg:px-16 box-border">
       <div className="max-w-7xl mx-auto flex justify-between items-center w-full min-w-0">
@@ -193,8 +203,8 @@ function UserNav({ user }: { user: User }) {
             </NavigationMenu>
           )}
 
-          {/* Members Icon */}
-          {isAppView && currentClubSlug && (
+          {/* Members Icon - Visible only if user has role 0, 1, or 2 */}
+          {isAppView && currentClubSlug && isClubMemberOrStaff && (
             <Link
               title="Club Members"
               href={`/clubs/${currentClubSlug}/members`}
@@ -345,8 +355,8 @@ function UserNav({ user }: { user: User }) {
               </>
             )}
 
-            {/* Members Link - Mobile */}
-            {isAppView && currentClubSlug && (
+            {/* Members Link - Mobile (Visible only if user has role 0, 1, or 2) */}
+            {isAppView && currentClubSlug && isClubMemberOrStaff && (
               <Link
                 href={`/clubs/${currentClubSlug}/members`}
                 onClick={() => setIsOpen(false)}
