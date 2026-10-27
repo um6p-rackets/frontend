@@ -26,15 +26,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-
 import Logo from "../logo";
 import { AuthButton } from "../auth/auth-button";
 import { useLogout } from "@/hooks/use-logout";
@@ -55,7 +46,6 @@ export default function Navbar() {
 
 function PendingNav() {
   return (
-    // إضافة max-w-[100vw] و box-border لمنع التمرير الأفقي تماماً
     <header className="absolute top-0 left-0 w-full max-w-[100vw] z-50 bg-transparent pt-6 px-4 md:px-12 lg:px-16 box-border">
       <div className="max-w-7xl mx-auto flex items-center w-full">
         <Logo />
@@ -171,7 +161,6 @@ function UserNav({ user }: { user: User }) {
   ];
 
   return (
-    // استخدام max-w-[100vw] يضمن عدم خروج القائمة العلوية عن الشاشة حتى لو كانت الصفحة ممددة
     <header className="absolute top-0 left-0 w-full max-w-[100vw] z-50 bg-transparent pt-6 px-4 md:px-12 lg:px-16 box-border">
       <div className="max-w-7xl mx-auto flex justify-between items-center w-full min-w-0">
         <div className="shrink-0 min-w-0">
