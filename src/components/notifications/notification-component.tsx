@@ -22,6 +22,7 @@ import type { NotificationRealtimePayload } from "@/types/contracts/notification
 
 interface NotificationComponentProps {
   notifications: NotificationRealtimePayload[];
+  connected: boolean;
   onMarkAllAsRead?: () => void;
   markingAllAsRead?: boolean;
   triggerMode?: "icon" | "menu"; 
@@ -103,6 +104,7 @@ function formatNotificationDate(date: string) {
 
 export function NotificationComponent({
   notifications,
+  connected,
   onMarkAllAsRead,
   markingAllAsRead = false,
   triggerMode = "icon", 
