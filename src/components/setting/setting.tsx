@@ -71,7 +71,7 @@ const SettingsProfile1 = ({
           }
         }
         if (field === "phone_number") {
-          (formattedErrors as any).phoneNumber = issue.message;
+          (formattedErrors as { phoneNumber?: string }).phoneNumber = issue.message;
         }
       });
 

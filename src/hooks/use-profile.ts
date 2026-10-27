@@ -40,19 +40,19 @@ export function useUpdateProfile() {
       queryClient.setQueryData(authKeys.me, data.user);
       
       // Instantly update My Profile page cache
-      queryClient.setQueryData(profileKeys.me(), (oldProfile: any) => 
+      queryClient.setQueryData(profileKeys.me(), (oldProfile: UserProfile | undefined) => 
         oldProfile ? { ...oldProfile, user: { ...oldProfile.user, ...data.user } } : oldProfile
       );
 
       // Instantly update generic detail cache
-      queryClient.setQueryData(profileKeys.detail(data.user.id), (oldProfile: any) => 
+      queryClient.setQueryData(profileKeys.detail(data.user.id), (oldProfile: UserProfile | undefined) => 
         oldProfile ? { ...oldProfile, user: { ...oldProfile.user, ...data.user } } : oldProfile
       );
 
       // 4. Background refetch for complete safety
       return queryClient.invalidateQueries({ queryKey: profileKeys.all });
     },
-    onError: (err: any) => toast.error(err.message || "Failed to update profile."),
+    onError: (err: Error) => toast.error(err.message || "Failed to update profile."),
   });
 }
 
