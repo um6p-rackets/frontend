@@ -313,17 +313,21 @@ function UserNav({ user }: { user: User }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
-        {/* Mobile Menu Toggle */}
-        <div className="md:hidden">
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="p-2 text-foreground rounded-lg hover:bg-black/5 transition-colors"
-            aria-label="Toggle Menu"
-          >
-            {isOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
-          </button>
-        </div>
+      </div>
+      {/* Mobile Actions: Notifications + Menu */}
+      {/* Mobile Menu Toggle */}
+      <div className="md:hidden">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2 text-foreground rounded-lg hover:bg-black/5 transition-colors"
+          aria-label="Toggle Menu"
+        >
+          {isOpen ? (
+            <X className="w-7 h-7" />
+          ) : (
+            <Menu className="w-7 h-7" />
+          )}
+        </button>
       </div>
 
       {/* Mobile Dropdown Menu */}
@@ -396,7 +400,7 @@ function UserNav({ user }: { user: User }) {
                 )}
               </div>
             </SheetContent>
-          </Sheet>
+          </Sheet> */}
 
           {/* Leaderboard Link - Mobile */}
           {isAppView && currentClubSlug && (

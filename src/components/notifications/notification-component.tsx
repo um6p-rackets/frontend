@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -11,11 +10,7 @@ import {
   WifiOff,
 } from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,15 +22,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import type {
-  NotificationRealtimePayload,
-} from "@/types/contracts/notification";
+import type { NotificationRealtimePayload } from "@/types/contracts/notification";
 
-interface NotificationCenterProps {
+interface NotificationComponentProps {
   notifications: NotificationRealtimePayload[];
   connected: boolean;
   onMarkAllAsRead?: () => void;
   markingAllAsRead?: boolean;
+  showLabel?: boolean;
 }
 
 const ORANGE = "#D7492A";
@@ -53,11 +47,8 @@ function getInitials(name?: string | null) {
     .toUpperCase();
 }
 
-function getNotificationText(
-  notification: NotificationRealtimePayload,
-) {
-  const sender =
-    notification.sender_name || "Someone";
+function getNotificationText(notification: NotificationRealtimePayload) {
+  const sender = notification.sender_name || "Someone";
 
   const club = notification.club_name || "your club";
 
@@ -112,37 +103,26 @@ function formatNotificationDate(date: string) {
   return parsed.toLocaleDateString([], {
     month: "short",
     day: "numeric",
-    year:
-      parsed.getFullYear() === now.getFullYear()
-        ? undefined
-        : "numeric",
+    year: parsed.getFullYear() === now.getFullYear() ? undefined : "numeric",
   });
 }
 
-export function NotificationCenter({
+export function NotificationComponent({
   notifications,
   connected,
   onMarkAllAsRead,
   markingAllAsRead = false,
-}: NotificationCenterProps) {
+  showLabel = false,
+}: NotificationComponentProps) {
   const unreadCount = notifications.filter(
     (notification) => !notification.is_read,
   ).length;
 
   return (
     <Sheet>
-      <SheetTrigger
-        title="Notifications"
-        aria-label={`Notifications, ${unreadCount} unread`}
-        className="relative inline-flex size-10 items-center justify-center rounded-xl border border-transparent text-[#3B3B3B] transition-colors hover:border-[#D7492A]/20 hover:bg-[#D7492A]/10 hover:text-[#D7492A] dark:text-white"
-      >
-        <Bell className="size-5" />
-
-        {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-[#D7492A] px-1 text-[10px] font-bold text-white dark:border-[#202020]">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
+      <SheetTrigger className="flex items-center gap-3 rounded-lg px-4 py-2 text-base font-semibold hover:bg-muted">
+        <Bell className="h-5 w-5" />
+        {showLabel && <span>Notifications</span>}
       </SheetTrigger>
 
       <SheetContent
@@ -160,9 +140,9 @@ export function NotificationCenter({
                 <SheetTitle className="text-xl font-bold text-white">
                   Notifications
                 </SheetTitle>
-                <SheetDescription className="mt-1 text-sm text-white/65">
+                {/* <SheetDescription className="mt-1 text-sm text-white/65">
                   Your club activity, all in one place.
-                </SheetDescription>
+                </SheetDescription> */}
               </div>
             </div>
 
@@ -171,41 +151,20 @@ export function NotificationCenter({
             </Badge>
           </div>
 
-          <div className="mt-5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs text-white/70">
-              {connected ? (
-                <Wifi className="size-3.5 text-[#ED6E47]" />
-              ) : (
-                <WifiOff className="size-3.5" />
-              )}
-
-              {connected ? "Live updates enabled" : "Reconnecting..."}
-            </div>
+          <div className="mt-5 flex items-center justify-end">
             <Button
               type="button"
               size="sm"
               variant="ghost"
               disabled={
-                unreadCount === 0 ||
-                markingAllAsRead ||
-                !onMarkAllAsRead
+                unreadCount === 0 || markingAllAsRead || !onMarkAllAsRead
               }
-              onClick={onMarkAllAsRead}
-            >
-              <CheckCheck className="size-3.5" />
-              {markingAllAsRead ? "Marking..." : "Mark all as read"}
-            </Button>
-            {/* <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={unreadCount === 0 || markingAllAsRead}
               onClick={onMarkAllAsRead}
               className="h-8 gap-1.5 px-2 text-xs text-white hover:bg-white/10 hover:text-[#ED6E47] disabled:text-white/35"
             >
               <CheckCheck className="size-3.5" />
               {markingAllAsRead ? "Marking..." : "Mark all as read"}
-            </Button> */}
+            </Button>
           </div>
         </SheetHeader>
 
@@ -257,9 +216,7 @@ export function NotificationCenter({
                       <div className="flex gap-3 pl-1">
                         <Avatar className="mt-0.5 size-11 shrink-0 border border-[#3B3B3B]/10">
                           <AvatarImage
-                            src={
-                              notification.sender_avatar_url || undefined
-                            }
+                            src={notification.sender_avatar_url || undefined}
                             alt={notification.sender_name || "Sender"}
                             referrerPolicy="no-referrer"
                           />
@@ -267,9 +224,7 @@ export function NotificationCenter({
                           <AvatarFallback
                             className="font-semibold text-white"
                             style={{
-                              backgroundColor: unread
-                                ? ORANGE
-                                : LIGHT_ORANGE,
+                              backgroundColor: unread ? ORANGE : LIGHT_ORANGE,
                             }}
                           >
                             {getInitials(notification.sender_name)}
@@ -297,9 +252,7 @@ export function NotificationCenter({
                           <div className="mt-3 flex items-center gap-1.5 text-[11px] text-[#3B3B3B]/45 dark:text-white/40">
                             <Clock3 className="size-3" />
                             <time dateTime={notification.sent_at}>
-                              {formatNotificationDate(
-                                notification.sent_at,
-                              )}
+                              {formatNotificationDate(notification.sent_at)}
                             </time>
 
                             {notification.club_name && (
