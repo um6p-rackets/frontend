@@ -166,8 +166,8 @@ function UserNav({ user }: { user: User }) {
   const isClubMemberOrStaff =
     clubStatus?.role !== undefined &&
     (clubStatus.role === MemberRole.MEMBER ||
-     clubStatus.role === MemberRole.LEADER ||
-     clubStatus.role === MemberRole.COACH);
+    clubStatus.role === MemberRole.LEADER ||
+    clubStatus.role === MemberRole.COACH);
 
   return (
     <header className="absolute top-0 left-0 w-full max-w-[100vw] z-50 bg-transparent pt-6 px-4 md:px-12 lg:px-16 box-border">
@@ -245,13 +245,6 @@ function UserNav({ user }: { user: User }) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <NotificationComponent
-            notifications={notifications}
-            onMarkAllAsRead={markAllAsRead}
-            markingAllAsRead={markingAllAsRead}
-            triggerMode="icon"
-          />
-
           {/* Leaderboard Icon */}
           {isAppView && currentClubSlug && (
             <Link
@@ -262,6 +255,13 @@ function UserNav({ user }: { user: User }) {
               <BarChart2 className="w-5 h-5" />
             </Link>
           )}
+
+          <NotificationComponent
+            notifications={notifications}
+            onMarkAllAsRead={markAllAsRead}
+            markingAllAsRead={markingAllAsRead}
+            triggerMode="icon"
+          />
 
           {/* Avatar Dropdown */}
           <DropdownMenu>
