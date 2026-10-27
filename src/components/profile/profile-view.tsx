@@ -100,6 +100,7 @@ export default function ProfileView({ data }: ProfileViewProps) {
             {/* Added h-full to the wrapper inside SportRankCard in the next step */}
             <SportRankCard
               clubRanks={memberProfile.club_ranks}
+              userId={user.id}
               userName={fullName}
               department={user.department}
             />

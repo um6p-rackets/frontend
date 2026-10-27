@@ -31,11 +31,11 @@ export const getClubMatches = (
   );
 };
 
-export async function getUserMatches(
+export const getUserMatches = (
   userId: number,
   page: number = 1,
   limit: number = 10,
-): Promise<Paginated<UserHistoryMatch>> {
+): Promise<Paginated<UserHistoryMatch>> => {
   return api<Paginated<UserHistoryMatch>>(
     `/users/${userId}/matches?page=${page}&limit=${limit}`,
   );

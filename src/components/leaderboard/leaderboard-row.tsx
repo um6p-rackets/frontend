@@ -1,61 +1,53 @@
-import Link from 'next/link';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { ClubPageData } from '@/types/mock-data-types';
-import { getUserIdForMember } from '@/lib/mock-data';
+import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Leaderboard } from "@/types"; // Adjust this import to wherever your Leaderboard type is
 
-import Rank1Badge from '@/components/badge/rank1';
-import Rank2Badge from '@/components/badge/rank2';
-import Rank3Badge from '@/components/badge/rank3';
-import UndefeatedBadge from '@/components/badge/undefeated';
-import HotStreakBadge from '@/components/badge/hot-streak';
+import Rank1Badge from "@/components/badge/rank1";
+import Rank2Badge from "@/components/badge/rank2";
+import Rank3Badge from "@/components/badge/rank3";
+import UndefeatedBadge from "@/components/badge/undefeated";
+import HotStreakBadge from "@/components/badge/hot-streak";
 
-export function calculateWinRate(record?: string) {
-  if (!record) return '-';
-  const match = record.match(/(\d+)W\s*-\s*(\d+)L/);
-  if (match) {
-    const wins = parseInt(match[1], 10);
-    const losses = parseInt(match[2], 10);
-    const total = wins + losses;
-    if (total === 0) return '0%';
-    return `${Number(((wins / total) * 100).toFixed(1))}%`;
-  }
-  return '-';
+// Optimized mathematically since we now have true database integers
+export function calculateWinRate(wins: number, total: number) {
+  if (total === 0) return "0%";
+  return `${Number(((wins / total) * 100).toFixed(1))}%`;
 }
 
-export default function LeaderboardRow({
-  member,
-  rank
-}: {
-  member: ClubPageData['top_members'][0];
-  rank: number;
-}) {
-  let rankBg = 'bg-brand-ink text-background';
-  let rowBg = 'bg-brand-cream/20 hover:bg-muted';
-  let cardBg = 'bg-brand-cream/20 border-border hover:border-brand-orange/60';
+export default function LeaderboardRow({ member }: { member: Leaderboard }) {
+  let rankBg = "bg-brand-ink text-background";
+  let rowBg = "bg-brand-cream/20 hover:bg-muted";
+  let cardBg = "bg-brand-cream/20 border-border hover:border-brand-orange/60";
 
-  if (rank === 1) {
-    rankBg = 'bg-yellow-400 text-white';
-    rowBg = 'bg-orange-50 hover:bg-muted';
-    cardBg = 'bg-orange-50 border-amber-300/70 hover:border-amber-400';
-  } else if (rank === 2) {
-    rankBg = 'bg-brand-teal text-white';
-    rowBg = 'bg-orange-50 hover:bg-muted';
-    cardBg = 'bg-orange-50 border-teal-300/70 hover:border-teal-400';
-  } else if (rank === 3) {
-    rankBg = 'bg-accent text-white';
-    rowBg = 'bg-orange-50 hover:bg-muted';
-    cardBg = 'bg-orange-50 border-accent/40 hover:border-accent';
+  if (member.rank === 1) {
+    rankBg = "bg-yellow-400 text-white";
+    rowBg = "bg-orange-50 hover:bg-muted";
+    cardBg = "bg-orange-50 border-amber-300/70 hover:border-amber-400";
+  } else if (member.rank === 2) {
+    rankBg = "bg-brand-teal text-white";
+    rowBg = "bg-orange-50 hover:bg-muted";
+    cardBg = "bg-orange-50 border-teal-300/70 hover:border-teal-400";
+  } else if (member.rank === 3) {
+    rankBg = "bg-accent text-white";
+    rowBg = "bg-orange-50 hover:bg-muted";
+    cardBg = "bg-orange-50 border-accent/40 hover:border-accent";
   }
 
-  const hasBadges = rank <= 3 || (member.badges && member.badges.length > 0);
-  const winRate = calculateWinRate(member.record);
-  const userId = member.user_id || getUserIdForMember(member);
+  // Derive UI properties from the exact database statistics
+  const fullName = `${member.player.first_name} ${member.player.last_name}`;
+  const record = `${member.wins}W - ${member.losses}L`;
+  const winRate = calculateWinRate(member.wins, member.total_matches);
+
+  // Dynamic Badges based on true stats
+  const isUndefeated = member.losses === 0 && member.wins > 0;
+  const isHotStreak = member.win_streak >= 3;
+  const hasBadges = member.rank <= 3 || isUndefeated || isHotStreak;
 
   return (
     <>
       {/* Mobile Card View (< md) - Links to user profile */}
       <Link
-        href={`/profile/${userId}`}
+        href={`/profile/${member.player.id}`}
         className={`md:hidden relative flex flex-col p-4 rounded-xl border transition-all cursor-pointer shadow-2xs hover:shadow-md ${cardBg}`}
       >
         {/* Header: Rank, Avatar, Name & Department, Points */}
@@ -65,24 +57,28 @@ export default function LeaderboardRow({
             <div
               className={`w-8 h-8 flex items-center justify-center rounded-lg font-black text-sm shrink-0 ${rankBg}`}
             >
-              {rank}
+              {member.rank}
             </div>
 
             {/* Athlete Avatar */}
             <Avatar className="w-10 h-10 border-2 border-background shadow-xs shrink-0">
-              <AvatarImage src={member.avatar_url} alt={member.name} referrerPolicy="no-referrer" />
+              <AvatarImage
+                src={member.player.avatar || undefined}
+                alt={fullName}
+                referrerPolicy="no-referrer"
+              />
               <AvatarFallback className="bg-brand-cream text-brand-orange font-bold text-sm">
-                {member.name.charAt(0)}
+                {fullName.charAt(0)}
               </AvatarFallback>
             </Avatar>
 
             {/* Athlete Name & Department */}
             <div className="min-w-0">
               <div className="font-bold text-brand-ink italic text-sm truncate leading-tight group-hover:text-brand-orange">
-                {member.name}
+                {fullName}
               </div>
               <div className="font-semibold text-muted-foreground italic text-xs truncate mt-0.5">
-                {member.department}
+                {member.player.department || "N/A"}
               </div>
             </div>
           </div>
@@ -101,11 +97,11 @@ export default function LeaderboardRow({
         {/* Badges */}
         {hasBadges && (
           <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-2.5 border-t border-border/40">
-            {rank === 1 && <Rank1Badge />}
-            {rank === 2 && <Rank2Badge />}
-            {rank === 3 && <Rank3Badge />}
-            {member.badges?.includes('undefeated') && <UndefeatedBadge />}
-            {member.badges?.includes('hot-streak') && <HotStreakBadge />}
+            {member.rank === 1 && <Rank1Badge />}
+            {member.rank === 2 && <Rank2Badge />}
+            {member.rank === 3 && <Rank3Badge />}
+            {isUndefeated && <UndefeatedBadge />}
+            {isHotStreak && <HotStreakBadge />}
           </div>
         )}
 
@@ -115,69 +111,69 @@ export default function LeaderboardRow({
             <span className="text-[9px] font-black text-muted-foreground italic tracking-wider">
               RECORD
             </span>
-            <span className="font-bold text-brand-ink italic text-xs mt-0.5">
-              {member.record || '-'}
-            </span>
+            <span className="font-bold text-brand-ink italic text-xs mt-0.5">{record}</span>
           </div>
           <div className="flex flex-col bg-background/70 rounded-lg px-3 py-1.5 border border-border/50">
             <span className="text-[9px] font-black text-muted-foreground italic tracking-wider">
               WIN RATE
             </span>
-            <span className="font-bold text-brand-ink italic text-xs mt-0.5">
-              {winRate}
-            </span>
+            <span className="font-bold text-brand-ink italic text-xs mt-0.5">{winRate}</span>
           </div>
         </div>
       </Link>
 
       {/* Desktop Row View (>= md) - Links to user profile */}
       <Link
-        href={`/profile/${userId}`}
+        href={`/profile/${member.player.id}`}
         className={`hidden md:flex relative flex-col justify-center px-4 sm:px-6 py-2.5 sm:py-4 rounded-xl transition-all cursor-pointer hover:shadow-xs ${rowBg}`}
       >
         {hasBadges && (
           <div className="absolute top-1 left-4 sm:left-6 flex flex-wrap items-center gap-1 scale-[0.8] sm:scale-100 origin-top-left">
-            {rank === 1 && <Rank1Badge />}
-            {rank === 2 && <Rank2Badge />}
-            {rank === 3 && <Rank3Badge />}
-            {member.badges?.includes('undefeated') && <UndefeatedBadge />}
-            {member.badges?.includes('hot-streak') && <HotStreakBadge />}
+            {member.rank === 1 && <Rank1Badge />}
+            {member.rank === 2 && <Rank2Badge />}
+            {member.rank === 3 && <Rank3Badge />}
+            {isUndefeated && <UndefeatedBadge />}
+            {isHotStreak && <HotStreakBadge />}
           </div>
         )}
 
         <div
-          className={`grid grid-cols-[60px_2.2fr_1fr_1fr_1fr_80px] items-center gap-4 w-full ${hasBadges ? 'mt-4 sm:mt-4' : ''}`}
+          className={`grid grid-cols-[60px_2.2fr_1fr_1fr_1fr_80px] items-center gap-4 w-full ${hasBadges ? "mt-4 sm:mt-4" : ""}`}
         >
           {/* Rank */}
           <div className="font-bold text-sm sm:text-lg">
             <div
               className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-md ${rankBg}`}
             >
-              {rank}
+              {member.rank}
             </div>
           </div>
 
           {/* Athlete */}
           <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
             <Avatar className="w-8 h-8 sm:w-10 sm:h-10 border-2 border-background shadow-sm shrink-0">
-              <AvatarImage src={member.avatar_url} alt={member.name}  referrerPolicy="no-referrer" />
+              <AvatarImage
+                src={member.player.avatar || undefined}
+                alt={fullName}
+                referrerPolicy="no-referrer"
+              />
               <AvatarFallback className="bg-brand-cream text-brand-orange font-bold text-xs sm:text-base">
-                {member.name.charAt(0)}
+                {fullName.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <span className="font-bold text-brand-ink italic text-xs sm:text-base truncate pr-2 sm:pr-3 hover:text-brand-orange transition-colors">
-              {member.name}
+              {fullName}
             </span>
           </div>
 
           {/* Department */}
           <div className="font-bold text-muted-foreground italic text-[11px] sm:text-sm truncate">
-            {member.department}
+            {member.player.department || "N/A"}
           </div>
 
           {/* Record & Win Rate */}
           <div className="font-bold text-muted-foreground italic text-[11px] sm:text-sm truncate">
-            {member.record || '-'}
+            {record}
           </div>
           <div className="font-bold text-muted-foreground italic text-[11px] sm:text-sm truncate">
             {winRate}
