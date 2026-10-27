@@ -7,6 +7,7 @@ import { MoveUpRight } from 'lucide-react';
 
 interface SportRankCardProps {
   clubRanks: UserClubRank[];
+  userId: number;
   userName: string;
   department?: string | null;
 }
@@ -29,7 +30,7 @@ function normalizeSportKey(sport: string): string {
   return s;
 }
 
-export default function SportRankCard({ clubRanks, userName, department }: SportRankCardProps) {
+export default function SportRankCard({ clubRanks, userId, userName, department }: SportRankCardProps) {
   const availableSports = (clubRanks || []).map((rank) => {
     const key = normalizeSportKey(rank.club_name);
     const catalogItem = sportsCatalog[key] || { name: rank.club_name };
@@ -143,7 +144,7 @@ export default function SportRankCard({ clubRanks, userName, department }: Sport
 
         {/* View Leaderboard Link */}
         <Link
-          href={`/clubs/${currentRankInfo.club_slug}/leaderboard`}
+          href={`/clubs/${currentRankInfo.club_slug}/leaderboard?target_user_id=${userId}`}
           className="flex items-center justify-center gap-1.5 pt-2 pb-1 text-xs sm:text-sm font-bold italic text-brand-ink dark:text-gray-200 hover:text-brand-orange dark:hover:text-brand-orange transition-colors cursor-pointer"
         >
           <span>View Leaderboard</span>
