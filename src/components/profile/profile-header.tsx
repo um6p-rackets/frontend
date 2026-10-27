@@ -6,7 +6,6 @@ import { GraduationCap, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { SettingsProfile1 } from "@/components/setting/setting";
 import { UserProfile } from "@/types";
-import { getAchievementMeta } from "@/components/achievement/achievement-meta";
 import { useMe } from "@/hooks/use-me";
 import { useUpdateProfile } from "@/hooks/use-profile"; // Adjust to wherever useUpdateProfile is exported
 import { AchievementBadge } from "../achievement/achievement-badge";
