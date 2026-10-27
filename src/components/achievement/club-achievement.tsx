@@ -36,16 +36,18 @@ export default function ClubAchievements({
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / LIMIT));
 
   return (
-      <div className="space-y-4 mt-6 w-182.5 lg:h-full flex flex-col p-6 bg-card rounded-3xl border border-border/70 shadow-2xs">
-      <div className="flex items-center justify-between gap- sm:gap-4 border-b border-gray-200">
-        <h2 className="text-xl sm:text-2xl px-4 py-3 font-bold flex items-center justify-start gap-3">Achievements</h2>
+    <div className="space-y-4 mt-6 w-full lg:w-182.5 max-w-full lg:h-full flex flex-col p-4 sm:p-6 bg-card rounded-3xl border border-border/70 shadow-2xs overflow-hidden">
+      <div className="flex items-center justify-between gap-2 sm:gap-4 border-b border-gray-200 pb-2">
+        <h2 className="text-xl sm:text-2xl px-2 sm:px-4 py-2 sm:py-3 font-bold flex items-center justify-start gap-3 truncate">
+          Achievements
+        </h2>
         {canManage && (
           <Button
             size="sm"
             onClick={() => setIsGiveOpen(true)}
-            className="h-9 sm:h-10 w-30 rounded-lg bg-brand-orange hover:bg-brand-orange/90 text-white font-semibold text-xs sm:text-sm cursor-pointer not-italic"
+            className="h-9 sm:h-10 w-auto sm:w-30 px-3 sm:px-4 rounded-lg bg-brand-orange hover:bg-brand-orange/90 text-white font-semibold text-xs sm:text-sm cursor-pointer not-italic shrink-0"
           >
-            Award <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
+            Award <Plus className="w-4 h-4 ml-1 sm:ml-1.5 stroke-[2.5]" />
           </Button>
         )}
       </div>
@@ -83,9 +85,11 @@ export default function ClubAchievements({
             return (
               <div
                 key={a.id}
-                className="p-3 sm:p-4 rounded-2xl border border-border/70 bg-card flex items-center gap-3 shadow-2xs"
+                className="p-3 sm:p-4 rounded-2xl border border-border/70 bg-card flex items-center gap-2 sm:gap-3 shadow-2xs"
               >
-                <AchievementChip code={a.code} />
+                <div className="shrink-0">
+                  <AchievementChip code={a.code} />
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="font-bold text-sm text-foreground truncate">{title}</div>
                   <div className="text-xs text-muted-foreground truncate">
@@ -107,7 +111,7 @@ export default function ClubAchievements({
                       });
                     }}
                     aria-label="Remove achievement"
-                    className="p-2 rounded-xl text-red-600 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50"
+                    className="p-2 rounded-xl text-red-600 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50 shrink-0 ml-1"
                   >
                     {isRemoving ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

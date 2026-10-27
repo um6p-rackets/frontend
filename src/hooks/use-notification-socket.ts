@@ -26,6 +26,7 @@ export function useNotificationSocket(userId: string | number | undefined) {
 
     socket.on("connect", () => {
       setConnected(true);
+      console.log("Notification socket connected:", socket.id);
     });
 
     socket.on("disconnect", () => {
@@ -39,7 +40,7 @@ export function useNotificationSocket(userId: string | number | undefined) {
         void queryClient.invalidateQueries({
           queryKey: notificationKeys.inbox(userId),
         });
-      },
+    },
     );
 
     socket.on("connect_error", (error) => {
@@ -53,7 +54,7 @@ export function useNotificationSocket(userId: string | number | undefined) {
       socket.disconnect();
       setConnected(false);
     };
-  }, [userId, queryClient]);
+}, [userId, queryClient]);
 
   return { connected };
 }
