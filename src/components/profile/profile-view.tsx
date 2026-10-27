@@ -22,11 +22,12 @@ export default function ProfileView({ data }: ProfileViewProps) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 max-w-7xl mx-auto w-full flex flex-col gap-6 sm:gap-7">
+      {/* Removed min-[1500px]:flex-row from here so the page remains vertically stacked always */}
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 max-w-10/12 mx-auto w-full flex flex-col gap-6 sm:gap-7">
         <ProfileHeader data={data} />
 
-        {/* Updated Grid: sm:grid-cols-2 lg:grid-cols-4 forces 4 items on the same line for desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+        {/* Updated Grid: sm:grid-cols-2 min-[1500px]:grid-cols-4 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 min-[1500px]:grid-cols-4 gap-4 w-full">
           <div className="bg-card rounded-2xl border border-border/80 p-5 shadow-xs flex flex-col justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground italic">
               Win Rate
@@ -94,9 +95,9 @@ export default function ProfileView({ data }: ProfileViewProps) {
           </div>
         </div>
 
-        {/* Main Content Grid: Removed 'items-start' so columns match height */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-7 w-full">
-          <aside className="lg:col-span-5 w-full flex flex-col gap-3 h-full">
+        {/* Changed lg to min-[1500px] to activate side-by-side layout only on extra large screens */}
+        <div className="grid grid-cols-1 min-[1500px]:grid-cols-12 gap-6 lg:gap-7 w-full">
+          <aside className="min-[1500px]:col-span-5 w-full flex flex-col gap-3 h-full">
             {/* Added h-full to the wrapper inside SportRankCard in the next step */}
             <SportRankCard
               clubRanks={memberProfile.club_ranks}
@@ -106,7 +107,7 @@ export default function ProfileView({ data }: ProfileViewProps) {
             />
           </aside>
 
-          <section className="lg:col-span-7 w-full flex flex-col gap-3 h-full min-h-0">
+          <section className="min-[1500px]:col-span-7 w-full flex flex-col gap-3 h-full min-h-0">
             <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
             {/* Added flex-1 and min-h-0 to allow internal scrolling */}

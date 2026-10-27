@@ -83,10 +83,10 @@ export default function SportRankCard({
               key={sport.id}
               onClick={() => setSelectedSport(sport.id)}
               title={sport.name}
-              className={`flex-1 min-w-0 px-1 sm:px-2 py-2 rounded-lg text-xs md:text-sm font-black italic tracking-widest transition-all cursor-pointer select-none truncate text-center ${
+              className={`flex-1 min-w-0 px-1 sm:px-2 py-2 rounded-lg text-xs font-black tracking-widest transition-all cursor-pointer select-none truncate text-center ${
                 isSelected
                   ? "bg-brand-orange text-white shadow-xs"
-                  : "text-muted-foreground hover:text-brand-ink dark:hover:text-white hover:bg-muted/50"
+                  : "text-foreground font-extrabold hover:text-brand-orange hover:bg-muted/50"
               }`}
             >
               {sport.tabName}

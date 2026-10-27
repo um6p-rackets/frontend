@@ -67,9 +67,9 @@ export function NotificationProvider({
   value={{
     notifications,
     connected,
-    // markAsRead: (id) => markOne.mutate(id),
-    markAllAsRead: () => markAll.mutate(),
     markingAllAsRead: markAll.isPending,
+    markAllAsRead: () => markAll.mutate(),
+    // markAsRead: (id) => markOne.mutate(id),
   }}
 >
   {children}

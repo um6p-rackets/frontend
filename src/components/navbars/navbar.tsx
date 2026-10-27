@@ -32,7 +32,6 @@ import { useNotifications } from "@/providers/NotificationProvider";
 import { User } from "@/types/contracts/auth";
 import { useMe } from "@/hooks/use-me";
 import { NotificationComponent } from "@/components/notifications/notification-component";
-
 import { useUserJoinedClubs } from "@/hooks/use-profile"; 
 
 export default function Navbar() {
@@ -138,7 +137,9 @@ function UserNav({ user }: { user: User }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const pathname = usePathname();
-  const { notifications } = useNotifications();
+  // markAllAsRead: () => markAll.mutate(),
+  //   markingAllAsRead: markAll.isPending,
+  const { notifications , markAllAsRead , markingAllAsRead   } = useNotifications();
   
   const pathParts = pathname?.split("/").filter(Boolean) || [];
   const clubsIndex = pathParts.indexOf("clubs");
@@ -236,6 +237,9 @@ function UserNav({ user }: { user: User }) {
 
           <NotificationComponent
             notifications={notifications}
+            onMarkAllAsRead={markAllAsRead}
+            markingAllAsRead={markingAllAsRead}
+            triggerMode="icon"
           />
 
           {/* Leaderboard Icon */}
@@ -376,6 +380,8 @@ function UserNav({ user }: { user: User }) {
             {/* Mobile Menu Version - Uses "menu" trigger style */}
             <NotificationComponent
               notifications={notifications}
+              onMarkAllAsRead={markAllAsRead}
+              markingAllAsRead={markingAllAsRead}
               triggerMode="menu" 
             />
 
