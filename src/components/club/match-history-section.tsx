@@ -157,22 +157,29 @@ function MatchCard({
         <div className="flex flex-col items-start gap-2 shrink-0 min-w-32">
           <div className={cn(PILL, statusBadge.className)}>{statusBadge.label}</div>
           {match.mode === 2 && (
-            <div className="px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold text-[11px] border border-border/40">
-              • Doubles
+            <div className="px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold text-[11px] border border-border/40 uppercase tracking-wider">
+              Doubles
             </div>
           )}
         </div>
 
-        <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-4 w-full">
-          <div className="flex-1 w-full p-3 rounded-2xl border border-border/70 bg-background/50 flex items-center justify-center text-center">
-            <div className="font-bold text-sm text-foreground truncate">
-              {team1Names.join(" • ")}
-            </div>
+        <div className="flex-1 flex flex-col md:flex-row items-stretch md:items-center justify-center gap-3 sm:gap-4 w-full min-w-0">
+          
+          {/* Team 1 Cards */}
+          <div className="flex-1 flex flex-col gap-2 w-full min-w-0 justify-center">
+            {team1Names.map((name, index) => (
+              <div key={index} className="w-full p-2.5 sm:p-3 rounded-2xl border border-border/70 bg-background/50 flex items-center justify-center text-center overflow-hidden">
+                <div className="font-bold text-sm leading-snug text-foreground break-words w-full px-2" title={name}>
+                  {name}
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className={cn("px-4 py-3 rounded-2xl border flex flex-col items-center justify-center shrink-0 min-w-28 shadow-2xs", scoreBoxClass)}>
+          {/* Score / VS Box */}
+          <div className={cn("px-4 py-2.5 sm:py-3 rounded-2xl border flex flex-col items-center justify-center shrink-0 min-w-24 sm:min-w-28 shadow-2xs self-center", scoreBoxClass)}>
             {isFinished ? (
-              <span className="font-black text-lg tracking-widest">
+              <span className="font-black text-base sm:text-lg tracking-widest whitespace-nowrap">
                 {match.team1_score} - {match.team2_score}
               </span>
             ) : (
@@ -180,11 +187,17 @@ function MatchCard({
             )}
           </div>
 
-          <div className="flex-1 w-full p-3 rounded-2xl border border-border/70 bg-background/50 flex items-center justify-center text-center">
-            <div className="font-bold text-sm text-foreground truncate">
-              {team2Names.join(" • ")}
-            </div>
+          {/* Team 2 Cards */}
+          <div className="flex-1 flex flex-col gap-2 w-full min-w-0 justify-center">
+            {team2Names.map((name, index) => (
+              <div key={index} className="w-full p-2.5 sm:p-3 rounded-2xl border border-border/70 bg-background/50 flex items-center justify-center text-center overflow-hidden">
+                <div className="font-bold text-sm leading-snug text-foreground break-words w-full px-2" title={name}>
+                  {name}
+                </div>
+              </div>
+            ))}
           </div>
+
         </div>
 
         <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
