@@ -22,7 +22,6 @@ import type { NotificationRealtimePayload } from "@/types/contracts/notification
 
 interface NotificationComponentProps {
   notifications: NotificationRealtimePayload[];
-  connected: boolean;
   onMarkAllAsRead?: () => void;
   markingAllAsRead?: boolean;
   triggerMode?: "icon" | "menu"; 
@@ -104,7 +103,6 @@ function formatNotificationDate(date: string) {
 
 export function NotificationComponent({
   notifications,
-  connected,
   onMarkAllAsRead,
   markingAllAsRead = false,
   triggerMode = "icon", 
@@ -144,7 +142,7 @@ export function NotificationComponent({
 
       <SheetContent
         side="right"
-        className="fixed inset-y-0 right-0 z-50 flex w-[85vw] max-w-[360px] sm:w-[440px] sm:max-w-[440px] flex-col gap-0 border-l border-border/70 bg-background p-0 shadow-2xl"
+        className="fixed inset-y-0 right-0 z-50 flex w-[85vw] max-w-90 sm:w-110 sm:max-w-110 flex-col gap-0 border-l border-border/70 bg-background p-0 shadow-2xl"
       >
         <SheetHeader className="border-b border-border/60 bg-background pl-4 pr-12 py-4 sm:px-6 sm:py-5">
           <div className="flex items-center justify-between gap-2 w-full min-w-0">
@@ -190,7 +188,7 @@ export function NotificationComponent({
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full w-full">
             {notifications.length === 0 ? (
-              <div className="flex min-h-[360px] flex-col items-center justify-center px-6 sm:px-8 text-center">
+              <div className="flex min-h-90 flex-col items-center justify-center px-6 sm:px-8 text-center">
                 <div className="mb-5 flex size-14 sm:size-16 items-center justify-center rounded-2xl bg-brand-orange/10">
                   <Inbox className="size-6 sm:size-7 text-brand-orange" />
                 </div>
@@ -199,7 +197,7 @@ export function NotificationComponent({
                   You&apos;re all caught up
                 </h3>
 
-                <p className="mt-2 max-w-[260px] text-xs sm:text-sm leading-relaxed text-muted-foreground">
+                <p className="mt-2 max-w-65 text-xs sm:text-sm leading-relaxed text-muted-foreground">
                   When something happens in your clubs, you&apos;ll find it here.
                 </p>
               </div>
@@ -226,7 +224,7 @@ export function NotificationComponent({
                         className={cn(
                           "group relative overflow-hidden rounded-2xl border p-4 transition-colors",
                           unread
-                            ? "border-brand-orange/30 bg-brand-orange/[0.04] shadow-xs"
+                            ? "border-brand-orange/30 bg-brand-orange/4 shadow-xs"
                             : "border-border/70 bg-card shadow-2xs"
                         )}
                       >
@@ -262,7 +260,7 @@ export function NotificationComponent({
                               )}
                             </div>
 
-                            <p className="text-xs sm:text-sm leading-relaxed text-muted-foreground break-words">
+                            <p className="text-xs sm:text-sm leading-relaxed text-muted-foreground wrap-break-word">
                               {content.description}
                             </p>
 
@@ -275,7 +273,7 @@ export function NotificationComponent({
                               {notification.club_name && (
                                 <>
                                   <span>•</span>
-                                  <span className="truncate max-w-[150px]">
+                                  <span className="truncate max-w-37.5">
                                     {notification.club_name}
                                   </span>
                                 </>

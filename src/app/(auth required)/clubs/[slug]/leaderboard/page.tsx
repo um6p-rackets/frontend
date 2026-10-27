@@ -38,7 +38,7 @@ export default function LeaderboardPage({
           Club Not Found
         </h1>
         <p className="text-muted-foreground italic mt-2">
-          The club <span className="font-bold text-brand-orange">"{slug}"</span> does not exist or
+          The club <span className="font-bold text-brand-orange">&quot;{slug}&quot;</span> does not exist or
           you do not have permission to view its leaderboard.
         </p>
       </main>
