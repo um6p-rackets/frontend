@@ -1,51 +1,47 @@
-'use client';
+"use client";
 
 // -> src/components/match/match-request-form.tsx
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowUpRight, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowUpRight, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-import { Button } from '@/components/ui/button';
-import { useRequestMatch } from '@/hooks/use-matches';
-import { MatchMode, type MatchRequestBody } from '@/types/contracts/club';
+import { Button } from "@/components/ui/button";
+import { useRequestMatch } from "@/hooks/use-matches";
+import { MatchMode, type MatchRequestBody } from "@/types/contracts/club";
 
-import MatchDisciplineCard from './match-discipline-card';
-import MatchPlayerCard from './match-player-card';
-import MatchDateTimeSection from './match-datetime-section';
-import MemberSearchModal from './member-search-modal';
+import MatchDisciplineCard from "./match-discipline-card";
+import MatchPlayerCard from "./match-player-card";
+import MatchDateTimeSection from "./match-datetime-section";
+import MemberSearchModal from "./member-search-modal";
+import { now } from "@/lib/date-utils";
 
 // One chosen member (replaces the 8 parallel id/name/dept/avatar states)
 type Picked = { id: number; name: string; dept: string; avatar: string | null };
-type Target = 'partner' | 'opponent_1' | 'opponent_2';
+type Target = "partner" | "opponent_1" | "opponent_2";
 
 export default function MatchRequestForm({
   clubSlug,
   currentMemberId,
   currentUserName,
-  currentUserAvatar
+  currentUserAvatar,
 }: {
   clubSlug: string;
   currentMemberId: number;
   currentUserName: string;
   currentUserDepartment?: string | null;
   currentUserAvatar?: string | null;
-  
 }) {
   const router = useRouter();
   const request = useRequestMatch(clubSlug);
 
   const [matchMode, setMatchMode] = useState<MatchMode>(MatchMode.SINGLES);
   const [partner, setPartner] = useState<Picked | null>(null);
-  const [opponents, setOpponents] = useState<[Picked | null, Picked | null]>([
-    null,
-    null
-  ]);
+  const [opponents, setOpponents] = useState<[Picked | null, Picked | null]>([null, null]);
 
-  const [matchDate, setMatchDate] = useState<Date>(new Date());
-  const [startTime, setStartTime] = useState('17:00');
-  const [endTime, setEndTime] = useState('18:30');
-  const [location, setLocation] = useState('');
+  const [matchDate, setMatchDate] = useState<Date>(now());
+  const [startTime, setStartTime] = useState("17:00");
+  const [location, setLocation] = useState("");
 
   const [activeTarget, setActiveTarget] = useState<Target | null>(null);
 
@@ -53,18 +49,18 @@ export default function MatchRequestForm({
     id: number,
     name: string,
     department: string,
-    avatar: string | null
+    avatar: string | null,
   ) => {
     const picked: Picked = {
       id,
       name,
-      dept: department.trim() !== '' ? department : 'Sport Department',
-      avatar
+      dept: department.trim() !== "" ? department : "Sport Department",
+      avatar,
     };
 
-    if (activeTarget === 'partner') setPartner(picked);
-    if (activeTarget === 'opponent_1') setOpponents((prev) => [picked, prev[1]]);
-    if (activeTarget === 'opponent_2') setOpponents((prev) => [prev[0], picked]);
+    if (activeTarget === "partner") setPartner(picked);
+    if (activeTarget === "opponent_1") setOpponents((prev) => [picked, prev[1]]);
+    if (activeTarget === "opponent_2") setOpponents((prev) => [prev[0], picked]);
     setActiveTarget(null);
   };
 
@@ -74,30 +70,29 @@ export default function MatchRequestForm({
     const isDoubles = matchMode === MatchMode.DOUBLES;
 
     if (isDoubles && !partner) {
-      toast.error('Please select a partner for doubles match.');
+      toast.error("Please select a partner for doubles match.");
       return;
     }
 
     const required = isDoubles ? 2 : 1;
-    const chosen = opponents
-      .slice(0, required)
-      .filter((o): o is Picked => o !== null);
+    const chosen = opponents.slice(0, required).filter((o): o is Picked => o !== null);
     if (chosen.length < required) {
       toast.error(`Please select ${required} opponent(s).`);
       return;
     }
 
-    if (startTime >= endTime) {
-      toast.error('End time must be after start time.');
-      return;
-    }
+    const [hours, minutes] = startTime.split(":").map(Number);
 
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const scheduledAt = new Date(matchDate);
-    scheduledAt.setHours(hours, minutes, 0, 0);
+    // 1. Create a true copy of the date to avoid mutating React state
+    const scheduledAt = new Date(matchDate.getTime());
 
-    if (scheduledAt < new Date()) {
-      toast.error('Match scheduled time must be in the future.');
+    // 2. Force the time using UTC methods to completely bypass the browser's GMT+0100
+    scheduledAt.setUTCHours(hours, minutes, 0, 0);
+
+    // Now log the safe UTC string instead of the raw browser Date object
+
+    if (scheduledAt < now()) {
+      toast.error("Match scheduled time must be in the future.");
       return;
     }
 
@@ -106,22 +101,17 @@ export default function MatchRequestForm({
       partner_id: isDoubles ? partner?.id : undefined,
       opponent_ids: chosen.map((o) => o.id),
       location: location.trim() || undefined,
-      scheduled_at: scheduledAt.toISOString()
+      scheduled_at: scheduledAt.toISOString(),
     };
 
     request.mutate(payload, {
-      onSuccess: () => router.push(`/clubs/${clubSlug}`)
+      onSuccess: () => router.push(`/clubs/${clubSlug}`),
     });
   };
 
-  const excludedIds = [
-    currentMemberId,
-    partner?.id,
-    opponents[0]?.id,
-    opponents[1]?.id
-  ].filter((id): id is number => id !== undefined);
-
-
+  const excludedIds = [currentMemberId, partner?.id, opponents[0]?.id, opponents[1]?.id].filter(
+    (id): id is number => id !== undefined,
+  );
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
@@ -130,8 +120,8 @@ export default function MatchRequestForm({
           Schedule A <span className="text-brand-orange">Match</span>
         </h1>
         <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-          Challenge fellow campus athletes, set your match format, and climb the
-          UM6P Elo ladder on official campus courts.
+          Challenge fellow campus athletes, set your match format, and climb the UM6P Elo ladder on
+          official campus courts.
         </p>
       </div>
 
@@ -146,9 +136,7 @@ export default function MatchRequestForm({
               1
             </div>
             <div>
-              <h2 className="font-bold text-lg text-foreground">
-                Select Match Discipline
-              </h2>
+              <h2 className="font-bold text-lg text-foreground">Select Match Discipline</h2>
             </div>
           </div>
 
@@ -179,9 +167,7 @@ export default function MatchRequestForm({
               2
             </div>
             <div>
-              <h2 className="font-bold text-lg text-foreground">
-                Select Players & Teams
-              </h2>
+              <h2 className="font-bold text-lg text-foreground">Select Players & Teams</h2>
             </div>
           </div>
 
@@ -201,9 +187,9 @@ export default function MatchRequestForm({
               {matchMode === MatchMode.DOUBLES && (
                 <MatchPlayerCard
                   type="empty"
-                  name={partner ? partner.name : 'Choose Teammate'}
+                  name={partner ? partner.name : "Choose Teammate"}
                   avatarUrl={partner?.avatar}
-                  onClick={() => setActiveTarget('partner')}
+                  onClick={() => setActiveTarget("partner")}
                 />
               )}
             </div>
@@ -211,7 +197,7 @@ export default function MatchRequestForm({
             {/* VS Badge */}
             <div
               className={`hidden md:flex absolute left-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-foreground text-background font-black text-xs items-center justify-center z-20 shadow-md transition-all duration-300 ${
-                matchMode === MatchMode.SINGLES ? 'top-17' : 'top-[59%]'
+                matchMode === MatchMode.SINGLES ? "top-17" : "top-[59%]"
               }`}
             >
               VS
@@ -225,17 +211,17 @@ export default function MatchRequestForm({
 
               <MatchPlayerCard
                 type="empty"
-                name={opponents[0] ? opponents[0].name : 'Choose Opponent'}
+                name={opponents[0] ? opponents[0].name : "Choose Opponent"}
                 avatarUrl={opponents[0]?.avatar}
-                onClick={() => setActiveTarget('opponent_1')}
+                onClick={() => setActiveTarget("opponent_1")}
               />
 
               {matchMode === MatchMode.DOUBLES && (
                 <MatchPlayerCard
                   type="empty"
-                  name={opponents[1] ? opponents[1].name : 'Choose Opponent 2'}
+                  name={opponents[1] ? opponents[1].name : "Choose Opponent 2"}
                   avatarUrl={opponents[1]?.avatar}
-                  onClick={() => setActiveTarget('opponent_2')}
+                  onClick={() => setActiveTarget("opponent_2")}
                 />
               )}
             </div>
@@ -249,9 +235,7 @@ export default function MatchRequestForm({
               3
             </div>
             <div>
-              <h2 className="font-bold text-lg text-foreground">
-                Select Date & Time
-              </h2>
+              <h2 className="font-bold text-lg text-foreground">Select Date & Time</h2>
             </div>
           </div>
 
@@ -260,8 +244,6 @@ export default function MatchRequestForm({
             setMatchDate={setMatchDate}
             startTime={startTime}
             setStartTime={setStartTime}
-            endTime={endTime}
-            setEndTime={setEndTime}
             location={location}
             setLocation={setLocation}
           />
@@ -276,8 +258,7 @@ export default function MatchRequestForm({
           >
             {request.isPending ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin mr-2" /> Sending
-                Request...
+                <Loader2 className="w-4 h-4 animate-spin mr-2" /> Sending Request...
               </>
             ) : (
               <>
@@ -294,9 +275,7 @@ export default function MatchRequestForm({
         onClose={() => setActiveTarget(null)}
         onSelectMember={handleSelectMember}
         excludeMemberIds={excludedIds}
-        title={
-          activeTarget === 'partner' ? 'Select Your Teammate' : 'Select Opponent'
-        }
+        title={activeTarget === "partner" ? "Select Your Teammate" : "Select Opponent"}
       />
     </div>
   );

@@ -101,6 +101,9 @@ export type Achievement = {
   taken_at: string;
 };
 
+// GET /:slug/achievements returns the owner with each row.
+export type AchievementWithUser = Achievement & { user: UserSummary };
+
 export type ClubDocument = {
   id: number;
   club_id: number;
@@ -171,11 +174,11 @@ export type Match = {
   team2_points: number;
   mode: MatchMode;
   status: MatchStatus;
-  location?: string | null;
+  location: string | null;
   scheduled_at: string;
-  cancelled_at?: string | null;
-  cancelled_by?: number | null; // member id
-  created_at?: string;
+  cancelled_at: string | null;
+  cancelled_by: number | null; // member id
+  created_at: string;
 };
 
 // ==========================================
@@ -203,7 +206,10 @@ export type Player = UserSummary & { member_id: number };
 // 4. Club views
 // ==========================================
 
-export type ClubWithMembersCountAndCoachFullName = Club & { members_count: number, coach_full_name: string };
+export type ClubWithMembersCountAndCoachFullName = Club & {
+  members_count: number;
+  coach_full_name: string;
+};
 
 // GET /:slug/status: who the current user is in this club.
 export type ClubMemberStatus = {
@@ -244,7 +250,6 @@ export type WeekView = {
   prev_week_start: string; // past weeks are read-only
   next_week_start: string | null; // null when already on next week (max one week ahead)
   sessions: SessionView[];
-  is_future_week: boolean; // true = all sessions are in the future, can be deleted
 };
 
 // ==========================================
@@ -300,31 +305,37 @@ export type UserClubRank = {
 };
 
 // GET /:slug/leaderboard
-export type LeaderboardEntry = {
+export type Leaderboard = {
   rank: number;
   player: Player;
   points: number;
   wins: number;
   losses: number;
+  total_matches: number;
+  win_streak: number;
+  best_win_streak: number;
 };
 
-export type UserProfileStat = {
+// For all clubs leaderboard
+export type UserGlobalStat = {
   total_matches: number;
   wins: number;
   losses: number;
-  win_rate: number; // 0..1
+  win_rate: number | string; // 0..1
   ladder_points: number;
   current_win_streak: number;
   best_rank: UserClubRank | null;
 };
 
 export type UserProfileData = {
-  user: User;
-  stats: UserProfileStat;
+  // Done
   joined_clubs: JoinedClub[];
+  // Done
   achievements: Achievement[];
-  history: UserHistoryMatch[];
+  // Done
   club_ranks: UserClubRank[];
+  // Done
+  global_stats: UserGlobalStat;
 };
 
 // ==========================================

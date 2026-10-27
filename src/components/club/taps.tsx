@@ -33,7 +33,7 @@ export default function ClubTaps({
 
   return (
     <Tabs defaultValue="sessions" className="w-full lg:h-full flex flex-col">
-      <TabsList className="w-full group-data-horizontal/tabs:h-auto h-auto p-1 sm:p-1.5 bg-gray-50 border border-border/50 rounded-xl flex flex-row items-center gap-1 sm:gap-1.5 shadow-2xs shrink-0">
+      <TabsList className="w-full group-data-horizontal/tabs:h-auto h-auto p-1 sm:p-1.5 bg-card border border-border/50 rounded-xl flex flex-row items-center gap-1 sm:gap-1.5 shadow-2xs shrink-0">
         <TabsTrigger value="sessions" className={tabTriggerClass}>
           Sessions
         </TabsTrigger>
@@ -47,7 +47,7 @@ export default function ClubTaps({
           Documents
         </TabsTrigger>
       </TabsList>
-      <div className="w-full flex-1 p-4 bg-gray-50 rounded-xl flex flex-col mt-2">
+      <div className="w-full flex-1 p-4 flex flex-col mt-2 bg-card rounded-3xl border border-border/70 shadow-2xs">
         <TabsContent value="sessions" className="flex-1 flex flex-col m-0">
           <Suspense fallback={<SessionsSkeleton />}>
             {/* Pass isAdmin to Sessions (for later) */}

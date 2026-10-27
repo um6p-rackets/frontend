@@ -8,7 +8,9 @@ import {
   cancelMatch,
   getClubMatches,
   getPendingMatches,
+  getUserMatches,
   requestMatch,
+  submitMatchResult
 } from "@/lib/api/matches";
 import type { MatchRequestBody } from "@/types/contracts/club";
 
@@ -18,6 +20,8 @@ export const matchKeys = {
   lists: (slug: string) => [...matchKeys.all(slug), "list"] as const,
   list: (slug: string, filters: Record<string, unknown>) =>
     [...matchKeys.lists(slug), filters] as const,
+  userMatches: (userId: number, page: number, limit: number) =>
+    ["users", userId, "matches", { page, limit }] as const,
 };
 
 export function usePendingMatches(slug: string, enabled = true) {
@@ -83,5 +87,35 @@ export function useRequestMatch(slug: string) {
       return queryClient.invalidateQueries({ queryKey: matchKeys.all(slug) });
     },
     onError: (err: Error) => toast.error(err.message || "Failed to send match request"),
+  });
+}
+
+export function useSubmitMatchResult(slug: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ matchId, team1_score, team2_score }: { matchId: number; team1_score: number; team2_score: number }) =>
+      submitMatchResult(slug, matchId, { team1_score, team2_score }),
+    onSuccess: () => {
+      toast.success("Match result saved successfully!");
+      return queryClient.invalidateQueries({ queryKey: matchKeys.all(slug) });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to submit match result.");
+    },
+  });
+}
+
+export function useUserMatches(
+  userId: number,
+  page: number = 1,
+  limit: number = 10,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: matchKeys.userMatches(userId, page, limit),
+    queryFn: () => getUserMatches(userId, page, limit),
+    enabled: enabled && Boolean(userId),
+    placeholderData: keepPreviousData, // Keeps previous page active while loading new page
   });
 }

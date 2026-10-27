@@ -56,7 +56,7 @@ export default function Leaderboard({
   const sortedMembers = [...top_members].sort((a, b) => b.points - a.points);
 
   return (
-    <Card className="w-full bg-gray-50 border-none shadow-none ring-0 rounded-md flex flex-col">
+      <Card  className='space-y-4 mt-6 max-w-2xl mx-auto p-6 bg-card rounded-3xl border border-border/70 shadow-2xs'>
       <div className="text-xl sm:text-2xl px-4 py-3 font-bold flex items-center justify-start gap-3 sm:gap-4 border-b border-gray-200">
         <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-accent shrink-0" />
         <span>Leaderboard</span>

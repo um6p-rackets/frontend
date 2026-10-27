@@ -1,20 +1,22 @@
 "use client";
 
 import { Calendar as CalendarIcon, Clock, MapPin } from "lucide-react";
+import { format } from "date-fns";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+
+const LABEL_CLASS = "flex items-center gap-1.5 text-xs font-semibold text-muted-foreground";
+const INPUT_CLASS = "h-11 border-border/70 rounded-xl bg-background";
 
 export default function MatchDateTimeSection({
   matchDate,
   setMatchDate,
   startTime,
   setStartTime,
-  endTime,
-  setEndTime,
   location,
   setLocation,
 }: {
@@ -22,8 +24,6 @@ export default function MatchDateTimeSection({
   setMatchDate: (date: Date) => void;
   startTime: string;
   setStartTime: (time: string) => void;
-  endTime: string;
-  setEndTime: (time: string) => void;
   location: string;
   setLocation: (value: string) => void;
 }) {
@@ -31,7 +31,7 @@ export default function MatchDateTimeSection({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
       {/* Date Picker */}
       <div className="space-y-2">
-        <Label className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+        <Label className={LABEL_CLASS}>
           <CalendarIcon className="w-3.5 h-3.5 text-brand-orange" /> Date
         </Label>
         <Popover>
@@ -64,44 +64,32 @@ export default function MatchDateTimeSection({
 
       {/* Start Time */}
       <div className="space-y-2">
-        <Label className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+        <Label htmlFor="match-start" className={LABEL_CLASS}>
           <Clock className="w-3.5 h-3.5 text-brand-orange" /> Start Time
         </Label>
         <Input
+          id="match-start"
           type="time"
           value={startTime}
           onChange={(e) => setStartTime(e.target.value)}
-          className="h-11 border-border/70 rounded-xl bg-background"
+          className={INPUT_CLASS}
           required
         />
       </div>
 
       {/* Place / Court */}
-      <div className="space-y-2">
-        <Label className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+      <div className="space-y-2 md:col-span-2">
+        <Label htmlFor="match-location" className={LABEL_CLASS}>
           <MapPin className="w-3.5 h-3.5 text-brand-orange" /> Place / Court
         </Label>
-        <input
+        <Input
+          id="match-location"
           type="text"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           maxLength={100}
           placeholder="Enter court or location"
-          className="w-full h-11 px-3 border border-border/70 rounded-xl bg-background text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        />
-      </div>
-
-      {/* End Time */}
-      <div className="space-y-2">
-        <Label className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-          <Clock className="w-3.5 h-3.5 text-brand-orange" /> End Time
-        </Label>
-        <Input
-          type="time"
-          value={endTime}
-          onChange={(e) => setEndTime(e.target.value)}
-          className="h-11 border-border/70 rounded-xl bg-background"
-          required
+          className={INPUT_CLASS}
         />
       </div>
     </div>

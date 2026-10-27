@@ -111,7 +111,7 @@ const SettingsProfile1 = ({
       email: email.trim(),
       department: finalDepartment,
       customDepartment: department === "OTHER" ? customDepartment.trim() : undefined,
-      avatar: avatarFiles.length > 0 ? avatarPreview : (currentAvatar || null),
+      // avatar: avatarFiles.length > 0 ? avatarPreview : (currentAvatar || null),
     });
   };
 
@@ -144,7 +144,7 @@ const SettingsProfile1 = ({
 
       {/* Body */}
       <div className="p-6 sm:p-7 space-y-5">
-        <ProfileAvatarUpload
+        {/* <ProfileAvatarUpload
           avatarFiles={avatarFiles}
           setAvatarFiles={setAvatarFiles}
           avatarPreview={avatarPreview}
@@ -153,7 +153,7 @@ const SettingsProfile1 = ({
           initials={initials}
           hasAvatar={avatarFiles.length > 0 || !!currentAvatar}
           onRemoveAvatar={handleRemoveAvatar}
-        />
+        /> */}
 
         <ProfileFormFields
           firstName={firstName}

@@ -4,13 +4,9 @@ import { toast } from "sonner";
 import { clubKeys } from "@/hooks/use-clubs";
 import {
   getAnnouncements,
-  getClubMembersForAnnouncements,
   createAnnouncement,
   deleteAnnouncement,
-  type ClubMember,
 } from "@/lib/api/announcement";
-
-export type { ClubMember };
 
 export const announcementKeys = {
   all: (slug: string) => [...clubKeys.detail(slug), "announcements"] as const,
@@ -21,27 +17,14 @@ export function useClubAnnouncements(slug: string, enabled = true) {
   return useQuery({
     queryKey: announcementKeys.lists(slug),
     queryFn: async () => {
-      if (!slug) return { announcements: [], membersMap: new Map<number, ClubMember>() };
+      if (!slug) return [];
 
-      const [annRes, membersRes] = await Promise.all([
-        getAnnouncements(slug, 20, 1),
-        getClubMembersForAnnouncements(slug),
-      ]);
-
+      const annRes = await getAnnouncements(slug, 20, 1);
       const fetchedAnnouncements = annRes.data || [];
-      
-      const map = new Map<number, ClubMember>();
-      const memberList = Array.isArray(membersRes) ? membersRes : (membersRes?.data || []);
-      memberList.forEach((m: ClubMember) => {
-        const key = m.member_id || m.id;
-        if (key) map.set(key, m);
-      });
 
-      const sorted = fetchedAnnouncements.sort(
+      return fetchedAnnouncements.sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
-      
-      return { announcements: sorted, membersMap: map };
     },
     enabled: enabled && Boolean(slug),
   });

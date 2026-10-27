@@ -1,42 +1,42 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import ProfileHeader from '@/components/profile/profile-header';
-import ProfileTabs, { ProfileTabType } from '@/components/profile/profile-tabs';
-import StatisticsTab from '@/components/profile/statistics-tab';
-import HistoryTab from '@/components/profile/history-tab';
-import SportRankCard from '@/components/profile/sport-rank-card';
-import { Footer } from '@/components/footer';
-import { UserProfileData } from '@/types/contracts/club';
+import { useState } from "react";
+import ProfileHeader from "@/components/profile/profile-header";
+import ProfileTabs, { ProfileTabType } from "@/components/profile/profile-tabs";
+import StatisticsTab from "@/components/profile/statistics-tab";
+import HistoryTab from "@/components/profile/history-tab";
+import SportRankCard from "@/components/profile/sport-rank-card";
+import { Footer } from "@/components/footer";
+import { UserProfile } from "@/types";
 
 interface ProfileViewProps {
-  data: UserProfileData;
+  data: UserProfile;
 }
 
 export default function ProfileView({ data }: ProfileViewProps) {
-  const [activeTab, setActiveTab] = useState<ProfileTabType>('statistics');
+  const [activeTab, setActiveTab] = useState<ProfileTabType>("history");
   const fullName = `${data.user.first_name} ${data.user.last_name}`;
-  const { stats } = data;
+  const user = data.user;
+  const memberProfile = data.memberProfile;
+  const { global_stats } = memberProfile;
 
   return (
-    // Outer container set to min-h-screen and flex-col so footer stays at the bottom
     <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16 max-w-7xl mx-auto w-full flex flex-col gap-6 sm:gap-7">
-        {/* Top Profile Header Card */}
         <ProfileHeader data={data} />
 
-        {/* Top Stats Banner (3 Cards: Win Rate, Matches, Current Run) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+        {/* Updated Grid: sm:grid-cols-2 lg:grid-cols-4 forces 4 items on the same line for desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
           <div className="bg-card rounded-2xl border border-border/80 p-5 shadow-xs flex flex-col justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground italic">
               Win Rate
             </span>
             <div className="mt-3">
               <div className="text-3xl font-black italic text-brand-ink dark:text-white">
-                {(stats.win_rate * 100).toFixed(1)}%
+                {global_stats.win_rate}%
               </div>
               <p className="text-xs font-semibold italic text-muted-foreground mt-0.5">
-                {stats.wins} Wins – {stats.losses} Losses
+                {global_stats.wins} Wins – {global_stats.losses} Losses
               </p>
             </div>
           </div>
@@ -47,11 +47,31 @@ export default function ProfileView({ data }: ProfileViewProps) {
             </span>
             <div className="mt-3">
               <div className="text-3xl font-black italic text-brand-ink dark:text-white flex items-baseline gap-2">
-                <span>{stats.total_matches}</span>
-                <span className="text-xs font-bold text-muted-foreground uppercase not-italic">Total</span>
+                <span>{global_stats.total_matches}</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase not-italic">
+                  Total
+                </span>
               </div>
               <p className="text-xs font-semibold italic text-muted-foreground mt-0.5">
-                Across all {data.club_ranks.length} sports
+                Across all {memberProfile.club_ranks.length} sports
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-card rounded-2xl border border-border/80 p-5 shadow-xs flex flex-col justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground italic">
+              Best Rank
+            </span>
+            <div className="mt-3">
+              <div className="text-3xl font-black italic text-brand-ink dark:text-white flex items-baseline gap-2">
+                {/* Safely fallback to N/A if the user hasn't played and has no best rank */}
+                <span>{global_stats.best_rank?.rank ?? "N/A"}</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase not-italic">
+                  Overall
+                </span>
+              </div>
+              <p className="text-xs font-semibold italic text-muted-foreground mt-0.5 truncate">
+                {global_stats.best_rank?.club_name ?? "No ranked sports yet"}
               </p>
             </div>
           </div>
@@ -62,8 +82,10 @@ export default function ProfileView({ data }: ProfileViewProps) {
             </span>
             <div className="mt-3">
               <div className="text-3xl font-black italic text-brand-orange flex items-baseline gap-2">
-                <span>{stats.current_win_streak}W</span>
-                <span className="text-xs font-bold text-brand-orange/80 uppercase not-italic">Unbroken</span>
+                <span>{global_stats.current_win_streak}W</span>
+                <span className="text-xs font-bold text-brand-orange/80 uppercase not-italic">
+                  Unbroken
+                </span>
               </div>
               <p className="text-xs font-semibold italic text-muted-foreground mt-0.5">
                 Active winning streak
@@ -72,39 +94,29 @@ export default function ProfileView({ data }: ProfileViewProps) {
           </div>
         </div>
 
-        {/* Main Content Grid: Campus Standing (Left) & Toggleable Section (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-7 items-start w-full">
-          {/* Left Column: Campus Standing / Sport Rank Card */}
-          <aside className="lg:col-span-4 w-full flex flex-col gap-3">
+        {/* Main Content Grid: Removed 'items-start' so columns match height */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-7 w-full">
+          <aside className="lg:col-span-5 w-full flex flex-col gap-3 h-full">
+            {/* Added h-full to the wrapper inside SportRankCard in the next step */}
             <SportRankCard
-              clubRanks={data.club_ranks}
+              clubRanks={memberProfile.club_ranks}
               userName={fullName}
-              department={data.user.department}
+              department={user.department}
             />
           </aside>
 
-          {/* Right Column: Interactive Performance by Sport / Match History */}
-          <section className="lg:col-span-8 w-full flex flex-col gap-3">
-            {/* Tab Navigation Switcher */}
-            <ProfileTabs
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-            />
+          <section className="lg:col-span-7 w-full flex flex-col gap-3 h-full min-h-0">
+            <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-            {/* Active Tab View Body */}
-            <div className="w-full">
-              {activeTab === 'statistics' && (
-                <StatisticsTab data={data} />
-              )}
-              {activeTab === 'history' && (
-                <HistoryTab history={data.history} />
-              )}
+            {/* Added flex-1 and min-h-0 to allow internal scrolling */}
+            <div className="w-full flex-1 min-h-0">
+              {/* {activeTab === "statistics" && <StatisticsTab data={memberProfile} />} */}
+              {activeTab === "history" && <HistoryTab userId={user.id} />}
             </div>
           </section>
         </div>
       </main>
 
-      {/* Global Footer component appended at the bottom */}
       <Footer />
     </div>
   );
