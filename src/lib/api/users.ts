@@ -1,4 +1,4 @@
-import { JoinedClub, UserProfile } from "@/types";
+import { JoinedClub, UpdateProfileBody, User, UserProfile } from "@/types";
 import { api } from "./api";
 
 export const UsersApi = {
@@ -8,20 +8,11 @@ export const UsersApi = {
   // Fetch a public user's profile by their ID
   getUserProfile: (userId: number) => api<UserProfile>(`/users/${userId}/profile`),
 
-    // /users/:userId/memberships
-  // @Get(':user_id/memberships')
-  // async getUserMemberships(
-  //   @Param() { user_id }: GetUserParamDto,
-  // ): Promise<JoinedClub[]> {
-  //   return rpc<JoinedClub[]>(
-  //     this.clubClient,
-  //     CLUB_PATTERNS.GET_USER_MEMBERSHIPS,
-  //     {
-  //       user_id: user_id,
-  //     },
-  //   );
-  // }
-
   getJoinedClubs: (userId: number) => api<JoinedClub[]>(`/users/${userId}/memberships`),
 
+  updateProfile: (body: UpdateProfileBody) =>
+    api<{ user: User }>(`/users/me`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
 };
