@@ -19,8 +19,9 @@ import MembersOnlyPanel from "@/components/club/members-only-panel";
 import { Button } from "@/components/ui/button";
 import { useClub, useClubStatus, useLeaveClub } from "@/hooks/use-clubs";
 import { ApiError } from "@/lib/api-error";
-import { mockClubData } from "@/lib/mock-data"; // TODO: the leaderboard still uses mock data
+import { useClubLeaderboard } from "@/hooks/use-leaderboard";
 import { MemberRole } from "@/types/contracts/club";
+import { Leaderboard as LeaderboardType } from "@/types";
 import ClubAchievements from "@/components/achievement/club-achievement";
 import { notFound } from "next/navigation";
 
@@ -41,10 +42,19 @@ export default function ClubPage() {
   } = useClubStatus(clubSlug);
   const leave = useLeaveClub(clubSlug);
 
+  const { data: leaderboardResponse } = useClubLeaderboard(
+    clubSlug,
+    1,
+    5 
+  );
+
+  // Safely extract the data array from the ClubLeaderboard paginated response structure
+  const LeaderboardData: LeaderboardType[] = leaderboardResponse?.leaderboard?.data ?? [];
+
   if (isError) {
     const notFoundError = error instanceof ApiError && error.status === 404;
     if (notFoundError) { return notFound(); }
-    return notFound();// update later to show a proper error page with retry button
+    return notFound();
   }
 
   const clubName = club?.name ?? clubSlug;
@@ -128,24 +138,35 @@ export default function ClubPage() {
             </div>
           ) : status?.is_member ? (
             <div className="w-full flex flex-col items-center justify-center mt-10 sm:mt-12">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch justify-center w-full animate-in fade-in duration-500">
-                <section className="lg:h-full flex flex-col min-w-0">
+              <div className="grid grid-cols-1 min-[1500px]:grid-cols-2 gap-8 w-full animate-in fade-in duration-500 items-stretch">
+                
+                {/* Row 1, Col 1: Sessions (Taps) */}
+                <section className="flex flex-col min-w-0">
                   <ClubTaps clubSlug={clubSlug} userRole={status.role} />
                 </section>
-                <section className="self-start w-full min-w-0">
-                  <Leaderboard top_members={mockClubData.top_members} />
-                </section>
-              </div>
-
-              <section className="self-start w-full min-w-0 space-y-8">
-                {memberId !== null && (
-                  <ClubAchievements
-                    clubSlug={clubSlug}
-                    currentMemberId={memberId}
-                    canManage={isStaffOnly}
+                
+                {/* Row 1, Col 2: Leaderboard */}
+                <section className="flex flex-col min-w-0">
+                  <Leaderboard 
+                    leaderboardData={LeaderboardData} 
+                    clubSlug={clubSlug} 
                   />
-                )}
-              </section>
+                </section>
+
+                {/* Row 2, Col 1: Achievements (Centered on small screens, left-aligned on 1500px+) */}
+                <section className="flex flex-col min-w-0 w-full max-w-2xl mx-auto min-[1500px]:max-w-none min-[1500px]:mx-0">
+                  {memberId !== null && (
+                    <ClubAchievements
+                      clubSlug={clubSlug}
+                      currentMemberId={memberId}
+                      canManage={isStaffOnly}
+                    />
+                  )}
+                </section>
+
+                {/* Row 2, Col 2: Invisible Spacer (Now on the RIGHT) */}
+                <div className="hidden min-[1500px]:block" />
+              </div>
             </div>
           ) : (
             <MembersOnlyPanel
