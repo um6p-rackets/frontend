@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 // Added Shield icon for "My Clubs"
-import { Menu, X, Users, Bell, BarChart2, Shield } from "lucide-react";
+import { Menu, X, Users, BarChart2, Shield } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
@@ -238,7 +238,6 @@ function UserNav({ user }: { user: User }) {
 
           <NotificationComponent
             notifications={notifications}
-            connected={connected}
           />
 
           {/* Leaderboard Icon */}
@@ -379,7 +378,6 @@ function UserNav({ user }: { user: User }) {
             {/* Mobile Menu Version - Uses "menu" trigger style */}
             <NotificationComponent
               notifications={notifications}
-              connected={connected}
               triggerMode="menu" 
             />
 
