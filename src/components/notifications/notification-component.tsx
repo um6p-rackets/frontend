@@ -1,16 +1,7 @@
-
 "use client";
+import { Bell, CheckCheck, Circle, Clock3, Inbox } from "lucide-react";
 
-import {
-  Bell,
-  CheckCheck,
-  Circle,
-  Clock3,
-  Inbox,
-  Wifi,
-  WifiOff,
-} from "lucide-react";
-
+import { cn } from "@/lib/utils";
 import {
   Avatar,
   AvatarFallback,
@@ -21,45 +12,38 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-import type {
-  NotificationRealtimePayload,
-} from "@/types/contracts/notification";
+import type { NotificationRealtimePayload } from "@/types/contracts/notification";
 
 interface NotificationComponentProps {
   notifications: NotificationRealtimePayload[];
-  connected: boolean;
   onMarkAllAsRead?: () => void;
   markingAllAsRead?: boolean;
-  showLabel?: boolean;
+  triggerMode?: "icon" | "menu"; 
 }
 
 const ORANGE = "#D7492A";
 const LIGHT_ORANGE = "#ED6E47";
 
 function getInitials(name?: string | null) {
-  if (!name) return "SY";
+  const parts = name?.trim().split(/\s+/).filter(Boolean) ?? [];
 
-  return name
-    .trim()
-    .split(/\s+/)
+  if (parts.length === 0) return "SY";
+
+  return parts
     .slice(0, 2)
     .map((part) => part[0])
     .join("")
     .toUpperCase();
 }
 
-function getNotificationText(
-  notification: NotificationRealtimePayload,
-) {
-  const sender =
-    notification.sender_name || "Someone";
-
+function getNotificationText(notification: NotificationRealtimePayload) {
+  const sender = notification.sender_name || "Someone";
   const club = notification.club_name || "your club";
 
   switch (notification.type) {
@@ -119,10 +103,9 @@ function formatNotificationDate(date: string) {
 
 export function NotificationComponent({
   notifications,
-  connected,
   onMarkAllAsRead,
   markingAllAsRead = false,
-  showLabel = false,
+  triggerMode = "icon", 
 }: NotificationComponentProps) {
   const unreadCount = notifications.filter(
     (notification) => !notification.is_read,
@@ -130,183 +113,181 @@ export function NotificationComponent({
 
   return (
     <Sheet>
-      <SheetTrigger className="flex items-center gap-3 rounded-lg px-4 py-2 text-base font-semibold hover:bg-muted">
-        <Bell className="h-5 w-5" />
-        {showLabel && <span>Notifications</span>}
-      </SheetTrigger>
+      {triggerMode === "menu" ? (
+        <SheetTrigger className="px-3 sm:px-4 py-2.5 flex items-center justify-between text-sm sm:text-base font-semibold rounded-lg hover:bg-muted text-foreground transition-colors w-full text-left border-t border-border mt-1 pt-3 min-w-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <Bell className="w-5 h-5 shrink-0" /> 
+            <span className="truncate">Notifications</span>
+          </div>
+          {unreadCount > 0 && (
+            <span className="bg-brand-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ml-2">
+              {unreadCount > 99 ? "99+" : unreadCount} new
+            </span>
+          )}
+        </SheetTrigger>
+      ) : (
+        <SheetTrigger
+          title="Notifications"
+          aria-label={`Notifications, ${unreadCount} unread`}
+          className="relative inline-flex size-9 sm:size-10 items-center justify-center rounded-xl border border-transparent text-muted-foreground transition-colors hover:border-brand-orange/20 hover:bg-brand-orange/10 hover:text-brand-orange shrink-0"
+        >
+          <Bell className="size-5" />
+          {unreadCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-background bg-brand-orange px-1 text-[10px] font-bold text-white">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </SheetTrigger>
+      )}
 
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 border-l border-[#3B3B3B]/15 bg-white p-0 text-[#3B3B3B] dark:border-white/10 dark:bg-[#202020] dark:text-white sm:max-w-[440px]"
+        className="fixed inset-y-0 right-0 z-50 flex w-[85vw] max-w-[360px] sm:w-[440px] sm:max-w-[440px] flex-col gap-0 border-l border-border/70 bg-background p-0 shadow-2xl"
       >
-        <SheetHeader className="border-b border-[#3B3B3B]/10 bg-[#3B3B3B] px-5 py-6 text-white">
-          <div className="flex items-center justify-between gap-3 pr-7">
-            <div className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-[#D7492A]">
-                <Bell className="size-5" />
+        <SheetHeader className="border-b border-border/60 bg-background pl-4 pr-12 py-4 sm:px-6 sm:py-5">
+          <div className="flex items-center justify-between gap-2 w-full min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex size-9 sm:size-11 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange shrink-0">
+                <Bell className="size-4 sm:size-5" />
               </div>
 
-              <div className="text-left">
-                <SheetTitle className="text-xl font-bold text-white">
+              <div className="min-w-0">
+                <SheetTitle className="text-lg sm:text-2xl font-black italic tracking-tight text-foreground truncate">
                   Notifications
                 </SheetTitle>
-                <SheetDescription className="mt-1 text-sm text-white/65">
-                  Your club activity, all in one place.
-                </SheetDescription>
               </div>
             </div>
 
-            <Badge className="shrink-0 border-0 bg-white/10 text-white hover:bg-white/10">
+            <Badge className="shrink-0 border-0 bg-brand-orange text-white hover:bg-brand-orange/90 font-bold px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs">
               {unreadCount} unread
             </Badge>
           </div>
 
-          <div className="mt-5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs text-white/70">
-              {connected ? (
-                <Wifi className="size-3.5 text-[#ED6E47]" />
-              ) : (
-                <WifiOff className="size-3.5" />
-              )}
-
-              {connected ? "Live updates enabled" : "Reconnecting..."}
-            </div>
-                        
+          <div className="mt-4 flex items-center justify-end">
             <Button
               type="button"
               size="sm"
               variant="ghost"
               disabled={
-                unreadCount === 0 ||
-                markingAllAsRead ||
-                !onMarkAllAsRead
+                unreadCount === 0 || markingAllAsRead || !onMarkAllAsRead
               }
-              onClick={onMarkAllAsRead}
-              className="h-8 gap-1.5 px-2 text-xs text-white hover:bg-white/10 hover:text-[#ED6E47] disabled:text-white/35"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onMarkAllAsRead) {
+                  onMarkAllAsRead();
+                }
+              }}
+              className="h-8 gap-1.5 px-2 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-brand-orange disabled:opacity-40 cursor-pointer z-10"
             >
               <CheckCheck className="size-3.5" />
               {markingAllAsRead ? "Marking..." : "Mark all as read"}
             </Button>
-
           </div>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto">
-          {notifications.length === 0 ? (
-            <div className="flex min-h-[360px] flex-col items-center justify-center px-8 text-center">
-              <div className="mb-5 flex size-16 items-center justify-center rounded-2xl bg-[#D7492A]/10">
-                <Inbox className="size-7 text-[#D7492A]" />
-              </div>
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full w-full">
+            {notifications.length === 0 ? (
+              <div className="flex min-h-[360px] flex-col items-center justify-center px-6 sm:px-8 text-center">
+                <div className="mb-5 flex size-14 sm:size-16 items-center justify-center rounded-2xl bg-brand-orange/10">
+                  <Inbox className="size-6 sm:size-7 text-brand-orange" />
+                </div>
 
-              <h3 className="text-lg font-semibold">
-                You&apos;re all caught up
-              </h3>
+                <h3 className="text-base sm:text-lg font-bold text-foreground">
+                  You&apos;re all caught up
+                </h3>
 
-              <p className="mt-2 max-w-[260px] text-sm leading-6 text-[#3B3B3B]/60 dark:text-white/55">
-                When something happens in your clubs, you&apos;ll find it here.
-              </p>
-            </div>
-          ) : (
-            <div className="p-3 sm:p-4">
-              <div className="mb-3 flex items-center justify-between px-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#3B3B3B]/50 dark:text-white/45">
-                  Recent activity
+                <p className="mt-2 max-w-[260px] text-xs sm:text-sm leading-relaxed text-muted-foreground">
+                  When something happens in your clubs, you&apos;ll find it here.
                 </p>
-
-                <span className="text-xs text-[#3B3B3B]/45 dark:text-white/40">
-                  {notifications.length} notifications
-                </span>
               </div>
+            ) : (
+              <div className="p-3 sm:p-4 pb-6 w-full">
+                <div className="mb-3 sm:mb-4 flex items-center justify-between px-1">
+                  <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                    Recent activity
+                  </p>
 
-              <div className="space-y-2">
-                {notifications.map((notification) => {
-                  const content = getNotificationText(notification);
-                  const unread = !notification.is_read;
+                  <span className="text-[10px] sm:text-xs font-medium text-muted-foreground/70">
+                    {notifications.length} notifications
+                  </span>
+                </div>
 
-                  return (
-                    <article
-                      key={notification.notification_id}
-                      className={`group relative overflow-hidden rounded-xl border p-3.5 transition-colors ${
-                        unread
-                          ? "border-[#D7492A]/20 bg-[#D7492A]/[0.055] dark:bg-[#D7492A]/10"
-                          : "border-[#3B3B3B]/10 bg-white hover:bg-[#3B3B3B]/[0.025] dark:border-white/10 dark:bg-white/[0.025] dark:hover:bg-white/[0.05]"
-                      }`}
-                    >
-                      {unread && (
-                        <div className="absolute inset-y-0 left-0 w-[3px] bg-[#D7492A]" />
-                      )}
+                <div className="space-y-3 w-full">
+                  {notifications.map((notification) => {
+                    const content = getNotificationText(notification);
+                    const unread = !notification.is_read;
 
-                      <div className="flex gap-3 pl-1">
-                        <Avatar className="mt-0.5 size-11 shrink-0 border border-[#3B3B3B]/10">
-                          <AvatarImage
-                            src={
-                              notification.sender_avatar_url || undefined
-                            }
-                            alt={notification.sender_name || "Sender"}
-                            referrerPolicy="no-referrer"
-                          />
+                    return (
+                      <article
+                        key={notification.notification_id}
+                        className={cn(
+                          "group relative overflow-hidden rounded-2xl border p-4 transition-colors",
+                          unread
+                            ? "border-brand-orange/30 bg-brand-orange/[0.04] shadow-xs"
+                            : "border-border/70 bg-card shadow-2xs"
+                        )}
+                      >
+                        <div className="flex gap-3 pl-1 w-full min-w-0">
+                          <Avatar className="mt-0.5 size-11 shrink-0 ring-2 ring-background shadow-xs">
+                            <AvatarImage
+                              src={notification.sender_avatar_url || undefined}
+                              alt={notification.sender_name || "Sender"}
+                              referrerPolicy="no-referrer"
+                            />
 
-                          <AvatarFallback
-                            className="font-semibold text-white"
-                            style={{
-                              backgroundColor: unread
-                                ? ORANGE
-                                : LIGHT_ORANGE,
-                            }}
-                          >
-                            {getInitials(notification.sender_name)}
-                          </AvatarFallback>
-                        </Avatar>
+                            <AvatarFallback
+                              className="font-black text-white text-sm"
+                              style={{
+                                backgroundColor: unread ? ORANGE : LIGHT_ORANGE,
+                              }}
+                            >
+                              {getInitials(notification.sender_name)}
+                            </AvatarFallback>
+                          </Avatar>
 
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <h4 className="text-sm font-semibold leading-5">
-                              {content.title}
-                            </h4>
+                          <div className="min-w-0 flex-1 flex flex-col justify-center gap-1.5 overflow-hidden">
+                            <div className="flex items-start justify-between gap-2 min-w-0">
+                              <h4 className="text-sm font-bold leading-snug text-foreground">
+                                {content.title}
+                              </h4>
 
-                            {unread && (
-                              <Circle
-                                className="mt-1 size-2 shrink-0 fill-[#D7492A] text-[#D7492A]"
-                                aria-label="Unread"
-                              />
-                            )}
-                          </div>
-
-                          <p className="mt-1.5 text-[13px] leading-5 text-[#3B3B3B]/70 dark:text-white/65">
-                            {content.description}
-                          </p>
-
-                          <div className="mt-3 flex items-center gap-1.5 text-[11px] text-[#3B3B3B]/45 dark:text-white/40">
-                            <Clock3 className="size-3" />
-                            <time dateTime={notification.sent_at}>
-                              {formatNotificationDate(
-                                notification.sent_at,
+                              {unread && (
+                                <Circle
+                                  className="mt-1 size-2 shrink-0 fill-brand-orange text-brand-orange"
+                                  aria-label="Unread"
+                                />
                               )}
-                            </time>
+                            </div>
 
-                            {notification.club_name && (
-                              <>
-                                <span>·</span>
-                                <span className="truncate">
-                                  {notification.club_name}
-                                </span>
-                              </>
-                            )}
+                            <p className="text-xs sm:text-sm leading-relaxed text-muted-foreground break-words">
+                              {content.description}
+                            </p>
+
+                            <div className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/70 min-w-0 flex-wrap">
+                              <Clock3 className="size-3 shrink-0" />
+                              <time dateTime={notification.sent_at} className="whitespace-nowrap">
+                                {formatNotificationDate(notification.sent_at)}
+                              </time>
+
+                              {notification.club_name && (
+                                <>
+                                  <span>•</span>
+                                  <span className="truncate max-w-[150px]">
+                                    {notification.club_name}
+                                  </span>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </article>
-                  );
-                })}
+                      </article>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-
-        <div className="border-t border-[#3B3B3B]/10 px-5 py-3 dark:border-white/10">
-          <p className="text-center text-[11px] text-[#3B3B3B]/45 dark:text-white/40">
-            Showing your latest notifications
-          </p>
+            )}
+          </ScrollArea>
         </div>
       </SheetContent>
     </Sheet>
