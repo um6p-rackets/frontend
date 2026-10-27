@@ -72,7 +72,6 @@ export default function LeaderboardTable({
                 Target Athlete
               </div>
 
-              {/* FIX: Use border-2 with p-0.5 so the outline renders inside without clipping */}
               <div className="p-0.5 border-2 border-brand-orange/60 rounded-[14px] overflow-hidden shadow-md">
                 <LeaderboardRow member={targetUserRow} />
               </div>

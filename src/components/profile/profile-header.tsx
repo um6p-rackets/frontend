@@ -1,42 +1,25 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { GraduationCap, Settings } from 'lucide-react';
-import Rank1Badge from '@/components/badge/rank1';
-import Rank2Badge from '@/components/badge/rank2';
-import Rank3Badge from '@/components/badge/rank3';
-import UndefeatedBadge from '@/components/badge/undefeated';
-import HotStreakBadge from '@/components/badge/hot-streak';
-import { mockClubData } from '@/lib/mock-data';
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { SettingsProfile1 } from '@/components/setting/setting';
-import { UserProfile } from '@/types';
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { GraduationCap, Settings } from "lucide-react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { SettingsProfile1 } from "@/components/setting/setting";
+import { UserProfile } from "@/types";
+import { AchievementBadge } from "../achievement/achievement-badge";
 
 export default function ProfileHeader({ data }: { data: UserProfile }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(data.user);
-  const { global_stats, joined_clubs, club_ranks } = data.memberProfile;
+  const { joined_clubs, achievements, club_ranks, global_stats } = data.memberProfile;
   const fullName = `${currentUser.first_name} ${currentUser.last_name}`;
-
-  // Find user's best rank across clubs or campus leaderboard
-  const lbMember = mockClubData.top_members.find((m) => m.user_id === currentUser.id);
-  const bestRankNumber = global_stats.best_rank?.rank ?? (lbMember ? mockClubData.top_members.indexOf(lbMember) + 1 : null);
-
-  const hasRank1 = bestRankNumber === 1;
-  const hasRank2 = bestRankNumber === 2;
-  const hasRank3 = bestRankNumber === 3;
-  const isUndefeated = (global_stats.wins > 0 && global_stats.losses === 0) || lbMember?.badges?.includes('undefeated');
-  const isHotStreak = global_stats.current_win_streak >= 3 || lbMember?.badges?.includes('hot-streak');
 
   // Top ranked sport for this user (highest points, then best rank)
   const topClubRank =
     club_ranks && club_ranks.length > 0
-      ? [...club_ranks].sort((a, b) => (b.points !== a.points ? b.points - a.points : a.rank - b.rank))[0]
+      ? [...club_ranks].sort((a, b) =>
+          b.points !== a.points ? b.points - a.points : a.rank - b.rank,
+        )[0]
       : global_stats.best_rank;
   const topClubId = topClubRank?.club_id;
 
@@ -76,22 +59,32 @@ export default function ProfileHeader({ data }: { data: UserProfile }) {
                 {fullName}
               </h1>
 
-              {/* Your custom imported badge components rendered horizontally */}
-              {(hasRank1 || hasRank2 || hasRank3 || isUndefeated || isHotStreak) && (
-                <div className="flex flex-wrap items-center gap-2">
-                  {hasRank1 && <Rank1Badge />}
-                  {hasRank2 && <Rank2Badge />}
-                  {hasRank3 && <Rank3Badge />}
-                  {isUndefeated && <UndefeatedBadge />}
-                  {isHotStreak && <HotStreakBadge />}
-                </div>
-              )}
+              {/* Unique Achievement Badges with Count */}
+              {achievements &&
+                achievements.length > 0 &&
+                (() => {
+                  const groupedCounts = achievements.reduce(
+                    (acc, achievement) => {
+                      acc[achievement.code] = (acc[achievement.code] || 0) + 1;
+                      return acc;
+                    },
+                    {} as Record<string, number>,
+                  );
+
+                  return (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {Object.entries(groupedCounts).map(([code, count]) => (
+                        <AchievementBadge key={code} code={code} count={count} />
+                      ))}
+                    </div>
+                  );
+                })()}
             </div>
 
             {/* Department */}
             <div className="flex items-center gap-1.5 text-muted-foreground text-sm font-medium italic mt-1">
               <GraduationCap className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span>Department {currentUser.department || 'Campus Athlete'}</span>
+              <span>Department {currentUser.department || "Campus Athlete"}</span>
             </div>
 
             {/* Joined Clubs / Sports Tags */}
@@ -121,7 +114,10 @@ export default function ProfileHeader({ data }: { data: UserProfile }) {
               <Settings className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45 text-muted-foreground group-hover:text-brand-orange" />
               <span>Settings</span>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-xl max-h-[92vh] overflow-y-auto p-0 border-0 bg-transparent ring-0 shadow-none" showCloseButton={false}>
+            <DialogContent
+              className="sm:max-w-xl max-h-[92vh] overflow-y-auto p-0 border-0 bg-transparent ring-0 shadow-none"
+              showCloseButton={false}
+            >
               <SettingsProfile1
                 defaultValues={{
                   first_name: currentUser.first_name,
@@ -130,7 +126,7 @@ export default function ProfileHeader({ data }: { data: UserProfile }) {
                   email: currentUser.email,
                   username: currentUser.login,
                   // avatar: currentUser.avatar ?? undefined,
-                  department: currentUser.department ?? '',
+                  department: currentUser.department ?? "",
                 }}
                 onSave={(updated) => {
                   setCurrentUser((prev) => ({
