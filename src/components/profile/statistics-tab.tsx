@@ -1,11 +1,12 @@
-import { UserProfileData } from '@/types/contracts/club';
+import { UserProfileData, Paginated, UserHistoryMatch } from '@/types/contracts/club';
 
 interface StatisticsTabProps {
   data: UserProfileData;
+  history: Paginated<UserHistoryMatch>; 
 }
 
-export default function StatisticsTab({ data }: StatisticsTabProps) {
-  const { club_ranks, history } = data;
+export default function StatisticsTab({ data, history }: StatisticsTabProps) {
+  const { club_ranks } = data;
 
   const sportBreakdown = club_ranks.map((cr, idx) => {
     const clubMatches = history.data.filter((m) => m.club_id === cr.club_id);
@@ -21,7 +22,7 @@ export default function StatisticsTab({ data }: StatisticsTabProps) {
       losses: losses,
       winRate: winRate,
       rating: cr.points,
-      isMain: idx === 0, // Designates the top/primary sport tag
+      isMain: idx === 0, 
     };
   });
 
