@@ -152,7 +152,6 @@ export function NotificationComponent({
 
         <SheetContent
           side="right"
-          // تم إضافة fixed inset-y-0 right-0 z-50 لإجبار القائمة على الالتصاق بالشاشة دائمًا
           className="fixed inset-y-0 right-0 z-50 flex w-[85vw] max-w-[340px] sm:w-[440px] sm:max-w-[440px] flex-col gap-0 border-l border-border/70 bg-background p-0 shadow-2xl"
         >
           <SheetHeader className="border-b border-border/60 bg-background pl-4 pr-12 py-4 sm:px-6 sm:py-5">
@@ -272,7 +271,6 @@ export function NotificationComponent({
           if (!open) setSelectedNotification(null);
         }}
       >
-        {/* تثبيت النافذة المنبثقة (Popup) في المنتصف دائمًا */}
         <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-50 w-[90vw] max-w-[360px] sm:max-w-md max-h-[85vh] overflow-y-auto rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl">
           {selectedNotification && (() => {
             const content = getNotificationText(selectedNotification);
