@@ -22,6 +22,7 @@ import { ApiError } from "@/lib/api-error";
 import { mockClubData } from "@/lib/mock-data"; // TODO: the leaderboard still uses mock data
 import { MemberRole } from "@/types/contracts/club";
 import ClubAchievements from "@/components/achievement/club-achievement";
+import { notFound } from "next/navigation";
 
 // Only one modal is open at a time
 type ClubModal = "accept-match" | "accept-join" | "set-leader" | "remove-leader" | "remove-member";
@@ -41,19 +42,9 @@ export default function ClubPage() {
   const leave = useLeaveClub(clubSlug);
 
   if (isError) {
-    const notFound = error instanceof ApiError && error.status === 404;
-    return (
-      <div className="w-[92%] lg:w-[70%] mx-auto py-24 text-center">
-        <h2 className="text-2xl font-black mb-2">
-          {notFound ? "Club not found" : "Could not load this club"}
-        </h2>
-        {!notFound && (
-          <Button variant="outline" onClick={() => refetch()}>
-            Retry
-          </Button>
-        )}
-      </div>
-    );
+    const notFoundError = error instanceof ApiError && error.status === 404;
+    if (notFoundError) { return notFound(); }
+    return notFound();// update later to show a proper error page with retry button
   }
 
   const clubName = club?.name ?? clubSlug;

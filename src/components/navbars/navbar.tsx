@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 // Added Shield icon for "My Clubs"
-import { Menu, X, Users, Bell, BarChart2, Shield } from "lucide-react";
+import { Menu, X, Users, BarChart2, Shield } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
@@ -25,15 +25,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 import Logo from "../logo";
 import { AuthButton } from "../auth/auth-button";
@@ -55,7 +46,6 @@ export default function Navbar() {
 
 function PendingNav() {
   return (
-    // إضافة max-w-[100vw] و box-border لمنع التمرير الأفقي تماماً
     <header className="absolute top-0 left-0 w-full max-w-[100vw] z-50 bg-transparent pt-6 px-4 md:px-12 lg:px-16 box-border">
       <div className="max-w-7xl mx-auto flex items-center w-full">
         <Logo />
@@ -171,7 +161,6 @@ function UserNav({ user }: { user: User }) {
   ];
 
   return (
-    // استخدام max-w-[100vw] يضمن عدم خروج القائمة العلوية عن الشاشة حتى لو كانت الصفحة ممددة
     <header className="absolute top-0 left-0 w-full max-w-[100vw] z-50 bg-transparent pt-6 px-4 md:px-12 lg:px-16 box-border">
       <div className="max-w-7xl mx-auto flex justify-between items-center w-full min-w-0">
         <div className="shrink-0 min-w-0">
@@ -249,7 +238,6 @@ function UserNav({ user }: { user: User }) {
 
           <NotificationComponent
             notifications={notifications}
-            connected={connected}
           />
 
           {/* Leaderboard Icon */}
@@ -390,7 +378,6 @@ function UserNav({ user }: { user: User }) {
             {/* Mobile Menu Version - Uses "menu" trigger style */}
             <NotificationComponent
               notifications={notifications}
-              connected={connected}
               triggerMode="menu" 
             />
 
