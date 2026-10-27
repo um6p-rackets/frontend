@@ -129,7 +129,7 @@ export function NotificationComponent({
         <SheetTrigger
           title="Notifications"
           aria-label={`Notifications, ${unreadCount} unread`}
-          className="relative inline-flex size-9 sm:size-10 items-center justify-center rounded-xl text-brand-ink transition-colors hover:text-brand-orange shrink-0"
+          className="relative cursor-pointer inline-flex size-9 sm:size-10 items-center justify-center rounded-xl text-brand-ink transition-colors hover:text-brand-orange shrink-0"
         >
           <Bell className="size-5" />
           {unreadCount > 0 && (
