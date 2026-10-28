@@ -16,7 +16,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 import type { NotificationRealtimePayload } from "@/types/contracts/notification";
 
@@ -185,10 +184,10 @@ export function NotificationComponent({
           </div>
         </SheetHeader>
 
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full w-full">
+        <div className="flex-1 overflow-y-auto">
+          <div className="h-full w-full">
             {notifications.length === 0 ? (
-              <div className="flex min-h-90 flex-col items-center justify-center px-6 sm:px-8 text-center">
+              <div className="flex min-h-[90vh] flex-col items-center justify-center px-6 sm:px-8 text-center">
                 <div className="mb-5 flex size-14 sm:size-16 items-center justify-center rounded-2xl bg-brand-orange/10">
                   <Inbox className="size-6 sm:size-7 text-brand-orange" />
                 </div>
@@ -287,7 +286,7 @@ export function NotificationComponent({
                 </div>
               </div>
             )}
-          </ScrollArea>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
