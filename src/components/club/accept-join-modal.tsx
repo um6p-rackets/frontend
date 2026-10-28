@@ -76,7 +76,7 @@ export default function AcceptJoinModal({ clubSlug, isOpen, onClose }: AcceptJoi
                                 >
                                     <div
                                         onClick={() =>
-                                            router.push(`/users/${req.user?.login || req.user_id}`)
+                                            router.push(`/profile/${req.user_id}`)
                                         }
                                         className="space-y-1 cursor-pointer group flex-1"
                                     >

@@ -182,7 +182,7 @@ export default function ManageLeadersModal({
                                         <div
                                             onClick={() =>
                                                 router.push(
-                                                    `/users/${member.user?.login || member.user_id}`
+                                                    `/profile/${member.user_id}`
                                                 )
                                             }
                                             className="space-y-1 cursor-pointer group flex-1"
