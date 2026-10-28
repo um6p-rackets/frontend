@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { io, type Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import { notificationKeys } from "@/hooks/use-notification-inbox";
 
 export function useNotificationSocket(userId: string | number | undefined) {
@@ -21,7 +21,7 @@ export function useNotificationSocket(userId: string | number | undefined) {
 
     socket.on("connect", () => {
       setConnected(true);
-      console.log("Notification socket connected:", socket.id);
+      //console.log("Notification socket connected:", socket.id);
     });
 
     socket.on("disconnect", () => {
