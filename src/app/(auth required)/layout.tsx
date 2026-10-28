@@ -56,7 +56,6 @@ export default function AuthRequiredLayout({ children }: { children: React.React
   // Logged in: the Navbar is shared by all protected pages
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-1">{children}</main>
     </div>
   );
