@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { Loader2, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import Navbar from "@/components/navbars/navbar";
 import { useMe } from "@/hooks/use-me";
 import { useAuthPopupStore } from "@/store/auth_popup";
 
