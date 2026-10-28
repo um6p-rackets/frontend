@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Providers } from '@/components/providers';
 import Navbar from '@/components/navbars/navbar';
 import { Toaster } from '@/components/ui/sonner';
+import { AuthDialog } from '@/components/auth/auth-dialog';
 
 const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <Providers>
           <Navbar />
           {children}
+          <AuthDialog />
           <Toaster richColors position="top-center" />
         </Providers>
       </body>

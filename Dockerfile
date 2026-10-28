@@ -1,6 +1,6 @@
 
 # deps
-FROM node:24.21.0-alpine3.24 AS deps
+FROM node:22-slim AS deps
 
 ####################################
 # libc6-compat is required when containerizing a Next.js application using an Alpine
@@ -14,9 +14,9 @@ FROM node:24.21.0-alpine3.24 AS deps
 # throwing missing library or process.dlopen execution errors.
 
 # RUN apk add --no-cache libc6-compat
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.edge.kernel.org/g' /etc/apk/repositories && \
-    apk update && \
-    apk add --no-cache libc6-compat
+# RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.edge.kernel.org/g' /etc/apk/repositories && \
+#     apk update && \
+#     apk add --no-cache libc6-compat
 #####################################
 
 WORKDIR /app
@@ -26,7 +26,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 # build stage
-FROM node:24.21.0-alpine3.24 AS builder
+FROM node:22-slim AS builder
 
 WORKDIR /app
 
@@ -42,7 +42,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
 RUN npm run build
 
 # production stage
-FROM node:24.21.0-alpine3.24
+FROM node:22-slim
 
 ##################################
 # NODE_ENV tells your app and its tools which mode it's running in:
