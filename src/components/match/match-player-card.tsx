@@ -7,13 +7,11 @@ import Image from "next/image";
 export default function MatchPlayerCard({
   type = "filled",
   name,
-  badgeText,
   avatarUrl,
   onClick,
 }: {
   type?: "filled" | "empty";
   name: string;
-  badgeText?: string;
   avatarUrl?: string | null;
   onClick?: () => void;
 }) {
@@ -96,11 +94,6 @@ export default function MatchPlayerCard({
           <div className="font-bold text-sm text-foreground">{name}</div>
         </div>
       </div>
-      {badgeText && (
-        <span className="px-2.5 py-1 rounded-md bg-orange-100 dark:bg-orange-950/50 text-brand-orange font-black text-xs shrink-0">
-          {badgeText}
-        </span>
-      )}
     </div>
   );
 }

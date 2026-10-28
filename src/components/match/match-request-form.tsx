@@ -180,7 +180,6 @@ export default function MatchRequestForm({
 
               <MatchPlayerCard
                 name={currentUserName}
-                badgeText="1200 PTS" // TODO: hardcoded, use the real rating
                 avatarUrl={currentUserAvatar}
               />
 

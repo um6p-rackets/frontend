@@ -5,8 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { io, type Socket } from "socket.io-client";
 import { notificationKeys } from "@/hooks/use-notification-inbox";
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:3010";
-
 export function useNotificationSocket(userId: string | number | undefined) {
   const queryClient = useQueryClient();
   const [connected, setConnected] = useState(false);
@@ -17,7 +15,7 @@ export function useNotificationSocket(userId: string | number | undefined) {
     }
     // const userId = queryClient.getQueryData(["me"]) as { id: string | number } | undefined;
 
-    const socket: Socket = io(`${WS_URL}/notifications`, {
+    const socket = io("/notifications", {
       withCredentials: true,
     });
 
