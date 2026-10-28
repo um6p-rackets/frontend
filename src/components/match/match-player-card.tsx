@@ -28,7 +28,7 @@ export default function MatchPlayerCard({
         <div className="flex items-center gap-3">
           {avatarUrl ? (
             <div className="w-10 h-10 rounded-full relative overflow-hidden shrink-0">
-              <Image src={avatarUrl} alt={name} fill className="object-cover" />
+              <Image src={avatarUrl} alt={name} fill sizes="40px" className="object-cover" />
             </div>
           ) : (
             <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center font-bold text-accent shrink-0 text-sm">
@@ -56,7 +56,7 @@ export default function MatchPlayerCard({
         <div className="flex items-center gap-3">
           {avatarUrl ? (
             <div className="w-10 h-10 rounded-full relative overflow-hidden shrink-0">
-              <Image src={avatarUrl} alt={name} fill className="object-cover" />
+              <Image src={avatarUrl} alt={name} fill sizes="40px" className="object-cover" />
             </div>
           ) : (
             <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center font-bold text-accent shrink-0 text-sm">
@@ -83,7 +83,7 @@ export default function MatchPlayerCard({
       <div className="flex items-center gap-3">
         {avatarUrl ? (
           <div className="w-10 h-10 rounded-full relative overflow-hidden shrink-0">
-            <Image src={avatarUrl} alt={name} fill className="object-cover" />
+            <Image src={avatarUrl} alt={name} fill sizes="40px" className="object-cover" />
           </div>
         ) : (
           <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center font-bold text-accent shrink-0 text-sm">

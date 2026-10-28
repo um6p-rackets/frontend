@@ -6,9 +6,27 @@ const nextConfig: NextConfig = {
   output: "standalone",
   skipTrailingSlashRedirect: true,
 
+  // Add the images configuration here to allow Google avatars
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/**', 
+      },
+      // Uncomment this if you also need 42 Intra avatars later
+      // {
+      //   protocol: 'https',
+      //   hostname: 'cdn.intra.42.fr',
+      //   port: '',
+      //   pathname: '/**',
+      // },
+    ],
+  },
+
   // To make the browser see one origin, as it will behind nginx,
   // we add the rewrite in next.config so the frontend calls /api/... and Next forwards to the gateway:
-  // next.config.ts
   async rewrites() {
     return [
       { source: "/api/:path*", destination: "http://127.0.0.1:3010/api/:path*" },
