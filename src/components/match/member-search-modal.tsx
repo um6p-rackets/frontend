@@ -84,7 +84,7 @@ export default function MemberSearchModal({
                     <div className="flex items-center gap-3">
                       {m.user.avatar ? (
                         <div className="w-9 h-9 rounded-full relative overflow-hidden shrink-0">
-                          <Image src={m.user.avatar} alt={name} fill className="object-cover" />
+                          <Image src={m.user.avatar} alt={name} fill className="object-cover " sizes="40px" />
                         </div>
                       ) : (
                         <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center font-bold text-accent text-sm shrink-0">
